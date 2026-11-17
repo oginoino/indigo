@@ -20,6 +20,9 @@ class NavItem extends StatelessWidget {
     final provider = context.watch<FeedsListProvider>();
     final String itemId = feedItem.id.toString();
     final bool isSelected = provider.isFeedSelected(itemId);
+    final Color indicatorColor = isSelected
+        ? DefaultTextStyle.of(context).style.color ?? Colors.transparent
+        : Colors.transparent;
 
     return InkWell(
       borderRadius: BorderRadius.circular(16),
@@ -39,9 +42,7 @@ class NavItem extends StatelessWidget {
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
-                  color: isSelected
-                      ? Colors.black
-                      : Colors.transparent,
+                  color: indicatorColor,
                   width: 2,
                 ),
               ),
