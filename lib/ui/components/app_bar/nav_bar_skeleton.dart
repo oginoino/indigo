@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../util/const/ui/ui_constants.dart';
+
 class NavBarSkeleton extends StatelessWidget {
   const NavBarSkeleton({super.key});
 
@@ -8,14 +10,16 @@ class NavBarSkeleton extends StatelessWidget {
     final color = Colors.grey.withValues(alpha: 0.13);
 
     return SizedBox(
-      height: 40,
+      height: UIConstants.navBarHeight,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 8),
+        padding: const EdgeInsets.symmetric(
+          horizontal: UIConstants.navBarHorizontalPadding,
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
-          spacing: 8,
+          spacing: UIConstants.navBarItemSpacing,
           children: [
             _SkeletonItem(width: 80, color: color),
             _SkeletonItem(width: 80, color: color),
@@ -24,11 +28,7 @@ class NavBarSkeleton extends StatelessWidget {
             _SkeletonItem(width: 80, color: color),
             _SkeletonItem(width: 80, color: color),
             const SizedBox(width: 8),
-            Icon(
-              Icons.add,
-              size: 28,
-              color: color,
-            ),
+            Icon(Icons.add, size: 28, color: color),
           ],
         ),
       ),
@@ -40,16 +40,13 @@ class _SkeletonItem extends StatelessWidget {
   final double width;
   final Color color;
 
-  const _SkeletonItem({
-    required this.width,
-    required this.color,
-  });
+  const _SkeletonItem({required this.width, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: width,
-      height: 40,
+      height: UIConstants.navBarHeight,
       child: Align(
         alignment: Alignment.center,
         child: Container(

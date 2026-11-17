@@ -1,17 +1,9 @@
 class AppConstants {
-  
+  const AppConstants._();
 
-  static const String _appName = 'Indigo';
-  static const String _appVersion = '1.0.0';
-  static const String _appTitle = 'Indigo';
-  static const String _appDescription = 'Indigo';
-  static const String _carameloLogoAsset = 'assets/images/logo.png';
-
-
-  static String get appName => _appName;
-  static String get appVersion => _appVersion;
-  static String get appTitle => _appTitle;
-  static String get appDescription => _appDescription;
-  static String get carameloLogoAsset => _carameloLogoAsset;
-
+  static const String appName = 'Indigo';
+  static const String appVersion = '1.0.0';
+  static const String appTitle = 'Indigo';
+  static const String appDescription = 'Indigo';
+  static const String carameloLogoAsset = 'assets/images/logo.png';
 }

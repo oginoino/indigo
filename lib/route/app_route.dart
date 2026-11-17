@@ -4,43 +4,25 @@ import 'package:material_ui/material_ui.dart';
 class AppRoute extends GoRoute {
   AppRoute(
     String path,
-    Widget Function(BuildContext context, GoRouterState s) builder, {
-    List<GoRoute> routes = const [],
-    this.useFade = true,
-    this.useCustomSliver = true,
-    this.titleBuilder,
-    this.titleWidgetBuilder,
-    this.leadingBuilder,
-    this.actionsBuilder,
-    this.padding,
-    this.hasScrollBody = false,
+    Widget Function(BuildContext context, GoRouterState state) builder, {
+    super.routes,
+    bool useFade = true,
   }) : super(
          path: path,
-         routes: routes,
          pageBuilder: (context, state) {
-           Widget pageContent;
-           pageContent = Scaffold(
-             body: builder(context, state),
-             resizeToAvoidBottomInset: true,
-           );
-           if (useFade) {
-             return CustomTransitionPage(
-               key: state.pageKey,
-               child: pageContent,
-               transitionsBuilder:
-                   (context, animation, secondaryAnimation, child) =>
-                       FadeTransition(opacity: animation, child: child),
-             );
+           final page = builder(context, state);
+           if (!useFade) {
+             return MaterialPage(key: state.pageKey, child: page);
            }
-           return MaterialPage(child: pageContent);
+
+           return CustomTransitionPage(
+             key: state.pageKey,
+             child: page,
+             transitionsBuilder:
+                 (context, animation, secondaryAnimation, child) {
+                   return FadeTransition(opacity: animation, child: child);
+                 },
+           );
          },
        );
-  final bool useFade;
-  final bool useCustomSliver;
-  final String Function(BuildContext context)? titleBuilder;
-  final Widget Function(BuildContext context)? titleWidgetBuilder;
-  final Widget Function(BuildContext context)? leadingBuilder;
-  final List<Widget> Function(BuildContext context)? actionsBuilder;
-  final EdgeInsetsGeometry? padding;
-  final bool hasScrollBody;
 }

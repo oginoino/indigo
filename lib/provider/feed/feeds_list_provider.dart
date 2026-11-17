@@ -1,33 +1,33 @@
-
 import 'package:material_ui/material_ui.dart';
 
-import '../../service/feed/feeds_list_service.dart';
 import '../../model/feed_item.dart';
+import '../../service/feed/feeds_list_service.dart';
 
 class FeedsListProvider extends ChangeNotifier {
+  FeedsListProvider(this._feedsListService);
+
+  final FeedsListService _feedsListService;
+
   List<FeedItem> _feedsList = [];
   FeedItem? _selectedFeed;
   bool _isLoading = false;
   Future<List<FeedItem>>? _pendingRequest;
+  double _navBarScrollOffset = 0;
 
   List<FeedItem> get feedsList => List.unmodifiable(_feedsList);
   FeedItem? get selectedFeed => _selectedFeed;
   bool get isLoading => _isLoading;
   bool get hasFeeds => _feedsList.isNotEmpty;
-
-  double _navBarScrollOffset = 0.0;
-
   double get navBarScrollOffset => _navBarScrollOffset;
 
-void saveNavBarScrollOffset(double offset) {
-  if (offset == _navBarScrollOffset) return;
-
-  _navBarScrollOffset = offset;
-}
+  void saveNavBarScrollOffset(double offset) {
+    if (offset == _navBarScrollOffset) return;
+    _navBarScrollOffset = offset;
+  }
 
   Future<List<FeedItem>> getFeedsList() {
-    // Reaproveita uma requisição em andamento.
-    if (_pendingRequest != null) return _pendingRequest!;
+    final pendingRequest = _pendingRequest;
+    if (pendingRequest != null) return pendingRequest;
 
     _isLoading = true;
     notifyListeners();
@@ -39,21 +39,8 @@ void saveNavBarScrollOffset(double offset) {
 
   Future<List<FeedItem>> _loadFeeds() async {
     try {
-      _feedsList = await FeedsListService.getFeedsList();
-
-      if (_feedsList.isNotEmpty) {
-        final selectedId = _selectedFeed?.id.toString();
-
-        _selectedFeed = selectedId == null
-            ? _feedsList.first
-            : _feedsList.cast<FeedItem?>().firstWhere(
-                  (feed) => feed?.id.toString() == selectedId,
-                  orElse: () => _feedsList.first,
-                );
-      } else {
-        _selectedFeed = null;
-      }
-
+      _feedsList = await _feedsListService.getFeedsList();
+      _selectedFeed = _resolveSelectedFeed(_feedsList, _selectedFeed?.id);
       return _feedsList;
     } finally {
       _isLoading = false;
@@ -62,30 +49,22 @@ void saveNavBarScrollOffset(double offset) {
     }
   }
 
-  void selectFeed(String itemId) {
-    for (final feed in _feedsList) {
-      if (feed.id.toString() == itemId) {
-        if (_selectedFeed?.id.toString() == itemId) return;
+  void selectFeed(int feedId) {
+    if (_selectedFeed?.id == feedId) return;
 
-        _selectedFeed = feed;
-        notifyListeners();
-        return;
-      }
-    }
+    final feed = _feedsList.where((item) => item.id == feedId).firstOrNull;
+    if (feed == null) return;
+
+    _selectedFeed = feed;
+    notifyListeners();
   }
 
-  bool isFeedSelected(String itemId) {
-    return _selectedFeed?.id.toString() == itemId;
-  }
+  bool isFeedSelected(int feedId) => _selectedFeed?.id == feedId;
 
-  FeedItem getSelectedFeed() {
-    if (_selectedFeed != null) return _selectedFeed!;
+  static FeedItem? _resolveSelectedFeed(List<FeedItem> feeds, int? selectedId) {
+    if (feeds.isEmpty) return null;
 
-    if (_feedsList.isNotEmpty) {
-      _selectedFeed = _feedsList.first;
-      return _selectedFeed!;
-    }
-
-    throw StateError('A lista de feeds ainda não foi carregada.');
+    return feeds.where((feed) => feed.id == selectedId).firstOrNull ??
+        feeds.first;
   }
 }

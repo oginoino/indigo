@@ -1,16 +1,16 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_ui/material_ui.dart';
+
 import 'routes.dart';
 
 class HandleRedirect {
-  String? get initialDeppLink => _initialDeepLink;
   String? _initialDeepLink;
 
-  static final Set<String> publicRoutes = {Routes.home};
+  String? get initialDeepLink => _initialDeepLink;
 
-  static final Set<String> protectedRoutes = {
-    // TODO: Adicionar rotas protegidas
-  };
+  static const Set<String> publicRoutes = {Routes.home};
+
+  static const Set<String> protectedRoutes = {};
 
   bool isProtectedRoute(String route) => protectedRoutes.contains(route);
 
@@ -18,12 +18,10 @@ class HandleRedirect {
     _initialDeepLink = state.uri.toString();
     final path = state.uri.path;
 
-    // Permitir navegação normal para rotas públicas
-    if (publicRoutes.contains(path)) {
+    if (publicRoutes.contains(path) || !isProtectedRoute(path)) {
       return null;
     }
 
-    // Por padrão, permitir navegação (pode adicionar lógica de autenticação aqui no futuro)
-    return null;
+    return Routes.home;
   }
 }

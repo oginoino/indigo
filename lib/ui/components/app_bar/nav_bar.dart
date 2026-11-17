@@ -1,12 +1,12 @@
-
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
-import 'nav_item.dart';
-import '../../../provider/feed/feeds_list_provider.dart';
 import '../../../model/feed_item.dart';
-import 'nav_bar_skeleton.dart';
+import '../../../provider/feed/feeds_list_provider.dart';
 import '../../../provider/theme/theme_provider.dart';
+import '../../../util/const/ui/ui_constants.dart';
+import 'nav_bar_skeleton.dart';
+import 'nav_item.dart';
 
 class NavBar extends StatefulWidget {
   const NavBar({super.key});
@@ -40,8 +40,7 @@ class _NavBarState extends State<NavBar> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
-      final future =
-          context.read<FeedsListProvider>().getFeedsList();
+      final future = context.read<FeedsListProvider>().getFeedsList();
 
       setState(() {
         _feedsFuture = future;
@@ -61,8 +60,8 @@ class _NavBarState extends State<NavBar> {
     if (!_scrollController.hasClients) return;
 
     context.read<FeedsListProvider>().saveNavBarScrollOffset(
-          _scrollController.offset,
-        );
+      _scrollController.offset,
+    );
   }
 
   GlobalKey _keyForItem(String id) {
@@ -79,11 +78,9 @@ class _NavBarState extends State<NavBar> {
 
       if (!mounted || !_scrollController.hasClients) return;
 
-      final savedOffset =
-          context.read<FeedsListProvider>().navBarScrollOffset;
+      final savedOffset = context.read<FeedsListProvider>().navBarScrollOffset;
 
-      final maxExtent =
-          _scrollController.position.maxScrollExtent;
+      final maxExtent = _scrollController.position.maxScrollExtent;
 
       final target = savedOffset.clamp(0.0, maxExtent);
 
@@ -104,10 +101,8 @@ class _NavBarState extends State<NavBar> {
         return;
       }
 
-      final itemBox =
-          itemContext.findRenderObject() as RenderBox?;
-      final viewportBox =
-          viewportContext.findRenderObject() as RenderBox?;
+      final itemBox = itemContext.findRenderObject() as RenderBox?;
+      final viewportBox = viewportContext.findRenderObject() as RenderBox?;
 
       if (itemBox == null ||
           viewportBox == null ||
@@ -117,14 +112,12 @@ class _NavBarState extends State<NavBar> {
       }
 
       final itemPosition = itemBox.localToGlobal(Offset.zero);
-      final viewportPosition =
-          viewportBox.localToGlobal(Offset.zero);
+      final viewportPosition = viewportBox.localToGlobal(Offset.zero);
 
       final itemLeft = itemPosition.dx;
       final itemRight = itemLeft + itemBox.size.width;
       final viewportLeft = viewportPosition.dx;
-      final viewportRight =
-          viewportLeft + viewportBox.size.width;
+      final viewportRight = viewportLeft + viewportBox.size.width;
 
       double delta = 0;
 
@@ -136,11 +129,9 @@ class _NavBarState extends State<NavBar> {
         return;
       }
 
-      final maxExtent =
-          _scrollController.position.maxScrollExtent;
+      final maxExtent = _scrollController.position.maxScrollExtent;
 
-      final target = (_scrollController.offset + delta)
-          .clamp(0.0, maxExtent);
+      final target = (_scrollController.offset + delta).clamp(0.0, maxExtent);
 
       _scrollController.animateTo(
         target,
@@ -165,57 +156,45 @@ class _NavBarState extends State<NavBar> {
 
         if (snapshot.hasError) {
           return SizedBox(
-            height: 40,
+            height: UIConstants.navBarHeight,
             child: Center(
               child: Text(
                 'Não foi possível carregar os feeds.',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
+                style: Theme.of(context).textTheme.bodySmall,
               ),
             ),
           );
         }
 
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+        final feedItems = snapshot.data;
+        if (feedItems == null || feedItems.isEmpty) {
           return const SizedBox(
-            height: 40,
-            child: Center(
-              child: Text('Nenhum feed encontrado'),
-            ),
+            height: UIConstants.navBarHeight,
+            child: Center(child: Text('Nenhum feed encontrado')),
           );
         }
 
-        final feedItems = snapshot.data!;
+        final ids = feedItems.map((item) => item.id.toString()).toSet();
 
-        final ids = feedItems
-            .map((item) => item.id.toString())
-            .toSet();
-
-        _itemKeys.removeWhere(
-          (id, key) => !ids.contains(id),
-        );
+        _itemKeys.removeWhere((id, key) => !ids.contains(id));
 
         _restoreScrollOffset();
 
         return Align(
           alignment: Alignment.centerLeft,
           child: SizedBox(
-            height: 40,
+            height: UIConstants.navBarHeight,
             child: SingleChildScrollView(
-              key: const PageStorageKey<String>(
-                'feeds-navbar-scroll',
-              ),
+              key: const PageStorageKey<String>('feeds-navbar-scroll'),
               controller: _scrollController,
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(
-                horizontal: 8,
+                horizontal: UIConstants.navBarHorizontalPadding,
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.start,
-                spacing: 8,
+                spacing: UIConstants.navBarItemSpacing,
                 children: [
                   ...feedItems.map((item) {
                     final id = item.id.toString();
@@ -242,5 +221,3 @@ class _NavBarState extends State<NavBar> {
     );
   }
 }
-
-

@@ -1,63 +1,32 @@
+import 'dart:async';
 
-import '../../ui/theme/light.dart';
-import '../../ui/theme/dark.dart';
 import 'package:material_ui/material_ui.dart';
+
 import '../../service/persistence/persistence_service.dart';
-
-ThemeData _lightTheme = lightTheme;
-ThemeData _darkTheme = darkTheme;
-
-ThemeData buildLightTheme() {
-  return _lightTheme;
-}
-
-ThemeData buildDarkTheme() {
-  return _darkTheme;
-}
+import '../../ui/theme/app_theme.dart';
 
 class ThemeProvider extends ChangeNotifier {
-  final PersistenceService _persistenceService;
-
   ThemeProvider(this._persistenceService) {
-    _loadThemeSettings();
+    _isDarkMode = _persistenceService.getIsDarkMode();
+    _currentTheme = _isDarkMode ? darkTheme : lightTheme;
   }
 
-  bool _isDarkMode = false;
-  ThemeData _currentTheme = buildLightTheme();
+  final PersistenceService _persistenceService;
+
+  late bool _isDarkMode;
+  late ThemeData _currentTheme;
 
   ThemeData get currentTheme => _currentTheme;
   bool get isDarkMode => _isDarkMode;
 
-  void _loadThemeSettings() {
-    _isDarkMode = _persistenceService.getIsDarkMode();
-    _applyTheme();
-  }
+  void setDarkMode(bool value) {
+    if (_isDarkMode == value) return;
 
-  void _applyTheme() {
-    _currentTheme = _isDarkMode ? buildDarkTheme() : buildLightTheme();
+    _isDarkMode = value;
+    _currentTheme = value ? darkTheme : lightTheme;
+    unawaited(_persistenceService.setIsDarkMode(value));
     notifyListeners();
   }
 
-  void toggleLightTheme() {
-    _isDarkMode = !_isDarkMode;
-    _persistenceService.setIsDarkMode(_isDarkMode);
-    _applyTheme();
-  }
-
-  void setDarkMode(bool value) {
-    _isDarkMode = value;
-    _persistenceService.setIsDarkMode(_isDarkMode);
-    _applyTheme();
-  }
-
-  void setCustomTheme(ThemeData theme) {
-    _currentTheme = theme;
-    _applyTheme();
-  }
-
-  void toggleTheme() {
-    _isDarkMode = !_isDarkMode;
-    _persistenceService.setIsDarkMode(_isDarkMode);
-    _applyTheme();
-  }
+  void toggleTheme() => setDarkMode(!_isDarkMode);
 }

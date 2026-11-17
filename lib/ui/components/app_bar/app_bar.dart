@@ -1,4 +1,6 @@
 import 'package:material_ui/material_ui.dart';
+
+import '../../../util/const/ui/ui_constants.dart';
 import '../avatar.dart';
 import 'nav_bar.dart';
 
@@ -7,20 +9,14 @@ class CustomAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
-
     return SliverAppBar(
-      title: Icon(Icons.star),
-      actions: [
-        IconButton(onPressed: () {}, icon: Icon(Icons.search)),
-      ],
-      leading: Avatar(),
-      
-      bottom: PreferredSize(
-        preferredSize: Size.fromHeight(40),
-        child: NavBar(),),
+      title: const Icon(Icons.star),
+      leading: const Avatar(),
+      actions: [IconButton(onPressed: () {}, icon: const Icon(Icons.search))],
+      bottom: const PreferredSize(
+        preferredSize: Size.fromHeight(UIConstants.navBarHeight),
+        child: NavBar(),
+      ),
     );
   }
 }
-
-  
