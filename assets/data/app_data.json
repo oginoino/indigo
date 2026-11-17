@@ -1,0 +1,40 @@
+
+{
+    "feed_items": [
+        {
+            "id": 1,
+            "name": "Descobrir",
+            "icon": "discover"
+        },
+        {
+            "id": 2,
+            "name": "Amigos",
+            "icon": "friends"
+        },
+        {
+            "id": 3,
+            "name": "Comunidades",
+            "icon": "communities"
+        },
+        {
+            "id": 4,
+            "name": "Notícias",
+            "icon": "news"
+        },
+        {
+            "id": 5,
+            "name": "Vídeos",
+            "icon": "videos"
+        },
+        {
+            "id": 6,
+            "name": "Fotos",
+            "icon": "photos"
+        },
+        {
+            "id": 7,
+            "name": "Eventos",
+            "icon": "events"
+        }
+    ]
+}

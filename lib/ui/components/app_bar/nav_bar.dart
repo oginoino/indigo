@@ -1,0 +1,246 @@
+
+import 'package:material_ui/material_ui.dart';
+import 'package:provider/provider.dart';
+
+import 'nav_item.dart';
+import '../../../provider/feed/feeds_list_provider.dart';
+import '../../../model/feed_item.dart';
+import 'nav_bar_skeleton.dart';
+import '../../../provider/theme/theme_provider.dart';
+
+class NavBar extends StatefulWidget {
+  const NavBar({super.key});
+
+  @override
+  State<NavBar> createState() => _NavBarState();
+}
+
+class _NavBarState extends State<NavBar> {
+  Future<List<FeedItem>>? _feedsFuture;
+
+  late final ScrollController _scrollController;
+
+  final GlobalKey _viewportKey = GlobalKey();
+  final Map<String, GlobalKey> _itemKeys = {};
+
+  bool _restoreScheduled = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final provider = context.read<FeedsListProvider>();
+
+    _scrollController = ScrollController(
+      initialScrollOffset: provider.navBarScrollOffset,
+    );
+
+    _scrollController.addListener(_saveScrollOffset);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      final future =
+          context.read<FeedsListProvider>().getFeedsList();
+
+      setState(() {
+        _feedsFuture = future;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _saveScrollOffset();
+    _scrollController.removeListener(_saveScrollOffset);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _saveScrollOffset() {
+    if (!_scrollController.hasClients) return;
+
+    context.read<FeedsListProvider>().saveNavBarScrollOffset(
+          _scrollController.offset,
+        );
+  }
+
+  GlobalKey _keyForItem(String id) {
+    return _itemKeys.putIfAbsent(id, () => GlobalKey());
+  }
+
+  void _restoreScrollOffset() {
+    if (_restoreScheduled) return;
+
+    _restoreScheduled = true;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _restoreScheduled = false;
+
+      if (!mounted || !_scrollController.hasClients) return;
+
+      final savedOffset =
+          context.read<FeedsListProvider>().navBarScrollOffset;
+
+      final maxExtent =
+          _scrollController.position.maxScrollExtent;
+
+      final target = savedOffset.clamp(0.0, maxExtent);
+
+      if ((_scrollController.offset - target).abs() > 1) {
+        _scrollController.jumpTo(target);
+      }
+    });
+  }
+
+  void _scrollToItem(String id) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scrollController.hasClients) return;
+
+      final itemContext = _itemKeys[id]?.currentContext;
+      final viewportContext = _viewportKey.currentContext;
+
+      if (itemContext == null || viewportContext == null) {
+        return;
+      }
+
+      final itemBox =
+          itemContext.findRenderObject() as RenderBox?;
+      final viewportBox =
+          viewportContext.findRenderObject() as RenderBox?;
+
+      if (itemBox == null ||
+          viewportBox == null ||
+          !itemBox.hasSize ||
+          !viewportBox.hasSize) {
+        return;
+      }
+
+      final itemPosition = itemBox.localToGlobal(Offset.zero);
+      final viewportPosition =
+          viewportBox.localToGlobal(Offset.zero);
+
+      final itemLeft = itemPosition.dx;
+      final itemRight = itemLeft + itemBox.size.width;
+      final viewportLeft = viewportPosition.dx;
+      final viewportRight =
+          viewportLeft + viewportBox.size.width;
+
+      double delta = 0;
+
+      if (itemLeft < viewportLeft) {
+        delta = itemLeft - viewportLeft;
+      } else if (itemRight > viewportRight) {
+        delta = itemRight - viewportRight;
+      } else {
+        return;
+      }
+
+      final maxExtent =
+          _scrollController.position.maxScrollExtent;
+
+      final target = (_scrollController.offset + delta)
+          .clamp(0.0, maxExtent);
+
+      _scrollController.animateTo(
+        target,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_feedsFuture == null) {
+      return const NavBarSkeleton();
+    }
+
+    return FutureBuilder<List<FeedItem>>(
+      future: _feedsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const NavBarSkeleton();
+        }
+
+        if (snapshot.hasError) {
+          return SizedBox(
+            height: 40,
+            child: Center(
+              child: Text(
+                'Não foi possível carregar os feeds.',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+          );
+        }
+
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const SizedBox(
+            height: 40,
+            child: Center(
+              child: Text('Nenhum feed encontrado'),
+            ),
+          );
+        }
+
+        final feedItems = snapshot.data!;
+
+        final ids = feedItems
+            .map((item) => item.id.toString())
+            .toSet();
+
+        _itemKeys.removeWhere(
+          (id, key) => !ids.contains(id),
+        );
+
+        _restoreScrollOffset();
+
+        return Align(
+          alignment: Alignment.centerLeft,
+          child: SizedBox(
+            height: 40,
+            child: SingleChildScrollView(
+              key: const PageStorageKey<String>(
+                'feeds-navbar-scroll',
+              ),
+              controller: _scrollController,
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                spacing: 8,
+                children: [
+                  ...feedItems.map((item) {
+                    final id = item.id.toString();
+
+                    return NavItem(
+                      key: _keyForItem(id),
+                      feedItem: item,
+                      onSelected: _scrollToItem,
+                    );
+                  }),
+                  IconButton(
+                    onPressed: () {
+                      // Change theme
+                      context.read<ThemeProvider>().toggleTheme();
+                    },
+                    icon: const Icon(Icons.add),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+

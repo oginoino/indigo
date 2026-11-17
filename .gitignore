@@ -1,0 +1,173 @@
+# ============================================================
+# Artefatos gerados pelas plataformas
+# ============================================================
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub/
+.pub-cache/
+build/
+**/build/
+coverage/
+**/doc/api/
+.widget_preview/
+**/ios/Flutter/.last_build_id
+
+# Android / Gradle
+**/.gradle/
+**/local.properties
+**/captures/
+**/outputs/
+**/.cxx/
+**/.externalNativeBuild/
+**/generated/
+**/intermediates/
+**/tmp/
+**/*.apk
+**/*.aab
+**/*.ap_
+**/*.dex
+**/*.class
+
+# iOS
+**/DerivedData/
+**/Pods/
+**/*.xcuserstate
+**/xcuserdata/
+**/*.mode1v3
+**/*.mode2v3
+**/*.perspectivev3
+**/Flutter/ephemeral/
+**/Runner/GeneratedPluginRegistrant.*
+
+# macOS
+**/Flutter/ephemeral/
+
+# Windows / Linux
+**/flutter/ephemeral/
+
+# Logs e símbolos de build
+*.log
+app.*.symbols
+app.*.map.json
+
+# ============================================================
+# Arquivos locais e temporários de IDEs
+# ============================================================
+
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ============================================================
+# Agentes de IA
+# ============================================================
+
+
+# Diretórios de agentes de IA
+.agents/
+**/.agents/
+
+# Claude Code
+.claude/
+CLAUDE.local.md
+
+# OpenAI Codex
+.codex/
+
+# Cursor
+.cursor/
+.cursorignore
+
+# GitHub Copilot
+.github/copilot/
+
+# Gemini
+.gemini/
+
+# Arquivos de contexto e instruções locais
+AGENTS.local.md
+AGENT.local.md
+.ai/
+.ai-cache/
+.ai-tmp/
+.ai-workspace/
+
+# Histórico, sessões e estado local de agentes
+**/agent-history/
+**/agent-sessions/
+**/agent-state/
+**/agent-cache/
+**/agent-logs/
+**/agent-tmp/
+**/sessions/
+**/checkpoints/
+
+# ============================================================
+# Skills de agentes de IA
+# ============================================================
+
+# Skills locais, geradas ou instaladas por ferramentas
+.skills/
+.ai/skills/
+.agents/skills/
+**/.skills-cache/
+**/skills-cache/
+
+# ============================================================
+# Configurações e segredos locais
+# ============================================================
+
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+
+secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+
+# ============================================================
+# Arquivos específicos do ambiente
+# ============================================================
+
+# Configurações locais opcionais
+analysis_options.local.yaml
+development_tools.local.yaml
+
+# Arquivos temporários
+*.tmp
+*.bak
+*.orig
+*.rej
+
+
+
+.metadata
+analysis_options.yaml
+devtools_options.yaml
+
+pubspec.lock
+
+
+# Platforms
+**/build/
+**/ios/
+**/android/
+**/web/
+**/linux/
+**/macos/
+**/windows/
+**/flutter_assets/
+**/flutter_assets_*/
+**/flutter_assets_*/
