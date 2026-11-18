@@ -1,6 +1,6 @@
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../model/feed_item.dart';
 import '../../../provider/feed/feeds_list_provider.dart';
