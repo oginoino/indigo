@@ -5,9 +5,20 @@ class RouteInfo {
   final String path;
 }
 
+class RouteNames {
+  const RouteNames._();
+
+  static const home = 'home';
+  static const videos = 'videos';
+  static const create = 'create';
+  static const messages = 'messages';
+  static const profile = 'profile';
+}
+
 class Routes {
   const Routes._();
 
+  static const String pathSeparator = '/';
   static const String home = '/';
   static const String videos = '/videos';
   static const String create = '/create';
@@ -15,11 +26,11 @@ class Routes {
   static const String profile = '/profile';
 
   static const List<RouteInfo> routes = [
-    RouteInfo(name: 'home', path: home),
-    RouteInfo(name: 'videos', path: videos),
-    RouteInfo(name: 'create', path: create),
-    RouteInfo(name: 'messages', path: messages),
-    RouteInfo(name: 'profile', path: profile),
+    RouteInfo(name: RouteNames.home, path: home),
+    RouteInfo(name: RouteNames.videos, path: videos),
+    RouteInfo(name: RouteNames.create, path: create),
+    RouteInfo(name: RouteNames.messages, path: messages),
+    RouteInfo(name: RouteNames.profile, path: profile),
   ];
 
   static List<String> get allRouteNames =>

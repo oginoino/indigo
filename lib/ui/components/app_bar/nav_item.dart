@@ -16,11 +16,12 @@ class NavItem extends StatelessWidget {
     final provider = context.watch<FeedsListProvider>();
     final isSelected = provider.isFeedSelected(feedItem.id);
     final indicatorColor = isSelected
-        ? DefaultTextStyle.of(context).style.color ?? Colors.transparent
+        ? Theme.of(context).textTheme.bodyMedium?.color ??
+              Theme.of(context).colorScheme.onSurface
         : Colors.transparent;
 
     return InkWell(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(UIConstants.navBarItemBorderRadius),
       onTap: () {
         context.read<FeedsListProvider>().selectFeed(feedItem.id);
         context.go(feedItem.route);
@@ -36,7 +37,10 @@ class NavItem extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(color: indicatorColor, width: 2),
+                bottom: BorderSide(
+                  color: indicatorColor,
+                  width: UIConstants.navBarSelectedIndicatorThickness,
+                ),
               ),
             ),
             child: Text(feedItem.name, textAlign: TextAlign.left),

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../../provider/feed/feeds_list_provider.dart';
 import '../../../provider/theme/theme_provider.dart';
+import '../../../util/const/app/app_strings.dart';
 import '../../../util/const/ui/ui_constants.dart';
 import 'nav_item.dart';
 
@@ -71,7 +72,8 @@ class _NavBarState extends State<NavBar> {
 
       final target = savedOffset.clamp(0.0, maxExtent);
 
-      if ((_scrollController.offset - target).abs() > 1) {
+      if ((_scrollController.offset - target).abs() >
+          UIConstants.navBarScrollTolerance) {
         _scrollController.jumpTo(target);
       }
     });
@@ -122,7 +124,7 @@ class _NavBarState extends State<NavBar> {
 
       _scrollController.animateTo(
         target,
-        duration: const Duration(milliseconds: 250),
+        duration: UIConstants.navBarScrollDuration,
         curve: Curves.easeInOut,
       );
     });
@@ -135,7 +137,7 @@ class _NavBarState extends State<NavBar> {
     if (feedItems.isEmpty) {
       return const SizedBox(
         height: UIConstants.navBarHeight,
-        child: Center(child: Text('Nenhum feed encontrado')),
+        child: Center(child: Text(AppStrings.noFeedsAvailable)),
       );
     }
 

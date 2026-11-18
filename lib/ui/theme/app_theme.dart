@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../../util/const/ui/ui_constants.dart';
+import 'app_component_theme.dart';
 
 ThemeData _buildTheme({
   required Brightness brightness,
@@ -8,12 +9,20 @@ ThemeData _buildTheme({
   required Color backgroundColor,
   required Color foregroundColor,
 }) {
+  final colorScheme = ColorScheme.fromSeed(
+    seedColor: seedColor,
+    brightness: brightness,
+  );
+  final isDark = brightness == Brightness.dark;
+  final iconTheme = IconThemeData(color: foregroundColor);
+  final navigationIconTheme = IconThemeData(
+    size: UIConstants.navigationIconSize,
+    color: foregroundColor,
+  );
+
   return ThemeData(
     brightness: brightness,
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: seedColor,
-      brightness: brightness,
-    ),
+    colorScheme: colorScheme,
     scaffoldBackgroundColor: backgroundColor,
     textTheme: const TextTheme().apply(
       bodyColor: foregroundColor,
@@ -22,19 +31,33 @@ ThemeData _buildTheme({
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.transparent,
       foregroundColor: foregroundColor,
-      iconTheme: IconThemeData(color: foregroundColor),
+      iconTheme: iconTheme,
     ),
-    iconTheme: IconThemeData(color: foregroundColor),
+    iconTheme: iconTheme,
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: backgroundColor.withValues(
-        alpha: brightness == Brightness.dark ? 0.88 : 0.92,
+        alpha: isDark
+            ? UIConstants.darkBottomNavigationBackgroundOpacity
+            : UIConstants.lightBottomNavigationBackgroundOpacity,
       ),
       selectedItemColor: foregroundColor,
       unselectedItemColor: foregroundColor,
-      selectedIconTheme: IconThemeData(size: 28, color: foregroundColor),
-      unselectedIconTheme: IconThemeData(size: 28, color: foregroundColor),
-      elevation: 0,
+      selectedIconTheme: navigationIconTheme,
+      unselectedIconTheme: navigationIconTheme,
+      elevation: UIConstants.noElevation,
     ),
+    extensions: [
+      AppComponentTheme(
+        bottomNavigationSelectionColor: colorScheme.onSurface.withValues(
+          alpha: isDark
+              ? UIConstants.darkBottomNavigationSelectionOpacity
+              : UIConstants.lightBottomNavigationSelectionOpacity,
+        ),
+        bottomNavigationBorderColor: colorScheme.outlineVariant.withValues(
+          alpha: UIConstants.bottomNavigationBorderOpacity,
+        ),
+      ),
+    ],
   );
 }
 
