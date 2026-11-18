@@ -4,8 +4,13 @@ class UIConstants {
   const UIConstants._();
 
   static const double defaultPadding = 16;
-  static const double avatarSize = 16;
+  static const double avatarSmallSize = 32;
+  static const double avatarMediumSize = 48;
+  static const double avatarLargeSize = 72;
+  static const double avatarPlaceholderIconScale = 0.6;
   static const double navigationIconSize = 28;
+  static const double appBarLeadingWidth = 56;
+  static const double appBarToolbarHeight = 56;
 
   static const double navBarHeight = 40;
   static const double navBarItemSpacing = 8;
