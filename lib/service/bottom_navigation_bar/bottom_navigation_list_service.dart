@@ -4,8 +4,8 @@ import 'package:flutter/services.dart';
 
 import '../../model/bottom_navigation_item.dart';
 
-class BottomNavigationItemsService {
-  const BottomNavigationItemsService();
+class BottomNavigationListService {
+  const BottomNavigationListService();
 
   static const _assetPath = 'assets/data/app_data.json';
 
