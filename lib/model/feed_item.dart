@@ -1,3 +1,5 @@
+import '../util/const/app/app_data_constants.dart';
+
 class FeedItem {
   const FeedItem({
     required this.id,
@@ -15,21 +17,21 @@ class FeedItem {
 
   factory FeedItem.fromJson(Map<String, dynamic> json) {
     return FeedItem(
-      id: json['id'] as int,
-      name: json['name'] as String,
-      icon: json['icon'] as String,
-      route: json['route'] as String,
-      appBar: json['app_bar'] as String?,
+      id: json[AppDataConstants.idKey] as int,
+      name: json[AppDataConstants.nameKey] as String,
+      icon: json[AppDataConstants.iconKey] as String,
+      route: json[AppDataConstants.routeKey] as String,
+      appBar: json[AppDataConstants.appBarKey] as String?,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'name': name,
-      'icon': icon,
-      'route': route,
-      'app_bar': appBar,
+      AppDataConstants.idKey: id,
+      AppDataConstants.nameKey: name,
+      AppDataConstants.iconKey: icon,
+      AppDataConstants.routeKey: route,
+      AppDataConstants.appBarKey: appBar,
     };
   }
 }

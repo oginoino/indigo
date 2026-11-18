@@ -1,3 +1,5 @@
+import '../util/const/app/app_data_constants.dart';
+
 class BottomNavigationItem {
   const BottomNavigationItem({
     required this.id,
@@ -13,14 +15,19 @@ class BottomNavigationItem {
 
   factory BottomNavigationItem.fromJson(Map<String, dynamic> json) {
     return BottomNavigationItem(
-      id: json['id'] as int,
-      name: json['name'] as String,
-      icon: json['icon'] as String,
-      route: json['route'] as String,
+      id: json[AppDataConstants.idKey] as int,
+      name: json[AppDataConstants.nameKey] as String,
+      icon: json[AppDataConstants.iconKey] as String,
+      route: json[AppDataConstants.routeKey] as String,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'id': id, 'name': name, 'icon': icon, 'route': route};
+    return {
+      AppDataConstants.idKey: id,
+      AppDataConstants.nameKey: name,
+      AppDataConstants.iconKey: icon,
+      AppDataConstants.routeKey: route,
+    };
   }
 }

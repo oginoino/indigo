@@ -13,7 +13,7 @@ class IndigoApp extends StatelessWidget {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         return MaterialApp.router(
-          title: AppConstants.appTitle,
+          title: AppConstants.appName,
           debugShowCheckedModeBanner: false,
           theme: themeProvider.currentTheme,
           routerConfig: appRouter,

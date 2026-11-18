@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../../model/feed_item.dart';
+import '../../util/const/ui/ui_constants.dart';
 
 class FeedsListProvider extends ChangeNotifier {
   FeedsListProvider(List<FeedItem> feeds)
@@ -9,7 +10,7 @@ class FeedsListProvider extends ChangeNotifier {
 
   final List<FeedItem> _feedsList;
   FeedItem? _selectedFeed;
-  double _navBarScrollOffset = 0;
+  double _navBarScrollOffset = UIConstants.navBarScrollInitialOffset;
 
   List<FeedItem> get feeds => _feedsList;
   FeedItem? get selectedFeed => _selectedFeed;

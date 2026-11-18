@@ -2,6 +2,10 @@ import 'dart:ui';
 
 import 'package:material_ui/material_ui.dart';
 
+import '../../util/const/app/app_strings.dart';
+import '../../util/const/ui/ui_constants.dart';
+import '../theme/app_component_theme.dart';
+
 class CustomBottomNavigationBar extends StatelessWidget {
   const CustomBottomNavigationBar({
     required this.currentIndex,
@@ -14,10 +18,6 @@ class CustomBottomNavigationBar extends StatelessWidget {
   final ValueChanged<int> onTap;
   final List<BottomNavigationBarItem> items;
 
-  static const double _height = 60;
-  static const double _radius = 40;
-  static const int _maxVisibleItems = 5;
-
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) {
@@ -27,18 +27,25 @@ class CustomBottomNavigationBar extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final navTheme = theme.bottomNavigationBarTheme;
+    final componentTheme = theme.extension<AppComponentTheme>();
 
     final selectedColor = navTheme.selectedItemColor ?? colors.onSurface;
 
     final unselectedColor = navTheme.unselectedItemColor ?? colors.onSurface;
 
     final backgroundColor = navTheme.backgroundColor ?? colors.surface;
+    final selectedBackgroundColor =
+        componentTheme?.bottomNavigationSelectionColor ??
+        colors.secondaryContainer;
+    final borderColor =
+        componentTheme?.bottomNavigationBorderColor ?? colors.outlineVariant;
 
     final selectedIndex = currentIndex >= 0 && currentIndex < items.length
         ? currentIndex
         : -1;
 
-    final isScrollable = items.length > _maxVisibleItems;
+    final isScrollable =
+        items.length > UIConstants.bottomNavigationMaxVisibleItems;
 
     final children = List<Widget>.generate(items.length, (index) {
       final item = items[index];
@@ -57,22 +64,20 @@ class CustomBottomNavigationBar extends StatelessWidget {
         selected: selected,
         label: item.label,
         child: Tooltip(
-          message: item.label ?? '',
+          message: item.label ?? AppStrings.empty,
           child: InkWell(
             onTap: () => onTap(index),
-            borderRadius: BorderRadius.circular(_radius),
+            borderRadius: BorderRadius.circular(
+              UIConstants.bottomNavigationRadius,
+            ),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 220),
+              duration: UIConstants.bottomNavigationAnimationDuration,
               curve: Curves.easeOutCubic,
               decoration: BoxDecoration(
-                color: selected
-                    ? colors.onSurface.withValues(
-                        alpha: theme.brightness == Brightness.dark
-                            ? 0.16
-                            : 0.07,
-                      )
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(_radius),
+                color: selected ? selectedBackgroundColor : Colors.transparent,
+                borderRadius: BorderRadius.circular(
+                  UIConstants.bottomNavigationRadius,
+                ),
               ),
               child: Center(
                 child: IconTheme(
@@ -86,7 +91,11 @@ class CustomBottomNavigationBar extends StatelessWidget {
       );
 
       if (isScrollable) {
-        return SizedBox(key: ValueKey(index), width: 64, child: button);
+        return SizedBox(
+          key: ValueKey(index),
+          width: UIConstants.bottomNavigationItemWidth,
+          child: button,
+        );
       }
 
       return Expanded(key: ValueKey(index), child: button);
@@ -94,20 +103,29 @@ class CustomBottomNavigationBar extends StatelessWidget {
 
     return SafeArea(
       top: false,
-      minimum: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      minimum: const EdgeInsets.only(
+        left: UIConstants.bottomNavigationOuterPadding,
+        right: UIConstants.bottomNavigationOuterPadding,
+        bottom: UIConstants.bottomNavigationBottomPadding,
+      ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(_radius),
+        borderRadius: BorderRadius.circular(UIConstants.bottomNavigationRadius),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          filter: ImageFilter.blur(
+            sigmaX: UIConstants.bottomNavigationBlurSigma,
+            sigmaY: UIConstants.bottomNavigationBlurSigma,
+          ),
           child: Container(
-            height: _height,
-            padding: const EdgeInsets.all(5),
+            height: UIConstants.bottomNavigationHeight,
+            padding: const EdgeInsets.all(
+              UIConstants.bottomNavigationContentPadding,
+            ),
             decoration: BoxDecoration(
               color: backgroundColor,
-              borderRadius: BorderRadius.circular(_radius),
-              border: Border.all(
-                color: colors.outlineVariant.withValues(alpha: 0.55),
+              borderRadius: BorderRadius.circular(
+                UIConstants.bottomNavigationRadius,
               ),
+              border: Border.all(color: borderColor),
             ),
             child: isScrollable
                 ? SingleChildScrollView(
