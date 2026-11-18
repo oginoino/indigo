@@ -4,8 +4,13 @@ import 'package:flutter/services.dart';
 
 import '../../model/bottom_navigation_item.dart';
 
-class BottomNavigationBarListService {
-  const BottomNavigationBarListService();
+abstract interface class BottomNavigationBarListService {
+  Future<List<BottomNavigationItem>> getBottomNavigationBarItems();
+}
+
+class AppBottomNavigationBarListService
+    implements BottomNavigationBarListService {
+  const AppBottomNavigationBarListService();
 
   static const _assetPath = 'assets/data/app_data.json';
 
@@ -18,9 +23,15 @@ class BottomNavigationBarListService {
 
     final items = data['bottom_navigation_items'];
     if (items is! List<dynamic>) {
-      throw const FormatException('App data is missing bottom navigation items.');
+      throw const FormatException(
+        'App data is missing bottom navigation items.',
+      );
     }
 
-    return items.map((item) => BottomNavigationItem.fromJson(item as Map<String, dynamic>)).toList();
+    return items
+        .map(
+          (item) => BottomNavigationItem.fromJson(item as Map<String, dynamic>),
+        )
+        .toList();
   }
 }

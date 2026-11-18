@@ -1,16 +1,12 @@
-
 import 'package:material_ui/material_ui.dart';
 
 import '../../model/bottom_navigation_item.dart';
 import '../../service/bottom_navigation_bar/bottom_navigation_bar_list_service.dart';
 
 class BottomNavigationBarListProvider extends ChangeNotifier {
-  BottomNavigationBarListProvider(
-    this._bottomNavigationBarListService,
-  );
+  BottomNavigationBarListProvider(this._bottomNavigationBarListService);
 
-  final BottomNavigationBarListService
-      _bottomNavigationBarListService;
+  final BottomNavigationBarListService _bottomNavigationBarListService;
 
   List<BottomNavigationItem> _bottomNavigationBarList = [];
 
@@ -18,6 +14,7 @@ class BottomNavigationBarListProvider extends ChangeNotifier {
 
   bool _isLoading = false;
   bool _disposed = false;
+  Object? _error;
 
   Future<List<BottomNavigationItem>>? _pendingRequest;
 
@@ -25,9 +22,9 @@ class BottomNavigationBarListProvider extends ChangeNotifier {
       List.unmodifiable(_bottomNavigationBarList);
 
   bool get isLoading => _isLoading;
+  Object? get error => _error;
 
-  bool get hasBottomNavigationBarItems =>
-      _bottomNavigationBarList.isNotEmpty;
+  bool get hasBottomNavigationBarItems => _bottomNavigationBarList.isNotEmpty;
 
   BottomNavigationItem? get selectedBottomNavigationItem =>
       _selectedBottomNavigationItem;
@@ -48,10 +45,11 @@ class BottomNavigationBarListProvider extends ChangeNotifier {
     if (_disposed) return;
 
     _isLoading = true;
+    _error = null;
     notifyListeners();
 
-    final request =
-        _bottomNavigationBarListService.getBottomNavigationBarItems();
+    final request = _bottomNavigationBarListService
+        .getBottomNavigationBarItems();
 
     _pendingRequest = request;
 
@@ -85,6 +83,8 @@ class BottomNavigationBarListProvider extends ChangeNotifier {
         '${items.length} itens',
       );
     } catch (error, stackTrace) {
+      if (_disposed) return;
+      _error = error;
       debugPrint('[BottomNavigation] Erro: $error');
       debugPrintStack(stackTrace: stackTrace);
     } finally {

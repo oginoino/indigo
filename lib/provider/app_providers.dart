@@ -10,8 +10,8 @@ List<SingleChildWidget> get appProviders => [
   ChangeNotifierProvider(create: (_) => ThemeProvider(persistenceService)),
   ChangeNotifierProvider(create: (_) => FeedsListProvider(feedsListService)),
   ChangeNotifierProvider(
-    create: (_) => BottomNavigationBarListProvider(
-      bottomNavigationBarListService,
-    )..loadBottomNavigationBarList(),
+    create: (_) =>
+        BottomNavigationBarListProvider(bottomNavigationBarListService)
+          ..loadBottomNavigationBarList(),
   ),
 ];
