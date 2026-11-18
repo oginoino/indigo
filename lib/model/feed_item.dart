@@ -1,19 +1,26 @@
 class FeedItem {
-  const FeedItem({required this.id, required this.name, required this.icon});
+  const FeedItem({
+    required this.id,
+    required this.name,
+    required this.icon,
+    required this.route,
+  });
 
   final int id;
   final String name;
   final String icon;
+  final String route;
 
   factory FeedItem.fromJson(Map<String, dynamic> json) {
     return FeedItem(
       id: json['id'] as int,
       name: json['name'] as String,
       icon: json['icon'] as String,
+      route: json['route'] as String,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'id': id, 'name': name, 'icon': icon};
+    return {'id': id, 'name': name, 'icon': icon, 'route': route};
   }
 }
