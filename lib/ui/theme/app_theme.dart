@@ -25,7 +25,25 @@ ThemeData _buildTheme({
       iconTheme: IconThemeData(color: foregroundColor),
     ),
     iconTheme: IconThemeData(color: foregroundColor),
-  );
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+    backgroundColor: backgroundColor.withValues(
+      alpha: brightness == Brightness.dark ? 0.82 : 0.78,
+    ),
+    selectedItemColor: foregroundColor,
+    unselectedItemColor: foregroundColor,
+    selectedIconTheme: IconThemeData(
+      size: 24,
+      color: foregroundColor,
+    ),
+    unselectedIconTheme: IconThemeData(
+      size: 24,
+      color: foregroundColor,
+    ),
+    elevation: 0,
+    type: BottomNavigationBarType.shifting,
+    ),
+    
+    );
 }
 
 final ThemeData lightTheme = _buildTheme(
