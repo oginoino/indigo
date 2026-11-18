@@ -40,20 +40,29 @@
     "bottom_navigation_items": [
         {
             "id": 1,
-            "name": "Home",
-            "icon": "home"
+            "name": "Descobrir",
+            "icon": "home_rounded"
         },
         {
             "id": 2,
-            "name": "Search",
-            "icon": "search"
+            "name": "Videos",
+            "icon": "video_library_rounded"
         },
         {
             "id": 3,
-            "name": "Add",
-            "icon": "add"
+            "name": "Criar",
+            "icon": "add_circle_outline_rounded"
+        },
+        {
+            "id": 4,
+            "name": "Mensagens",
+            "icon": "send_rounded"
+        },
+        {
+            "id": 5,
+            "name": "Perfil",
+            "icon": "person_rounded"
         }
-        
     
     ]
 }

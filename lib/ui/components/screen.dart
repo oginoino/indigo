@@ -34,7 +34,7 @@ class Screen extends StatelessWidget {
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
             activeIcon: Icon(Icons.home_rounded),
-            label: 'Home',
+            label: 'Descobrir',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.video_library_rounded),
