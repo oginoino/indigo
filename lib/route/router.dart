@@ -8,5 +8,9 @@ import 'routes.dart';
 final GoRouter appRouter = GoRouter(
   initialLocation: Routes.home,
   redirect: HandleRedirect().handleRedirect,
-  routes: [AppRoute(Routes.home, (context, state) => const HomePage())],
+  routes: _routes,
 );
+
+final List<GoRoute> _routes = [
+  AppRoute(Routes.home, (context, state) => const HomePage()),
+];
