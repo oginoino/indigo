@@ -36,5 +36,24 @@
             "name": "Eventos",
             "icon": "events"
         }
+    ],
+    "bottom_navigation_items": [
+        {
+            "id": 1,
+            "name": "Home",
+            "icon": "home"
+        },
+        {
+            "id": 2,
+            "name": "Search",
+            "icon": "search"
+        },
+        {
+            "id": 3,
+            "name": "Add",
+            "icon": "add"
+        }
+        
+    
     ]
 }
