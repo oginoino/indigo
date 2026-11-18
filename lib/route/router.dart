@@ -30,4 +30,32 @@ final List<GoRoute> _routes = [
     Routes.profile,
     (context, state) => const PlaceholderPage(title: 'Perfil'),
   ),
+  AppRoute(
+    Routes.discover,
+    (context, state) => const PlaceholderPage(title: 'Descobrir'),
+  ),
+  AppRoute(
+    Routes.friends,
+    (context, state) => const PlaceholderPage(title: 'Amigos'),
+  ),
+  AppRoute(
+    Routes.communities,
+    (context, state) => const PlaceholderPage(title: 'Comunidades'),
+  ),
+  AppRoute(
+    Routes.news,
+    (context, state) => const PlaceholderPage(title: 'Notícias'),
+  ),
+  AppRoute(
+    Routes.appbarVideos,
+    (context, state) => const PlaceholderPage(title: 'Vídeos'),
+  ),
+  AppRoute(
+    Routes.photos,
+    (context, state) => const PlaceholderPage(title: 'Fotos'),
+  ),
+  AppRoute(
+    Routes.events,
+    (context, state) => const PlaceholderPage(title: 'Eventos'),
+  ),
 ];

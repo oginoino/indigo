@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../model/feed_item.dart';
 import '../../../provider/feed/feeds_list_provider.dart';
@@ -25,6 +26,7 @@ class NavItem extends StatelessWidget {
       onTap: () {
         context.read<FeedsListProvider>().selectFeed(feedItem.id);
         onSelected?.call(itemId);
+        context.go(feedItem.route);
       },
       child: Row(
         mainAxisSize: MainAxisSize.min,

@@ -4,37 +4,44 @@
         {
             "id": 1,
             "name": "Descobrir",
-            "icon": "discover"
+            "icon": "discover",
+            "route": "/discover"
         },
         {
             "id": 2,
             "name": "Amigos",
-            "icon": "friends"
+            "icon": "friends",
+            "route": "/friends"
         },
         {
             "id": 3,
             "name": "Comunidades",
-            "icon": "communities"
+            "icon": "communities",
+            "route": "/communities"
         },
         {
             "id": 4,
             "name": "Notícias",
-            "icon": "news"
+            "icon": "news",
+            "route": "/news"
         },
         {
             "id": 5,
             "name": "Vídeos",
-            "icon": "videos"
+            "icon": "videos",
+            "route": "/appbar-videos"
         },
         {
             "id": 6,
             "name": "Fotos",
-            "icon": "photos"
+            "icon": "photos",
+            "route": "/photos"
         },
         {
             "id": 7,
             "name": "Eventos",
-            "icon": "events"
+            "icon": "events",
+            "route": "/events"
         }
     ],
     "bottom_navigation_items": [
