@@ -13,6 +13,10 @@ class AppStrings {
   static const videoPlaybackFailed = 'Não foi possível reproduzir este vídeo.';
   static const noVideosAvailable = 'Nenhum vídeo disponível.';
   static const postEngagementSeparator = '  ·  ';
+  static const viewPostImage = 'Visualizar imagem {index}';
+  static const closeImageViewer = 'Fechar visualização';
+  static const imageViewerCounter = '{current} / {total}';
+  static const imageLoadFailed = 'Não foi possível carregar esta imagem.';
   static const playVideo = 'Reproduzir vídeo';
   static const pauseVideo = 'Pausar vídeo';
   static const muteVideo = 'Silenciar vídeo';
