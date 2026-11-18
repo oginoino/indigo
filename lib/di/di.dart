@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../service/app_data_service.dart';
 import '../service/persistence/avatar_image_service.dart';
 import '../service/persistence/persistence_service.dart';
+import '../service/social_data_service.dart';
 
 class DependencyInjection {
   const DependencyInjection._();
@@ -33,8 +34,12 @@ class DependencyInjection {
     if (!locator.isRegistered<AppDataService>()) {
       locator.registerSingleton<AppDataService>(AssetAppDataService());
     }
+    if (!locator.isRegistered<SocialDataService>()) {
+      locator.registerSingleton<SocialDataService>(AssetSocialDataService());
+    }
 
     await locator<AppDataService>().load();
+    await locator<SocialDataService>().load();
   }
 }
 
@@ -45,3 +50,5 @@ AvatarImageService get avatarImageService =>
     GetIt.instance<AvatarImageService>();
 
 AppDataService get appDataService => GetIt.instance<AppDataService>();
+
+SocialDataService get socialDataService => GetIt.instance<SocialDataService>();

@@ -1,0 +1,1055 @@
+{
+    "schema_version": 1,
+    "current_user_party_id": "party-ana",
+    "parties": [
+        {
+            "id": "party-ana",
+            "type": "person",
+            "created_at": "2024-02-11T10:00:00Z"
+        },
+        {
+            "id": "party-lucas",
+            "type": "person",
+            "created_at": "2023-08-03T10:00:00Z"
+        },
+        {
+            "id": "party-maya",
+            "type": "person",
+            "created_at": "2025-01-19T10:00:00Z"
+        },
+        {
+            "id": "party-rafa",
+            "type": "person",
+            "created_at": "2025-07-26T10:00:00Z"
+        },
+        {
+            "id": "party-indigo-studio",
+            "type": "organization",
+            "created_at": "2024-01-01T10:00:00Z"
+        }
+    ],
+    "user_profiles": [
+        {
+            "party_id": "party-ana",
+            "platform_user_role_id": "role-ana-user",
+            "username": "ana.costa",
+            "display_name": "Ana Costa",
+            "avatar_url": "https://i.pravatar.cc/160?img=47",
+            "bio": "Fotografia, café e dias ao ar livre.",
+            "created_at": "2024-02-11T10:00:00Z"
+        },
+        {
+            "party_id": "party-lucas",
+            "platform_user_role_id": "role-lucas-user",
+            "username": "lucas.design",
+            "display_name": "Lucas Mendes",
+            "avatar_url": "https://i.pravatar.cc/160?img=12",
+            "bio": "Designer de produto. Explorando lugares novos.",
+            "created_at": "2023-08-03T10:00:00Z"
+        },
+        {
+            "party_id": "party-maya",
+            "platform_user_role_id": "role-maya-user",
+            "username": "mayaribeiro",
+            "display_name": "Maya Ribeiro",
+            "avatar_url": "https://i.pravatar.cc/160?img=44",
+            "bio": "Música, trilhas e histórias.",
+            "created_at": "2025-01-19T10:00:00Z"
+        },
+        {
+            "party_id": "party-rafa",
+            "platform_user_role_id": "role-rafa-user",
+            "username": "rafa.santos",
+            "display_name": "Rafa Santos",
+            "avatar_url": "https://i.pravatar.cc/160?img=33",
+            "bio": "Aprendendo a cozinhar sem receita.",
+            "created_at": "2025-07-26T10:00:00Z"
+        }
+    ],
+    "party_roles": [
+        {
+            "id": "role-ana-user",
+            "party_id": "party-ana",
+            "type": "platformUser",
+            "scope": "platform",
+            "valid_from": "2024-02-11T10:00:00Z"
+        },
+        {
+            "id": "role-lucas-user",
+            "party_id": "party-lucas",
+            "type": "platformUser",
+            "scope": "platform",
+            "valid_from": "2023-08-03T10:00:00Z"
+        },
+        {
+            "id": "role-maya-user",
+            "party_id": "party-maya",
+            "type": "platformUser",
+            "scope": "platform",
+            "valid_from": "2025-01-19T10:00:00Z"
+        },
+        {
+            "id": "role-rafa-user",
+            "party_id": "party-rafa",
+            "type": "platformUser",
+            "scope": "platform",
+            "valid_from": "2025-07-26T10:00:00Z"
+        },
+        {
+            "id": "role-lucas-community-owner",
+            "party_id": "party-lucas",
+            "type": "communityOwner",
+            "scope": "community",
+            "scope_id": "community-design",
+            "valid_from": "2025-03-01T10:00:00Z"
+        },
+        {
+            "id": "role-maya-community-moderator",
+            "party_id": "party-maya",
+            "type": "communityModerator",
+            "scope": "community",
+            "scope_id": "community-design",
+            "valid_from": "2025-03-01T10:00:00Z"
+        },
+        {
+            "id": "role-ana-community-member",
+            "party_id": "party-ana",
+            "type": "communityMember",
+            "scope": "community",
+            "scope_id": "community-design",
+            "valid_from": "2025-03-08T10:00:00Z"
+        },
+        {
+            "id": "role-ana-chat-lucas",
+            "party_id": "party-ana",
+            "type": "conversationParticipant",
+            "scope": "conversation",
+            "scope_id": "conversation-ana-lucas",
+            "valid_from": "2025-04-10T10:00:00Z"
+        },
+        {
+            "id": "role-lucas-chat-ana",
+            "party_id": "party-lucas",
+            "type": "conversationParticipant",
+            "scope": "conversation",
+            "scope_id": "conversation-ana-lucas",
+            "valid_from": "2025-04-10T10:00:00Z"
+        },
+        {
+            "id": "role-lucas-chat-team",
+            "party_id": "party-lucas",
+            "type": "conversationParticipant",
+            "scope": "conversation",
+            "scope_id": "conversation-design-team",
+            "valid_from": "2026-02-03T10:00:00Z"
+        },
+        {
+            "id": "role-ana-live-host",
+            "party_id": "party-ana",
+            "type": "liveHost",
+            "scope": "liveSession",
+            "scope_id": "live-photo-walk",
+            "valid_from": "2026-11-18T18:00:00Z"
+        },
+        {
+            "id": "role-lucas-live-moderator",
+            "party_id": "party-lucas",
+            "type": "liveModerator",
+            "scope": "liveSession",
+            "scope_id": "live-photo-walk",
+            "valid_from": "2026-11-18T18:00:00Z"
+        },
+        {
+            "id": "role-maya-live-speaker",
+            "party_id": "party-maya",
+            "type": "liveSpeaker",
+            "scope": "liveSession",
+            "scope_id": "live-photo-walk",
+            "valid_from": "2026-11-18T18:00:00Z"
+        },
+        {
+            "id": "role-rafa-live-viewer",
+            "party_id": "party-rafa",
+            "type": "liveViewer",
+            "scope": "liveSession",
+            "scope_id": "live-photo-walk",
+            "valid_from": "2026-11-18T18:05:00Z"
+        },
+        {
+            "id": "role-maya-live-host-plants",
+            "party_id": "party-maya",
+            "type": "liveHost",
+            "scope": "liveSession",
+            "scope_id": "live-plants-next-week",
+            "valid_from": "2026-11-17T12:00:00Z"
+        },
+        {
+            "id": "role-maya-live-host-previous",
+            "party_id": "party-maya",
+            "type": "liveHost",
+            "scope": "liveSession",
+            "scope_id": "live-photo-walk-previous",
+            "valid_from": "2026-11-15T19:00:00Z",
+            "valid_until": "2026-11-15T21:00:00Z"
+        }
+    ],
+    "friendships": [
+        {
+            "id": "friendship-ana-lucas",
+            "requester_party_id": "party-ana",
+            "recipient_party_id": "party-lucas",
+            "status": "accepted",
+            "requested_at": "2025-04-10T10:00:00Z",
+            "responded_at": "2025-04-10T10:05:00Z"
+        },
+        {
+            "id": "friendship-ana-maya",
+            "requester_party_id": "party-maya",
+            "recipient_party_id": "party-ana",
+            "status": "accepted",
+            "requested_at": "2025-06-02T10:00:00Z",
+            "responded_at": "2025-06-02T10:30:00Z"
+        },
+        {
+            "id": "friendship-rafa-ana",
+            "requester_party_id": "party-rafa",
+            "recipient_party_id": "party-ana",
+            "status": "pending",
+            "requested_at": "2026-11-18T16:30:00Z"
+        }
+    ],
+    "communities": [
+        {
+            "id": "community-design",
+            "name": "Design em movimento",
+            "description": "Ideias, referências e conversas sobre design.",
+            "created_by_party_role_id": "role-lucas-user",
+            "created_at": "2025-03-01T10:00:00Z",
+            "visibility": "public"
+        },
+        {
+            "id": "community-indoor-plants",
+            "name": "Plantas de apartamento",
+            "description": "Cuidados, trocas e cantinhos verdes.",
+            "created_by_party_role_id": "role-maya-user",
+            "created_at": "2025-09-12T10:00:00Z",
+            "visibility": "public"
+        }
+    ],
+    "conversations": [
+        {
+            "id": "conversation-ana-lucas",
+            "type": "direct",
+            "created_by_party_role_id": "role-ana-user",
+            "created_at": "2025-04-10T10:00:00Z"
+        },
+        {
+            "id": "conversation-design-team",
+            "type": "group",
+            "created_by_party_role_id": "role-lucas-user",
+            "created_at": "2026-02-03T10:00:00Z"
+        }
+    ],
+    "conversation_messages": [
+        {
+            "id": "message-ana-lucas-1",
+            "conversation_id": "conversation-ana-lucas",
+            "sender_party_role_id": "role-ana-chat-lucas",
+            "content": {
+                "segments": [
+                    {
+                        "text": "Você vai fotografar o passeio de sábado?",
+                        "styles": []
+                    }
+                ]
+            },
+            "created_at": "2026-11-17T19:10:00Z"
+        },
+        {
+            "id": "message-ana-lucas-2",
+            "conversation_id": "conversation-ana-lucas",
+            "sender_party_role_id": "role-lucas-chat-ana",
+            "content": {
+                "segments": [
+                    {
+                        "text": "Vou sim! Esse lugar parece ótimo.",
+                        "styles": []
+                    }
+                ]
+            },
+            "shared_post_id": "post-river-walk",
+            "created_at": "2026-11-17T19:12:00Z"
+        },
+        {
+            "id": "message-ana-lucas-3",
+            "conversation_id": "conversation-ana-lucas",
+            "sender_party_role_id": "role-ana-chat-lucas",
+            "content": {
+                "segments": [
+                    {
+                        "text": "Perfeito, te mando o ponto de encontro.",
+                        "styles": []
+                    }
+                ]
+            },
+            "reply_to_message_id": "message-ana-lucas-2",
+            "created_at": "2026-11-17T19:14:00Z"
+        },
+        {
+            "id": "message-design-team-1",
+            "conversation_id": "conversation-design-team",
+            "sender_party_role_id": "role-lucas-chat-team",
+            "content": {
+                "segments": [
+                    {
+                        "text": "Separei três referências para a revisão de amanhã.",
+                        "styles": [
+                            "bold"
+                        ]
+                    }
+                ]
+            },
+            "created_at": "2026-11-18T14:00:00Z"
+        }
+    ],
+    "post_themes": [
+        {
+            "id": "theme-sunset",
+            "name": "Fim de tarde",
+            "background_color_hex": "#FCE4D6",
+            "foreground_color_hex": "#34251F",
+            "accent_color_hex": "#E8754D"
+        },
+        {
+            "id": "theme-midnight",
+            "name": "Noite",
+            "background_color_hex": "#171A2B",
+            "foreground_color_hex": "#F5F5FA",
+            "accent_color_hex": "#9B8AFB"
+        },
+        {
+            "id": "theme-paper",
+            "name": "Papel",
+            "background_color_hex": "#F7F2E8",
+            "foreground_color_hex": "#292722",
+            "accent_color_hex": "#6C8A72"
+        }
+    ],
+    "sticker_assets": [
+        {
+            "id": "sticker-sparkle",
+            "type": "image",
+            "asset_uri": "https://picsum.photos/id/106/160/160",
+            "accessibility_label": "Ilustração decorativa"
+        },
+        {
+            "id": "sticker-wave",
+            "type": "gif",
+            "asset_uri": "https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif",
+            "accessibility_label": "Sticker animado de gato"
+        }
+    ],
+    "posts": [
+        {
+            "id": "post-river-walk",
+            "author_party_role_id": "role-ana-user",
+            "title": "Um respiro no meio da semana",
+            "content": {
+                "segments": [
+                    {
+                        "text": "Às vezes tudo que a gente precisa é ",
+                        "styles": []
+                    },
+                    {
+                        "text": "desacelerar",
+                        "styles": [
+                            "italic"
+                        ]
+                    },
+                    {
+                        "text": " e olhar em volta. 🌿",
+                        "styles": [],
+                        "entity": {
+                            "type": "hashtag",
+                            "value": "diasleves",
+                            "id": "tag-dias-leves"
+                        }
+                    }
+                ]
+            },
+            "theme_id": "theme-sunset",
+            "location": {
+                "place_id": "place-ibira",
+                "name": "Parque Ibirapuera",
+                "locality": "São Paulo",
+                "region": "SP",
+                "country_code": "BR",
+                "precision": "city",
+                "coordinates": {
+                    "latitude": -23.5874,
+                    "longitude": -46.6576
+                }
+            },
+            "media": [
+                {
+                    "id": "media-river-1",
+                    "type": "image",
+                    "source_url": "https://picsum.photos/id/1011/1200/900",
+                    "thumbnail_url": "https://picsum.photos/id/1011/480/360",
+                    "alt_text": "Lago cercado por árvores em um dia ensolarado",
+                    "mime_type": "image/jpeg",
+                    "width": 1200,
+                    "height": 900
+                },
+                {
+                    "id": "media-river-2",
+                    "type": "image",
+                    "source_url": "https://picsum.photos/id/1015/1200/900",
+                    "thumbnail_url": "https://picsum.photos/id/1015/480/360",
+                    "alt_text": "Trilha entre árvores",
+                    "mime_type": "image/jpeg",
+                    "width": 1200,
+                    "height": 900
+                }
+            ],
+            "tags": [
+                {
+                    "id": "tag-dias-leves",
+                    "label": "diasleves",
+                    "type": "hashtag"
+                },
+                {
+                    "id": "tag-fotografia",
+                    "label": "fotografia",
+                    "type": "topic"
+                },
+                {
+                    "id": "tag-lucas",
+                    "label": "lucas.design",
+                    "type": "user"
+                }
+            ],
+            "stickers": [
+                {
+                    "id": "post-sticker-sparkle",
+                    "target_media_id": "media-river-1",
+                    "position": {
+                        "x": 0.82,
+                        "y": 0.18,
+                        "scale": 0.8,
+                        "rotation_degrees": -8,
+                        "layer_order": 1
+                    },
+                    "payload": {
+                        "type": "asset",
+                        "asset_id": "sticker-sparkle"
+                    }
+                },
+                {
+                    "id": "post-sticker-location",
+                    "position": {
+                        "x": 0.5,
+                        "y": 0.88,
+                        "scale": 1,
+                        "rotation_degrees": 0,
+                        "layer_order": 2
+                    },
+                    "payload": {
+                        "type": "location",
+                        "location": {
+                            "place_id": "place-ibira",
+                            "name": "Parque Ibirapuera",
+                            "locality": "São Paulo",
+                            "region": "SP",
+                            "country_code": "BR",
+                            "precision": "city"
+                        }
+                    }
+                }
+            ],
+            "engagement": {
+                "reaction_count": 128,
+                "comment_count": 14,
+                "save_count": 36,
+                "share_count": 9,
+                "view_count": 1840,
+                "viewer": {
+                    "reaction": "like",
+                    "is_saved": true,
+                    "is_shared": false
+                }
+            },
+            "visibility": "public",
+            "status": "published",
+            "created_at": "2026-11-18T15:20:00Z",
+            "updated_at": "2026-11-18T15:25:00Z"
+        },
+        {
+            "id": "post-night-market",
+            "author_party_role_id": "role-lucas-user",
+            "title": "Quando a cidade acende",
+            "content": {
+                "segments": [
+                    {
+                        "text": "Um minuto de cores no caminho de volta para casa. ",
+                        "styles": []
+                    },
+                    {
+                        "text": "Som ligado",
+                        "styles": [
+                            "bold"
+                        ]
+                    },
+                    {
+                        "text": " 🎶",
+                        "styles": []
+                    }
+                ]
+            },
+            "theme_id": "theme-midnight",
+            "media": [
+                {
+                    "id": "media-night-video",
+                    "type": "video",
+                    "source_url": "https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4",
+                    "thumbnail_url": "https://picsum.photos/id/1012/640/360",
+                    "alt_text": "Vídeo curto de uma borboleta em movimento",
+                    "mime_type": "video/mp4",
+                    "width": 1280,
+                    "height": 720,
+                    "duration_seconds": 18
+                },
+                {
+                    "id": "media-night-gif",
+                    "type": "gif",
+                    "source_url": "https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif",
+                    "thumbnail_url": "https://picsum.photos/id/1025/480/360",
+                    "alt_text": "Gato animado",
+                    "mime_type": "image/gif",
+                    "width": 480,
+                    "height": 360
+                }
+            ],
+            "tags": [
+                {
+                    "id": "tag-cidade-a-noite",
+                    "label": "cidadeanoite",
+                    "type": "hashtag"
+                },
+                {
+                    "id": "tag-video-criativo",
+                    "label": "vídeo criativo",
+                    "type": "topic"
+                }
+            ],
+            "stickers": [
+                {
+                    "id": "post-sticker-wave",
+                    "target_media_id": "media-night-video",
+                    "position": {
+                        "x": 0.78,
+                        "y": 0.2,
+                        "scale": 1.1,
+                        "rotation_degrees": 5,
+                        "layer_order": 1
+                    },
+                    "payload": {
+                        "type": "asset",
+                        "asset_id": "sticker-wave"
+                    }
+                }
+            ],
+            "engagement": {
+                "reaction_count": 74,
+                "comment_count": 8,
+                "save_count": 21,
+                "share_count": 12,
+                "view_count": 12600,
+                "viewer": {
+                    "reaction": null,
+                    "is_saved": false,
+                    "is_shared": false
+                }
+            },
+            "visibility": "public",
+            "status": "published",
+            "created_at": "2026-11-18T12:05:00Z"
+        },
+        {
+            "id": "post-long-video",
+            "author_party_role_id": "role-maya-user",
+            "content": {
+                "segments": [
+                    {
+                        "text": "A versão completa da trilha, sem cortes. Guarde para assistir com calma.",
+                        "styles": []
+                    }
+                ]
+            },
+            "theme_id": "theme-paper",
+            "media": [
+                {
+                    "id": "media-long-video",
+                    "type": "video",
+                    "source_url": "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                    "thumbnail_url": "https://storage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
+                    "alt_text": "Animação de um coelho em uma paisagem",
+                    "mime_type": "video/mp4",
+                    "width": 1280,
+                    "height": 720,
+                    "duration_seconds": 596
+                }
+            ],
+            "tags": [
+                {
+                    "id": "tag-trilha",
+                    "label": "trilha",
+                    "type": "topic"
+                },
+                {
+                    "id": "tag-natureza",
+                    "label": "natureza",
+                    "type": "hashtag"
+                }
+            ],
+            "stickers": [],
+            "engagement": {
+                "reaction_count": 942,
+                "comment_count": 73,
+                "save_count": 311,
+                "share_count": 68,
+                "view_count": 48200,
+                "viewer": {
+                    "reaction": "love",
+                    "is_saved": false,
+                    "is_shared": false
+                }
+            },
+            "visibility": "public",
+            "status": "published",
+            "created_at": "2026-11-17T18:00:00Z"
+        },
+        {
+            "id": "post-quote-river",
+            "author_party_role_id": "role-rafa-user",
+            "content": {
+                "segments": [
+                    {
+                        "text": "Esse lugar entrou para a minha lista de passeios do fim de semana.",
+                        "styles": []
+                    }
+                ]
+            },
+            "media": [],
+            "tags": [
+                {
+                    "id": "tag-fim-de-semana",
+                    "label": "fimdesemana",
+                    "type": "hashtag"
+                }
+            ],
+            "stickers": [],
+            "relationship": {
+                "type": "quote",
+                "target_post_id": "post-river-walk"
+            },
+            "engagement": {
+                "reaction_count": 16,
+                "comment_count": 2,
+                "save_count": 4,
+                "share_count": 1,
+                "view_count": 502,
+                "viewer": {
+                    "reaction": null,
+                    "is_saved": false,
+                    "is_shared": false
+                }
+            },
+            "visibility": "public",
+            "status": "published",
+            "created_at": "2026-11-18T16:10:00Z"
+        },
+        {
+            "id": "post-story-cafe",
+            "author_party_role_id": "role-ana-user",
+            "content": {
+                "segments": [
+                    {
+                        "text": "Pausa para recarregar ☕",
+                        "styles": []
+                    }
+                ]
+            },
+            "media": [
+                {
+                    "id": "media-story-cafe",
+                    "type": "image",
+                    "source_url": "https://picsum.photos/id/1060/900/1600",
+                    "thumbnail_url": "https://picsum.photos/id/1060/360/640",
+                    "alt_text": "Mesa de café perto de uma janela",
+                    "mime_type": "image/jpeg",
+                    "width": 900,
+                    "height": 1600
+                }
+            ],
+            "tags": [],
+            "stickers": [
+                {
+                    "id": "post-sticker-cafe-text",
+                    "target_media_id": "media-story-cafe",
+                    "position": {
+                        "x": 0.5,
+                        "y": 0.72,
+                        "scale": 1,
+                        "rotation_degrees": 0,
+                        "layer_order": 1
+                    },
+                    "payload": {
+                        "type": "text",
+                        "content": {
+                            "segments": [
+                                {
+                                    "text": "qual seu café favorito?",
+                                    "styles": [
+                                        "bold"
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                }
+            ],
+            "engagement": {
+                "reaction_count": 32,
+                "comment_count": 0,
+                "save_count": 0,
+                "share_count": 2,
+                "view_count": 820,
+                "viewer": {
+                    "reaction": null,
+                    "is_saved": false,
+                    "is_shared": false
+                }
+            },
+            "visibility": "followers",
+            "status": "published",
+            "created_at": "2026-11-18T18:30:00Z",
+            "expires_at": "2026-11-19T18:30:00Z"
+        }
+    ],
+    "comments": [
+        {
+            "id": "comment-river-1",
+            "post_id": "post-river-walk",
+            "author_party_role_id": "role-lucas-user",
+            "content": {
+                "segments": [
+                    {
+                        "text": "A luz estava linda nesse horário!",
+                        "styles": []
+                    }
+                ]
+            },
+            "media": [],
+            "engagement": {
+                "reaction_count": 8,
+                "reply_count": 1,
+                "viewer_reaction": "like"
+            },
+            "created_at": "2026-11-18T15:34:00Z"
+        },
+        {
+            "id": "comment-river-2",
+            "post_id": "post-river-walk",
+            "parent_comment_id": "comment-river-1",
+            "author_party_role_id": "role-ana-user",
+            "content": {
+                "segments": [
+                    {
+                        "text": "Foi pouco antes do pôr do sol 🌅",
+                        "styles": []
+                    }
+                ]
+            },
+            "media": [],
+            "engagement": {
+                "reaction_count": 2,
+                "reply_count": 0,
+                "viewer_reaction": null
+            },
+            "created_at": "2026-11-18T15:42:00Z"
+        },
+        {
+            "id": "comment-video-1",
+            "post_id": "post-long-video",
+            "author_party_role_id": "role-rafa-user",
+            "content": {
+                "segments": [
+                    {
+                        "text": "Salvei para ver no fim de semana.",
+                        "styles": []
+                    }
+                ]
+            },
+            "media": [],
+            "engagement": {
+                "reaction_count": 4,
+                "reply_count": 0,
+                "viewer_reaction": null
+            },
+            "created_at": "2026-11-18T17:05:00Z"
+        }
+    ],
+    "post_reactions": [
+        {
+            "id": "reaction-ana-river",
+            "post_id": "post-river-walk",
+            "actor_party_role_id": "role-ana-user",
+            "type": "like",
+            "created_at": "2026-11-18T15:20:00Z"
+        },
+        {
+            "id": "reaction-lucas-river",
+            "post_id": "post-river-walk",
+            "actor_party_role_id": "role-lucas-user",
+            "type": "love",
+            "created_at": "2026-11-18T15:36:00Z"
+        },
+        {
+            "id": "reaction-rafa-video",
+            "post_id": "post-long-video",
+            "actor_party_role_id": "role-rafa-user",
+            "type": "wow",
+            "created_at": "2026-11-18T17:04:00Z"
+        }
+    ],
+    "comment_reactions": [
+        {
+            "id": "comment-reaction-1",
+            "comment_id": "comment-river-1",
+            "actor_party_role_id": "role-ana-user",
+            "type": "like",
+            "created_at": "2026-11-18T15:40:00Z"
+        }
+    ],
+    "post_saves": [
+        {
+            "id": "save-ana-video",
+            "post_id": "post-long-video",
+            "actor_party_role_id": "role-ana-user",
+            "created_at": "2026-11-18T18:00:00Z"
+        }
+    ],
+    "post_shares": [
+        {
+            "id": "share-rafa-quote",
+            "post_id": "post-river-walk",
+            "actor_party_role_id": "role-rafa-user",
+            "destination": "feed",
+            "response_post_id": "post-quote-river",
+            "created_at": "2026-11-18T16:10:00Z"
+        },
+        {
+            "id": "share-lucas-chat",
+            "post_id": "post-river-walk",
+            "actor_party_role_id": "role-lucas-user",
+            "destination": "conversation",
+            "conversation_id": "conversation-ana-lucas",
+            "response_message_id": "message-ana-lucas-2",
+            "created_at": "2026-11-17T19:12:00Z"
+        }
+    ],
+    "live_sessions": [
+        {
+            "id": "live-photo-walk",
+            "host_party_role_id": "role-ana-live-host",
+            "community_id": "community-design",
+            "title": "Fotografando a cidade no fim da tarde",
+            "description": "Conversa ao vivo sobre composição, luz e fotografia de rua.",
+            "status": "live",
+            "visibility": "public",
+            "created_at": "2026-11-18T17:30:00Z",
+            "scheduled_at": "2026-11-18T18:00:00Z",
+            "started_at": "2026-11-18T18:02:00Z"
+        },
+        {
+            "id": "live-plants-next-week",
+            "host_party_role_id": "role-maya-live-host-plants",
+            "community_id": "community-indoor-plants",
+            "title": "Como cuidar de plantas em apartamentos",
+            "description": "Perguntas e respostas para quem está começando.",
+            "status": "scheduled",
+            "visibility": "community",
+            "created_at": "2026-11-17T12:00:00Z",
+            "scheduled_at": "2026-11-24T19:00:00Z"
+        },
+        {
+            "id": "live-photo-walk-previous",
+            "host_party_role_id": "role-maya-live-host-previous",
+            "community_id": "community-design",
+            "title": "Composição com luz natural",
+            "description": "Gravação de uma live anterior.",
+            "status": "ended",
+            "visibility": "public",
+            "created_at": "2026-11-15T19:00:00Z",
+            "started_at": "2026-11-15T19:03:00Z",
+            "ended_at": "2026-11-15T20:00:00Z"
+        }
+    ],
+    "live_participants": [
+        {
+            "id": "live-participant-ana",
+            "live_session_id": "live-photo-walk",
+            "party_role_id": "role-ana-live-host",
+            "joined_at": "2026-11-18T18:00:00Z",
+            "status": "connected"
+        },
+        {
+            "id": "live-participant-lucas",
+            "live_session_id": "live-photo-walk",
+            "party_role_id": "role-lucas-live-moderator",
+            "joined_at": "2026-11-18T18:00:00Z",
+            "status": "connected"
+        },
+        {
+            "id": "live-participant-maya",
+            "live_session_id": "live-photo-walk",
+            "party_role_id": "role-maya-live-speaker",
+            "joined_at": "2026-11-18T18:03:00Z",
+            "status": "connected"
+        },
+        {
+            "id": "live-participant-rafa",
+            "live_session_id": "live-photo-walk",
+            "party_role_id": "role-rafa-live-viewer",
+            "joined_at": "2026-11-18T18:05:00Z",
+            "status": "connected"
+        }
+    ],
+    "live_chat_messages": [
+        {
+            "id": "live-message-1",
+            "live_session_id": "live-photo-walk",
+            "author_party_role_id": "role-rafa-live-viewer",
+            "content": {
+                "segments": [
+                    {
+                        "text": "Qual lente você está usando?",
+                        "styles": []
+                    }
+                ]
+            },
+            "created_at": "2026-11-18T18:10:00Z",
+            "status": "visible"
+        },
+        {
+            "id": "live-message-2",
+            "live_session_id": "live-photo-walk",
+            "author_party_role_id": "role-ana-live-host",
+            "reply_to_message_id": "live-message-1",
+            "content": {
+                "segments": [
+                    {
+                        "text": "Uma 35mm, ótima para esse tipo de passeio.",
+                        "styles": []
+                    }
+                ]
+            },
+            "created_at": "2026-11-18T18:11:00Z",
+            "status": "visible"
+        },
+        {
+            "id": "live-message-3",
+            "live_session_id": "live-photo-walk",
+            "author_party_role_id": "role-lucas-live-moderator",
+            "content": {
+                "segments": [
+                    {
+                        "text": "Deixei o link das referências fixado.",
+                        "styles": []
+                    }
+                ]
+            },
+            "created_at": "2026-11-18T18:13:00Z",
+            "status": "visible"
+        },
+        {
+            "id": "live-message-hidden",
+            "live_session_id": "live-photo-walk",
+            "author_party_role_id": "role-rafa-live-viewer",
+            "content": {
+                "segments": [
+                    {
+                        "text": "Mensagem de exemplo ocultada pela moderação.",
+                        "styles": []
+                    }
+                ]
+            },
+            "created_at": "2026-11-18T18:14:00Z",
+            "status": "hidden"
+        }
+    ],
+    "live_reactions": [
+        {
+            "id": "live-reaction-1",
+            "live_session_id": "live-photo-walk",
+            "actor_party_role_id": "role-rafa-live-viewer",
+            "type": "heart",
+            "created_at": "2026-11-18T18:10:30Z"
+        },
+        {
+            "id": "live-reaction-2",
+            "live_session_id": "live-photo-walk",
+            "actor_party_role_id": "role-maya-live-speaker",
+            "target_party_role_id": "role-ana-live-host",
+            "type": "clap",
+            "created_at": "2026-11-18T18:12:00Z"
+        }
+    ],
+    "live_engagement_summaries": [
+        {
+            "live_session_id": "live-photo-walk",
+            "viewer_count": 42,
+            "peak_viewer_count": 57,
+            "message_count": 23,
+            "reaction_counts": {
+                "heart": 186,
+                "clap": 42,
+                "laugh": 7,
+                "wow": 15,
+                "fire": 31,
+                "sad": 0
+            }
+        }
+    ],
+    "live_moderation_actions": [
+        {
+            "id": "live-moderation-1",
+            "live_session_id": "live-photo-walk",
+            "actor_party_role_id": "role-lucas-live-moderator",
+            "target_message_id": "live-message-hidden",
+            "type": "hideMessage",
+            "reason": "Mensagem fora do tema da live.",
+            "created_at": "2026-11-18T18:14:00Z"
+        }
+    ],
+    "live_recordings": [
+        {
+            "id": "live-recording-1",
+            "live_session_id": "live-photo-walk",
+            "status": "processing",
+            "created_at": "2026-11-18T18:02:00Z"
+        },
+        {
+            "id": "live-recording-2",
+            "live_session_id": "live-photo-walk-previous",
+            "status": "ready",
+            "media_url": "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+            "thumbnail_url": "https://picsum.photos/id/1039/640/360",
+            "duration_seconds": 1240,
+            "replay_post_id": "post-long-video",
+            "created_at": "2026-11-15T20:00:00Z",
+            "ready_at": "2026-11-15T20:30:00Z"
+        }
+    ]
+}
