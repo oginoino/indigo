@@ -18,4 +18,11 @@ class AppStrings {
   static const invalidOrDuplicateFeedRoute =
       'Invalid or duplicate feed route: {route}';
   static const unknownFeedAppBar = 'Unknown feed app bar: {appBar}';
+
+  static const avatarImageMissing = 'Avatar image does not exist.';
+  static const missingAvatarPathClearFailed =
+      'Could not clear the missing avatar image path.';
+  static const avatarPathSaveFailed = 'Could not save the avatar image path.';
+  static const avatarPathRemoveFailed =
+      'Could not remove the avatar image path.';
 }

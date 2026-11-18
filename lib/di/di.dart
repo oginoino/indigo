@@ -1,7 +1,9 @@
 import 'package:get_it/get_it.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../service/app_data_service.dart';
+import '../service/persistence/avatar_image_service.dart';
 import '../service/persistence/persistence_service.dart';
 
 class DependencyInjection {
@@ -19,6 +21,15 @@ class DependencyInjection {
         PersistenceService(sharedPreferences),
       );
     }
+    if (!locator.isRegistered<AvatarImageService>()) {
+      final storageDirectory = await getApplicationSupportDirectory();
+      locator.registerSingleton<AvatarImageService>(
+        AvatarImageService(
+          preferences: sharedPreferences,
+          storageDirectory: storageDirectory,
+        ),
+      );
+    }
     if (!locator.isRegistered<AppDataService>()) {
       locator.registerSingleton<AppDataService>(AssetAppDataService());
     }
@@ -29,5 +40,8 @@ class DependencyInjection {
 
 PersistenceService get persistenceService =>
     GetIt.instance<PersistenceService>();
+
+AvatarImageService get avatarImageService =>
+    GetIt.instance<AvatarImageService>();
 
 AppDataService get appDataService => GetIt.instance<AppDataService>();
