@@ -6,6 +6,12 @@ class SocialDataConstants {
   static const schemaVersionKey = 'schema_version';
   static const currentUserPartyIdKey = 'current_user_party_id';
   static const partyIdKey = 'party_id';
+  static const usernameKey = 'username';
+  static const displayNameKey = 'display_name';
+  static const avatarUrlKey = 'avatar_url';
+  static const bioKey = 'bio';
+  static const platformUserRoleIdKey = 'platform_user_role_id';
+  static const createdAtKey = 'created_at';
   static const postIdKey = 'post_id';
   static const conversationIdKey = 'conversation_id';
   static const liveSessionIdKey = 'live_session_id';

@@ -21,6 +21,9 @@ List<SingleChildWidget> get appProviders => [
         BottomNavigationProvider(appDataService.bottomNavigationItems),
   ),
   ChangeNotifierProvider(
-    create: (_) => PostsProvider(repository: postRepository)..load(),
+    create: (_) => PostsProvider(
+      repository: postRepository,
+      socialDataService: socialDataService,
+    )..load(),
   ),
 ];

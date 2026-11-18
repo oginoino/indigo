@@ -39,6 +39,11 @@ class UIConstants {
   static const double postCardRadius = 16;
   static const double postMediaAspectRatio = 1.2;
   static const double postMediaRadius = 12;
+  static const double postHeaderAvatarSize = 44;
+  static const double postHeaderSpacing = 12;
+  static const double postHeaderTextSpacing = 2;
+  static const double postEngagementIconSize = 20;
+  static const double postEngagementItemSpacing = 6;
   static const double postPhotoPairAspectRatio = 1.45;
   static const double postPhotoGridAspectRatio = 1;
   static const double postPhotoGridSpacing = 4;

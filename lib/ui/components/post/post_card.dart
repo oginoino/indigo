@@ -1,14 +1,17 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../../model/party/user_profile.dart';
 import '../../../model/post/post.dart';
-import '../../../util/const/app/app_strings.dart';
 import '../../../util/const/ui/ui_constants.dart';
+import 'post_author_header.dart';
+import 'post_engagement_bar.dart';
 import 'post_media_gallery.dart';
 
 class PostCard extends StatelessWidget {
-  const PostCard({required this.post, super.key});
+  const PostCard({required this.post, required this.author, super.key});
 
   final Post post;
+  final UserProfile? author;
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +31,8 @@ class PostCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            PostAuthorHeader(author: author, publishedAt: post.createdAt),
+            const SizedBox(height: UIConstants.postCardSpacing),
             if (post.title case final title?) ...[
               Text(title, style: theme.textTheme.titleMedium),
               const SizedBox(height: UIConstants.postCardSpacing),
@@ -36,14 +41,8 @@ class PostCard extends StatelessWidget {
               Text(content, style: theme.textTheme.bodyLarge),
             PostMediaGallery(postId: post.id, media: post.media),
             const SizedBox(height: UIConstants.postCardSpacing),
-            Text(
-              '${post.engagement.reactionCount}'
-              '${AppStrings.postEngagementSeparator}'
-              '${post.engagement.commentCount}'
-              '${AppStrings.postEngagementSeparator}'
-              '${post.engagement.shareCount}',
-              style: theme.textTheme.labelMedium,
-            ),
+            Divider(color: theme.colorScheme.outlineVariant),
+            PostEngagementBar(post: post),
           ],
         ),
       ),
