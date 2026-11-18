@@ -12,12 +12,22 @@ class DependencyInjection {
     final sharedPreferences = await SharedPreferences.getInstance();
     final locator = GetIt.instance;
 
-    locator.registerSingleton<SharedPreferences>(sharedPreferences);
-    locator.registerSingleton<PersistenceService>(
-      PersistenceService(sharedPreferences),
-    );
-    locator.registerSingleton<FeedsListService>(const FeedsListService());
-    locator.registerSingleton<BottomNavigationBarListService>(const BottomNavigationBarListService());
+    if (!locator.isRegistered<SharedPreferences>()) {
+      locator.registerSingleton<SharedPreferences>(sharedPreferences);
+    }
+    if (!locator.isRegistered<PersistenceService>()) {
+      locator.registerSingleton<PersistenceService>(
+        PersistenceService(sharedPreferences),
+      );
+    }
+    if (!locator.isRegistered<FeedsListService>()) {
+      locator.registerSingleton<FeedsListService>(const FeedsListService());
+    }
+    if (!locator.isRegistered<BottomNavigationBarListService>()) {
+      locator.registerSingleton<BottomNavigationBarListService>(
+        const AppBottomNavigationBarListService(),
+      );
+    }
   }
 }
 
@@ -25,4 +35,5 @@ PersistenceService get persistenceService =>
     GetIt.instance<PersistenceService>();
 
 FeedsListService get feedsListService => GetIt.instance<FeedsListService>();
-BottomNavigationBarListService get bottomNavigationBarListService => GetIt.instance<BottomNavigationBarListService>();
+BottomNavigationBarListService get bottomNavigationBarListService =>
+    GetIt.instance<BottomNavigationBarListService>();
