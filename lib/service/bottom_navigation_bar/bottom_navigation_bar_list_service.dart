@@ -14,6 +14,7 @@ class AppBottomNavigationBarListService
 
   static const _assetPath = 'assets/data/app_data.json';
 
+  @override
   Future<List<BottomNavigationItem>> getBottomNavigationBarItems() async {
     final appData = await rootBundle.loadString(_assetPath);
     final data = jsonDecode(appData);
