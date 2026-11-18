@@ -38,8 +38,18 @@ class UIConstants {
   static const double postCardSpacing = 12;
   static const double postCardRadius = 16;
   static const double postMediaAspectRatio = 1.2;
+  static const double postMediaRadius = 12;
+  static const double postPhotoPairAspectRatio = 1.45;
+  static const double postPhotoGridAspectRatio = 1;
+  static const double postPhotoGridSpacing = 4;
+  static const int postPhotoGridColumns = 2;
+  static const int postPhotoGridCapacity =
+      postPhotoGridColumns * postPhotoGridColumns;
   static const double videoActionIconSize = 32;
   static const double videoOverlayPadding = 20;
+  static const Duration imageViewerTransitionDuration = Duration(
+    milliseconds: 220,
+  );
 
   static const double lightBottomNavigationBackgroundOpacity = 0.92;
   static const double darkBottomNavigationBackgroundOpacity = 0.88;
