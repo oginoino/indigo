@@ -1,5 +1,8 @@
 import 'package:go_router/go_router.dart';
 
+import '../di/di.dart';
+import '../ui/components/app_bar/app_bar.dart';
+import '../ui/components/app_bar/feed_app_bar_resolver.dart';
 import '../ui/page/home_page.dart';
 import '../ui/page/placeholder_page.dart';
 import 'app_route.dart';
@@ -12,50 +15,47 @@ final GoRouter appRouter = GoRouter(
   routes: _routes,
 );
 
-final List<GoRoute> _routes = [
-  AppRoute(Routes.home, (context, state) => const HomePage()),
-  AppRoute(
-    Routes.videos,
-    (context, state) => const PlaceholderPage(title: 'Vídeos'),
-  ),
-  AppRoute(
-    Routes.create,
-    (context, state) => const PlaceholderPage(title: 'Criar'),
-  ),
-  AppRoute(
-    Routes.messages,
-    (context, state) => const PlaceholderPage(title: 'Mensagens'),
-  ),
-  AppRoute(
-    Routes.profile,
-    (context, state) => const PlaceholderPage(title: 'Perfil'),
-  ),
-  AppRoute(
-    Routes.discover,
-    (context, state) => const PlaceholderPage(title: 'Descobrir'),
-  ),
-  AppRoute(
-    Routes.friends,
-    (context, state) => const PlaceholderPage(title: 'Amigos'),
-  ),
-  AppRoute(
-    Routes.communities,
-    (context, state) => const PlaceholderPage(title: 'Comunidades'),
-  ),
-  AppRoute(
-    Routes.news,
-    (context, state) => const PlaceholderPage(title: 'Notícias'),
-  ),
-  AppRoute(
-    Routes.appbarVideos,
-    (context, state) => const PlaceholderPage(title: 'Vídeos'),
-  ),
-  AppRoute(
-    Routes.photos,
-    (context, state) => const PlaceholderPage(title: 'Fotos'),
-  ),
-  AppRoute(
-    Routes.events,
-    (context, state) => const PlaceholderPage(title: 'Eventos'),
-  ),
-];
+final List<GoRoute> _routes = _buildRoutes();
+
+List<GoRoute> _buildRoutes() {
+  final registeredPaths = Routes.routes.map((route) => route.path).toSet();
+
+  final feedRoutes = feedsListService.configuredFeeds.map((feed) {
+    if (!feed.route.startsWith('/') || !registeredPaths.add(feed.route)) {
+      throw FormatException('Invalid or duplicate feed route: ${feed.route}');
+    }
+
+    return AppRoute(
+      feed.route,
+      (context, state) => PlaceholderPage(
+        title: feed.name,
+        appBar: FeedAppBarResolver.resolve(feed.appBar, feed.name),
+      ),
+    );
+  });
+
+  return [
+    AppRoute(Routes.home, (context, state) => const HomePage()),
+    AppRoute(
+      Routes.videos,
+      (context, state) =>
+          const PlaceholderPage(title: 'Vídeos', appBar: CustomAppBar()),
+    ),
+    AppRoute(
+      Routes.create,
+      (context, state) =>
+          const PlaceholderPage(title: 'Criar', appBar: CustomAppBar()),
+    ),
+    AppRoute(
+      Routes.messages,
+      (context, state) =>
+          const PlaceholderPage(title: 'Mensagens', appBar: CustomAppBar()),
+    ),
+    AppRoute(
+      Routes.profile,
+      (context, state) =>
+          const PlaceholderPage(title: 'Perfil', appBar: CustomAppBar()),
+    ),
+    ...feedRoutes,
+  ];
+}

@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../provider/bottom_navigation_bar/bottom_navigation_bar_list.dart';
 import '../../util/resolver/navigation_icon_resolver.dart';
-import 'app_bar/app_bar.dart';
 import 'custom_bottom_navigation_bar.dart';
 
 class Screen extends StatelessWidget {
@@ -16,7 +15,7 @@ class Screen extends StatelessWidget {
   });
 
   final Widget child;
-  final CustomAppBar? appBar;
+  final Widget? appBar;
   final Widget? bottomSliver;
 
   @override
@@ -25,7 +24,7 @@ class Screen extends StatelessWidget {
       extendBody: true,
       body: CustomScrollView(
         slivers: [
-          appBar ?? const CustomAppBar(),
+          ?appBar,
           SliverFillRemaining(child: child),
           ?bottomSliver,
         ],

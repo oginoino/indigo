@@ -21,13 +21,15 @@ class DependencyInjection {
       );
     }
     if (!locator.isRegistered<FeedsListService>()) {
-      locator.registerSingleton<FeedsListService>(const FeedsListService());
+      locator.registerSingleton<FeedsListService>(FeedsListService());
     }
     if (!locator.isRegistered<BottomNavigationBarListService>()) {
       locator.registerSingleton<BottomNavigationBarListService>(
         const AppBottomNavigationBarListService(),
       );
     }
+
+    await locator<FeedsListService>().getFeedsList();
   }
 }
 
