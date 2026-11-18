@@ -23,7 +23,7 @@ class Screen extends StatelessWidget {
         slivers: [
           appBar ?? const CustomAppBar(),
           SliverFillRemaining(child: child),
-          if (bottomSliver != null) bottomSliver!,
+          ?bottomSliver,
         ],
       ),
       extendBody: true,

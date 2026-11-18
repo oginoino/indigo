@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../service/bottom_navigation_bar/bottom_navigation_bar_list_service.dart';
 import '../service/feed/feeds_list_service.dart';
 import '../service/persistence/persistence_service.dart';
 
@@ -16,6 +17,7 @@ class DependencyInjection {
       PersistenceService(sharedPreferences),
     );
     locator.registerSingleton<FeedsListService>(const FeedsListService());
+    locator.registerSingleton<BottomNavigationBarListService>(const BottomNavigationBarListService());
   }
 }
 
@@ -23,3 +25,4 @@ PersistenceService get persistenceService =>
     GetIt.instance<PersistenceService>();
 
 FeedsListService get feedsListService => GetIt.instance<FeedsListService>();
+BottomNavigationBarListService get bottomNavigationBarListService => GetIt.instance<BottomNavigationBarListService>();

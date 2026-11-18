@@ -4,12 +4,12 @@ import 'package:flutter/services.dart';
 
 import '../../model/bottom_navigation_item.dart';
 
-class BottomNavigationListService {
-  const BottomNavigationListService();
+class BottomNavigationBarListService {
+  const BottomNavigationBarListService();
 
   static const _assetPath = 'assets/data/app_data.json';
 
-  Future<List<BottomNavigationItem>> getBottomNavigationItems() async {
+  Future<List<BottomNavigationItem>> getBottomNavigationBarItems() async {
     final appData = await rootBundle.loadString(_assetPath);
     final data = jsonDecode(appData);
     if (data is! Map<String, dynamic>) {
