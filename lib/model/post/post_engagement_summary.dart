@@ -1,10 +1,13 @@
 import 'post_interaction.dart';
 
 class PostViewerEngagement {
+  static const bool defaultIsSaved = false;
+  static const bool defaultIsShared = false;
+
   const PostViewerEngagement({
     this.reaction,
-    this.isSaved = false,
-    this.isShared = false,
+    this.isSaved = defaultIsSaved,
+    this.isShared = defaultIsShared,
   });
 
   final PostReactionType? reaction;
@@ -15,12 +18,14 @@ class PostViewerEngagement {
 }
 
 class PostEngagementSummary {
+  static const int defaultCount = 0;
+
   const PostEngagementSummary({
-    this.reactionCount = 0,
-    this.commentCount = 0,
-    this.saveCount = 0,
-    this.shareCount = 0,
-    this.viewCount = 0,
+    this.reactionCount = defaultCount,
+    this.commentCount = defaultCount,
+    this.saveCount = defaultCount,
+    this.shareCount = defaultCount,
+    this.viewCount = defaultCount,
     this.viewer = const PostViewerEngagement(),
   });
 

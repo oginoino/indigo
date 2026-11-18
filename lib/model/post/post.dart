@@ -61,4 +61,9 @@ class Post {
   bool get hasTitle => title?.isNotEmpty ?? false;
   bool get hasLocation => location != null;
   bool get hasStickers => stickers.isNotEmpty;
+  bool get hasVideo => media.any((item) => item.isVideo);
+
+  bool isPublishedAt(DateTime instant) =>
+      status == PostStatus.published &&
+      (expiresAt == null || expiresAt!.isAfter(instant));
 }
