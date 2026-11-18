@@ -7,15 +7,13 @@ import '../../../provider/feed/feeds_list_provider.dart';
 import '../../../util/const/ui/ui_constants.dart';
 
 class NavItem extends StatelessWidget {
-  const NavItem({required this.feedItem, this.onSelected, super.key});
+  const NavItem({required this.feedItem, super.key});
 
   final FeedItem feedItem;
-  final ValueChanged<String>? onSelected;
 
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<FeedsListProvider>();
-    final itemId = feedItem.id.toString();
     final isSelected = provider.isFeedSelected(feedItem.id);
     final indicatorColor = isSelected
         ? DefaultTextStyle.of(context).style.color ?? Colors.transparent
@@ -25,7 +23,6 @@ class NavItem extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       onTap: () {
         context.read<FeedsListProvider>().selectFeed(feedItem.id);
-        onSelected?.call(itemId);
         context.go(feedItem.route);
       },
       child: Row(

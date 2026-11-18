@@ -1,10 +1,6 @@
-import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:provider/provider.dart';
 
-import '../../provider/bottom_navigation_bar/bottom_navigation_bar_list.dart';
-import '../../util/resolver/navigation_icon_resolver.dart';
-import 'custom_bottom_navigation_bar.dart';
+import 'app_bottom_navigation_bar.dart';
 
 class Screen extends StatelessWidget {
   const Screen({
@@ -29,76 +25,7 @@ class Screen extends StatelessWidget {
           ?bottomSliver,
         ],
       ),
-      bottomNavigationBar: Consumer<BottomNavigationBarListProvider>(
-        builder: (context, provider, _) {
-          final navigationItems = provider.bottomNavigationBarList;
-
-          if (navigationItems.isEmpty) {
-            if (provider.isLoading) {
-              return const SafeArea(
-                top: false,
-                child: SizedBox(
-                  height: 72,
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-              );
-            }
-
-            if (provider.error != null) {
-              return SafeArea(
-                top: false,
-                child: SizedBox(
-                  height: 72,
-                  child: Center(
-                    child: TextButton(
-                      onPressed: provider.loadBottomNavigationBarList,
-                      child: const Text('Tentar novamente'),
-                    ),
-                  ),
-                ),
-              );
-            }
-
-            return const SizedBox.shrink();
-          }
-
-          final items = navigationItems
-              .map((item) {
-                final icon = NavigationIconResolver.resolve(item.icon);
-
-                return BottomNavigationBarItem(
-                  icon: Icon(icon),
-                  activeIcon: Icon(
-                    NavigationIconResolver.resolveActive(item.icon),
-                  ),
-                  label: item.name,
-                  tooltip: item.name,
-                );
-              })
-              .toList(growable: false);
-
-          final selectedItem = provider.selectedBottomNavigationItem;
-
-          final index = selectedItem == null
-              ? 0
-              : navigationItems.indexWhere(
-                  (item) => item.id == selectedItem.id,
-                );
-
-          return CustomBottomNavigationBar(
-            items: items,
-            currentIndex: index >= 0 ? index : 0,
-            onTap: (index) {
-              if (index < 0 || index >= navigationItems.length) {
-                return;
-              }
-
-              provider.selectBottomNavigationItem(navigationItems[index]);
-              context.go(navigationItems[index].route);
-            },
-          );
-        },
-      ),
+      bottomNavigationBar: const AppBottomNavigationBar(),
     );
   }
 }
