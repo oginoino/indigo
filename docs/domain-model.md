@@ -177,3 +177,22 @@ camada de streaming agregue eventos de alto volume.
   não fontes de verdade para ações individuais.
 - Os modelos não implementam serialização JSON, armazenamento, autorização,
   entrega de mídia ou transporte de live.
+
+## Backend simulado
+
+`SocialDataService` define a fronteira consumida pela interface.
+`AssetSocialDataService` carrega `assets/data/social_mock_data.json` e expõe
+`SocialMockData`, um snapshot imutável do JSON com consultas comuns para posts,
+perfis, comentários, conversas e mensagens de live. O serviço é registrado na
+injeção de dependências e disponibilizado por `Provider<SocialDataService>`.
+
+O fixture usa IDs cruzados entre as seções, timestamps ISO-8601 em UTC e enums
+serializados pelos nomes Dart. Mídias de imagem JPEG, GIF e vídeo MP4 apontam
+para URLs de demonstração e exigem rede para renderização; `duration_seconds`
+representa a duração de vídeo em segundos. `schema_version` identifica a versão
+do formato do fixture. As seções e chaves estão em
+`lib/util/const/app/social_data_constants.dart`.
+
+O serviço preserva o formato JSON como DTO de mock; a conversão para modelos de
+domínio fica para a camada de mapeamento quando os consumidores da interface
+forem definidos.
