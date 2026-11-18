@@ -1,11 +1,9 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
-import '../../../model/feed_item.dart';
 import '../../../provider/feed/feeds_list_provider.dart';
 import '../../../provider/theme/theme_provider.dart';
 import '../../../util/const/ui/ui_constants.dart';
-import 'nav_bar_skeleton.dart';
 import 'nav_item.dart';
 
 class NavBar extends StatefulWidget {
@@ -16,14 +14,13 @@ class NavBar extends StatefulWidget {
 }
 
 class _NavBarState extends State<NavBar> {
-  Future<List<FeedItem>>? _feedsFuture;
-
   late final ScrollController _scrollController;
 
   final GlobalKey _viewportKey = GlobalKey();
   final Map<String, GlobalKey> _itemKeys = {};
 
   bool _restoreScheduled = false;
+  String? _scheduledSelectedItemId;
 
   @override
   void initState() {
@@ -36,16 +33,6 @@ class _NavBarState extends State<NavBar> {
     );
 
     _scrollController.addListener(_saveScrollOffset);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-
-      final future = context.read<FeedsListProvider>().getFeedsList();
-
-      setState(() {
-        _feedsFuture = future;
-      });
-    });
   }
 
   @override
@@ -143,81 +130,53 @@ class _NavBarState extends State<NavBar> {
 
   @override
   Widget build(BuildContext context) {
-    if (_feedsFuture == null) {
-      return const NavBarSkeleton();
+    final provider = context.watch<FeedsListProvider>();
+    final feedItems = provider.feeds;
+    if (feedItems.isEmpty) {
+      return const SizedBox(
+        height: UIConstants.navBarHeight,
+        child: Center(child: Text('Nenhum feed encontrado')),
+      );
     }
 
-    return FutureBuilder<List<FeedItem>>(
-      future: _feedsFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const NavBarSkeleton();
-        }
+    final ids = feedItems.map((item) => item.id.toString()).toSet();
+    _itemKeys.removeWhere((id, key) => !ids.contains(id));
+    _restoreScrollOffset();
 
-        if (snapshot.hasError) {
-          return SizedBox(
-            height: UIConstants.navBarHeight,
-            child: Center(
-              child: Text(
-                'Não foi possível carregar os feeds.',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ),
-          );
-        }
+    final selectedId = provider.selectedFeed?.id.toString();
+    if (selectedId != null && selectedId != _scheduledSelectedItemId) {
+      _scheduledSelectedItemId = selectedId;
+      _scrollToItem(selectedId);
+    }
 
-        final feedItems = snapshot.data;
-        if (feedItems == null || feedItems.isEmpty) {
-          return const SizedBox(
-            height: UIConstants.navBarHeight,
-            child: Center(child: Text('Nenhum feed encontrado')),
-          );
-        }
-
-        final ids = feedItems.map((item) => item.id.toString()).toSet();
-
-        _itemKeys.removeWhere((id, key) => !ids.contains(id));
-
-        _restoreScrollOffset();
-
-        return Align(
-          alignment: Alignment.centerLeft,
-          child: SizedBox(
-            height: UIConstants.navBarHeight,
-            child: SingleChildScrollView(
-              key: const PageStorageKey<String>('feeds-navbar-scroll'),
-              controller: _scrollController,
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(
-                horizontal: UIConstants.navBarHorizontalPadding,
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                spacing: UIConstants.navBarItemSpacing,
-                children: [
-                  ...feedItems.map((item) {
-                    final id = item.id.toString();
-
-                    return NavItem(
-                      key: _keyForItem(id),
-                      feedItem: item,
-                      onSelected: _scrollToItem,
-                    );
-                  }),
-                  IconButton(
-                    onPressed: () {
-                      // Change theme
-                      context.read<ThemeProvider>().toggleTheme();
-                    },
-                    icon: const Icon(Icons.add),
-                  ),
-                ],
-              ),
-            ),
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: SizedBox(
+        height: UIConstants.navBarHeight,
+        child: SingleChildScrollView(
+          key: _viewportKey,
+          controller: _scrollController,
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(
+            horizontal: UIConstants.navBarHorizontalPadding,
           ),
-        );
-      },
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            spacing: UIConstants.navBarItemSpacing,
+            children: [
+              ...feedItems.map((item) {
+                final id = item.id.toString();
+                return NavItem(key: _keyForItem(id), feedItem: item);
+              }),
+              IconButton(
+                onPressed: context.read<ThemeProvider>().toggleTheme,
+                icon: const Icon(Icons.add),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

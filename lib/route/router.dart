@@ -20,7 +20,7 @@ final List<GoRoute> _routes = _buildRoutes();
 List<GoRoute> _buildRoutes() {
   final registeredPaths = Routes.routes.map((route) => route.path).toSet();
 
-  final feedRoutes = feedsListService.configuredFeeds.map((feed) {
+  final feedRoutes = appDataService.feeds.map((feed) {
     if (!feed.route.startsWith('/') || !registeredPaths.add(feed.route)) {
       throw FormatException('Invalid or duplicate feed route: ${feed.route}');
     }
