@@ -9,5 +9,9 @@ import 'theme/theme_provider.dart';
 List<SingleChildWidget> get appProviders => [
   ChangeNotifierProvider(create: (_) => ThemeProvider(persistenceService)),
   ChangeNotifierProvider(create: (_) => FeedsListProvider(feedsListService)),
-  ChangeNotifierProvider(create: (_) => BottomNavigationBarListProvider(bottomNavigationBarListService)),
+  ChangeNotifierProvider(
+    create: (_) => BottomNavigationBarListProvider(
+      bottomNavigationBarListService,
+    )..loadBottomNavigationBarList(),
+  ),
 ];

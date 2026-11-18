@@ -1,6 +1,10 @@
 
 import 'package:material_ui/material_ui.dart';
+import 'package:provider/provider.dart';
 
+
+import '../../provider/bottom_navigation_bar/bottom_navigation_bar_list.dart';
+import '../../util/resolver/navigation_icon_resolver.dart';
 import 'app_bar/app_bar.dart';
 import 'custom_bottom_navigation_bar.dart';
 
@@ -19,35 +23,79 @@ class Screen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: CustomScrollView(
         slivers: [
           appBar ?? const CustomAppBar(),
-          SliverFillRemaining(child: child),
+          SliverFillRemaining(
+            child: child,
+          ),
           ?bottomSliver,
         ],
       ),
-      extendBody: true,
-      bottomNavigationBar: CustomBottomNavigationBar(
-        currentIndex: 0,
-        onTap: (index) {},
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home_rounded),
-            label: 'Descobrir',
+      bottomNavigationBar: Consumer<BottomNavigationBarListProvider>(
+  builder: (context, provider, _) {
+    final navigationItems = provider.bottomNavigationBarList;
+
+    debugPrint(
+      '[BottomNavigation] '
+      'loading=${provider.isLoading}, '
+      'items=${navigationItems.length}, '
+      'selected=${provider.selectedBottomNavigationItem?.id}',
+    );
+
+    if (navigationItems.isEmpty) {
+      if (provider.isLoading) {
+        return const SafeArea(
+          top: false,
+          child: SizedBox(
+            height: 72,
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.video_library_rounded),
-            label: 'Videos',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle_outline_rounded),
-            label: 'Criar',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.send_rounded), label: 'Mensagens'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Perfil'),
-        ],
-      ),
+        );
+      }
+
+      return const SizedBox.shrink();
+    }
+
+    final items = navigationItems.map((item) {
+      final icon = NavigationIconResolver.resolve(item.icon);
+
+      return BottomNavigationBarItem(
+        icon: Icon(icon),
+        activeIcon: Icon(
+          NavigationIconResolver.resolveActive(item.icon),
+        ),
+        label: item.name,
+        tooltip: item.name,
+      );
+    }).toList(growable: false);
+
+    final selectedItem = provider.selectedBottomNavigationItem;
+
+    final index = selectedItem == null
+        ? 0
+        : navigationItems.indexWhere(
+            (item) => item.id == selectedItem.id,
+          );
+
+    return CustomBottomNavigationBar(
+      items: items,
+      currentIndex: index >= 0 ? index : 0,
+      onTap: (index) {
+        if (index < 0 || index >= navigationItems.length) {
+          return;
+        }
+
+        provider.selectBottomNavigationItem(
+          navigationItems[index],
+        );
+      },
+    );
+  },
+),
     );
   }
 }

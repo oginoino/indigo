@@ -1,3 +1,4 @@
+
 import 'package:material_ui/material_ui.dart';
 
 import '../../util/const/ui/ui_constants.dart';
@@ -22,28 +23,30 @@ ThemeData _buildTheme({
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.transparent,
       foregroundColor: foregroundColor,
-      iconTheme: IconThemeData(color: foregroundColor),
+      iconTheme: IconThemeData(
+        color: foregroundColor,
+      ),
     ),
-    iconTheme: IconThemeData(color: foregroundColor),
+    iconTheme: IconThemeData(
+      color: foregroundColor,
+    ),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
-    backgroundColor: backgroundColor.withValues(
-      alpha: brightness == Brightness.dark ? 0.82 : 0.78,
+      backgroundColor: backgroundColor.withValues(
+        alpha: brightness == Brightness.dark ? 0.88 : 0.92,
+      ),
+      selectedItemColor: foregroundColor,
+      unselectedItemColor: foregroundColor,
+      selectedIconTheme: IconThemeData(
+        size: 28,
+        color: foregroundColor,
+      ),
+      unselectedIconTheme: IconThemeData(
+        size: 28,
+        color: foregroundColor,
+      ),
+      elevation: 0,
     ),
-    selectedItemColor: foregroundColor,
-    unselectedItemColor: foregroundColor,
-    selectedIconTheme: IconThemeData(
-      size: 24,
-      color: foregroundColor,
-    ),
-    unselectedIconTheme: IconThemeData(
-      size: 24,
-      color: foregroundColor,
-    ),
-    elevation: 0,
-    type: BottomNavigationBarType.shifting,
-    ),
-    
-    );
+  );
 }
 
 final ThemeData lightTheme = _buildTheme(
