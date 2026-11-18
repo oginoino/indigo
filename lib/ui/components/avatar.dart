@@ -21,6 +21,7 @@ class Avatar extends StatefulWidget {
     this.size = AvatarSize.medium,
     this.diameter,
     this.imageProvider,
+    this.useSavedImage = true,
     this.badge,
     this.badgeAlignment = Alignment.bottomRight,
     this.decoration,
@@ -31,6 +32,7 @@ class Avatar extends StatefulWidget {
   final AvatarSize size;
   final double? diameter;
   final ImageProvider<Object>? imageProvider;
+  final bool useSavedImage;
   final Widget? badge;
   final AlignmentGeometry badgeAlignment;
   final Decoration? decoration;
@@ -49,7 +51,7 @@ class _AvatarState extends State<Avatar> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (widget.imageProvider != null) return;
+    if (widget.imageProvider != null || !widget.useSavedImage) return;
 
     final service = context.read<AvatarImageService>();
     if (!identical(service, _imageService)) {
@@ -61,9 +63,12 @@ class _AvatarState extends State<Avatar> {
   @override
   void didUpdateWidget(covariant Avatar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.imageProvider == widget.imageProvider) return;
+    if (oldWidget.imageProvider == widget.imageProvider &&
+        oldWidget.useSavedImage == widget.useSavedImage) {
+      return;
+    }
 
-    _savedImage = widget.imageProvider == null
+    _savedImage = widget.imageProvider == null && widget.useSavedImage
         ? context.read<AvatarImageService>().loadImage()
         : null;
   }

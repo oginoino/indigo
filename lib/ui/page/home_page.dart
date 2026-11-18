@@ -46,7 +46,10 @@ class HomePage extends StatelessWidget {
               primary: false,
               physics: const AlwaysScrollableScrollPhysics(),
               itemCount: posts.length,
-              itemBuilder: (context, index) => PostCard(post: posts[index]),
+              itemBuilder: (context, index) => PostCard(
+                post: posts[index],
+                author: provider.authorFor(posts[index]),
+              ),
             ),
           );
         },

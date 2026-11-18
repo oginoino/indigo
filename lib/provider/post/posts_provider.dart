@@ -2,7 +2,10 @@ import 'package:flutter/foundation.dart';
 
 import '../../model/post/post.dart';
 import '../../model/post/post_media.dart';
+import '../../model/party/user_profile.dart';
+import '../../service/mapper/user_profile_json_mapper.dart';
 import '../../service/post_repository.dart';
+import '../../service/social_data_service.dart';
 
 enum PostsLoadStatus { initial, loading, loaded, error }
 
@@ -16,12 +19,16 @@ class VideoFeedItem {
 class PostsProvider extends ChangeNotifier {
   PostsProvider({
     required PostRepository repository,
+    required SocialDataService socialDataService,
     DateTime Function()? clock,
   }) : _repository = repository,
+       _socialDataService = socialDataService,
        _clock = clock ?? DateTime.now;
 
   final PostRepository _repository;
+  final SocialDataService _socialDataService;
   final DateTime Function() _clock;
+  final Map<String, UserProfile> _authorCache = {};
   List<Post> _posts = const [];
   PostsLoadStatus _status = PostsLoadStatus.initial;
   Object? _error;
@@ -30,6 +37,19 @@ class PostsProvider extends ChangeNotifier {
   List<Post> get posts => _posts;
   PostsLoadStatus get status => _status;
   Object? get error => _error;
+
+  UserProfile? authorFor(Post post) {
+    final roleId = post.authorPartyRoleId;
+    final cachedProfile = _authorCache[roleId];
+    if (cachedProfile != null) return cachedProfile;
+
+    final profileJson = _socialDataService.data.profileForPartyRole(roleId);
+    if (profileJson == null) return null;
+
+    final profile = UserProfileJsonMapper.fromJson(profileJson);
+    _authorCache[roleId] = profile;
+    return profile;
+  }
 
   List<Post> get feedPosts =>
       List.unmodifiable(_posts.where((post) => post.isPublishedAt(_clock())));

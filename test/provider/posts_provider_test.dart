@@ -4,12 +4,17 @@ import 'package:indigo/model/post/post_content.dart';
 import 'package:indigo/model/post/post_media.dart';
 import 'package:indigo/provider/post/posts_provider.dart';
 import 'package:indigo/service/post_repository.dart';
+import 'package:indigo/service/social_data_service.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('PostsProvider', () {
     test(
       'exposes published posts and only video media for the video feed',
       () async {
+        final socialDataService = AssetSocialDataService();
+        await socialDataService.load();
         final provider = PostsProvider(
           repository: _FakePostRepository([
             _post(
@@ -40,6 +45,7 @@ void main() {
             _post(id: 'draft-post', status: PostStatus.draft),
             _post(id: 'expired-post', expiresAt: DateTime.utc(2025)),
           ]),
+          socialDataService: socialDataService,
           clock: () => DateTime.utc(2026),
         );
 
@@ -53,6 +59,10 @@ void main() {
         expect(provider.videoFeedItems.single.post.id, 'mixed-post');
         expect(provider.videoFeedItems.single.media.isVideo, isTrue);
         expect(provider.status, PostsLoadStatus.loaded);
+        expect(
+          provider.authorFor(provider.feedPosts.first)?.displayName,
+          'Ana Costa',
+        );
       },
     );
   });
@@ -65,7 +75,7 @@ Post _post({
   DateTime? expiresAt,
 }) => Post(
   id: id,
-  authorPartyRoleId: 'author',
+  authorPartyRoleId: 'role-ana-user',
   content: PostContent(segments: [PostTextSegment(text: id)]),
   media: media,
   status: status,

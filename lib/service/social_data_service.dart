@@ -125,6 +125,17 @@ class SocialMockData {
   JsonObject? profileForParty(String partyId) =>
       _firstByValue(userProfiles, SocialDataConstants.partyIdKey, partyId);
 
+  JsonObject? profileForPartyRole(String partyRoleId) {
+    final partyRole = _firstByValue(
+      partyRoles,
+      SocialDataConstants.idKey,
+      partyRoleId,
+    );
+    final partyId = partyRole?[SocialDataConstants.partyIdKey];
+    if (partyId is! String) return null;
+    return profileForParty(partyId);
+  }
+
   JsonObject? liveSessionById(String id) => _findById(liveSessions, id);
 
   List<JsonObject> commentsForPost(String postId) =>
