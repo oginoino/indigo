@@ -35,6 +35,12 @@ class UIConstants {
   );
   static const double bottomNavigationBorderOpacity = 0.55;
 
+  static const double postCardSpacing = 12;
+  static const double postCardRadius = 16;
+  static const double postMediaAspectRatio = 1.2;
+  static const double videoActionIconSize = 32;
+  static const double videoOverlayPadding = 20;
+
   static const double lightBottomNavigationBackgroundOpacity = 0.92;
   static const double darkBottomNavigationBackgroundOpacity = 0.88;
   static const double lightBottomNavigationSelectionOpacity = 0.07;

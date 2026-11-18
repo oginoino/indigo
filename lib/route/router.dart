@@ -5,6 +5,7 @@ import '../ui/components/app_bar/app_bar.dart';
 import '../ui/components/app_bar/feed_app_bar_resolver.dart';
 import '../ui/page/home_page.dart';
 import '../ui/page/placeholder_page.dart';
+import '../ui/page/videos_page.dart';
 import '../util/const/app/app_strings.dart';
 import 'app_route.dart';
 import 'handle_redirect.dart';
@@ -43,13 +44,7 @@ List<GoRoute> _buildRoutes() {
 
   return [
     AppRoute(Routes.home, (context, state) => const HomePage()),
-    AppRoute(
-      Routes.videos,
-      (context, state) => const PlaceholderPage(
-        title: AppStrings.videosTitle,
-        appBar: CustomAppBar(),
-      ),
-    ),
+    AppRoute(Routes.videos, (context, state) => const VideosPage()),
     AppRoute(
       Routes.create,
       (context, state) => const PlaceholderPage(

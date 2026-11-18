@@ -7,6 +7,16 @@ class AppStrings {
 
   static const noFeedsAvailable = 'Nenhum feed encontrado';
   static const videosTitle = 'Vídeos';
+  static const postsLoadFailed = 'Não foi possível carregar as publicações.';
+  static const noPostsAvailable = 'Nenhuma publicação disponível.';
+  static const retry = 'Tentar novamente';
+  static const videoPlaybackFailed = 'Não foi possível reproduzir este vídeo.';
+  static const noVideosAvailable = 'Nenhum vídeo disponível.';
+  static const postEngagementSeparator = '  ·  ';
+  static const playVideo = 'Reproduzir vídeo';
+  static const pauseVideo = 'Pausar vídeo';
+  static const muteVideo = 'Silenciar vídeo';
+  static const unmuteVideo = 'Ativar som do vídeo';
   static const createTitle = 'Criar';
   static const messagesTitle = 'Mensagens';
   static const profileTitle = 'Perfil';
@@ -23,6 +33,12 @@ class AppStrings {
       'Items in social mock data section {section} must be JSON objects.';
   static const socialMockDataNotLoaded =
       'Social mock data has not been loaded yet.';
+  static const invalidSocialPostField = 'Invalid {field} in social post data.';
+  static const invalidSocialPostCache = 'Invalid local social post cache.';
+  static const socialPostCacheSaveFailed =
+      'Could not save the local social post cache.';
+  static const socialPostCacheClearFailed =
+      'Could not clear the local social post cache.';
   static const invalidOrDuplicateFeedRoute =
       'Invalid or duplicate feed route: {route}';
   static const unknownFeedAppBar = 'Unknown feed app bar: {appBar}';

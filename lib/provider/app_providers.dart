@@ -6,6 +6,7 @@ import '../service/persistence/avatar_image_service.dart';
 import '../service/social_data_service.dart';
 import 'bottom_navigation_bar/bottom_navigation_provider.dart';
 import 'feed/feeds_list_provider.dart';
+import 'post/posts_provider.dart';
 import 'theme/theme_provider.dart';
 
 List<SingleChildWidget> get appProviders => [
@@ -18,5 +19,8 @@ List<SingleChildWidget> get appProviders => [
   ChangeNotifierProvider(
     create: (_) =>
         BottomNavigationProvider(appDataService.bottomNavigationItems),
+  ),
+  ChangeNotifierProvider(
+    create: (_) => PostsProvider(repository: postRepository)..load(),
   ),
 ];

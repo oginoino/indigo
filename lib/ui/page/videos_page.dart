@@ -1,0 +1,242 @@
+import 'dart:async';
+
+import 'package:material_ui/material_ui.dart';
+import 'package:provider/provider.dart';
+import 'package:video_player/video_player.dart';
+
+import '../../provider/post/posts_provider.dart';
+import '../../util/const/app/app_strings.dart';
+import '../../util/const/ui/ui_constants.dart';
+import '../components/app_bottom_navigation_bar.dart';
+
+class VideosPage extends StatelessWidget {
+  const VideosPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      extendBody: true,
+      body: Consumer<PostsProvider>(
+        builder: (context, provider, _) {
+          if (provider.status == PostsLoadStatus.loading ||
+              provider.status == PostsLoadStatus.initial) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (provider.status == PostsLoadStatus.error) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    AppStrings.postsLoadFailed,
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  TextButton(
+                    onPressed: provider.load,
+                    child: const Text(AppStrings.retry),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          final videos = provider.videoFeedItems;
+          if (videos.isEmpty) {
+            return const Center(
+              child: Text(
+                AppStrings.noVideosAvailable,
+                style: TextStyle(color: Colors.white),
+              ),
+            );
+          }
+
+          return _VideoCarousel(items: videos);
+        },
+      ),
+      bottomNavigationBar: const AppBottomNavigationBar(),
+    );
+  }
+}
+
+class _VideoCarousel extends StatefulWidget {
+  const _VideoCarousel({required this.items});
+
+  final List<VideoFeedItem> items;
+
+  @override
+  State<_VideoCarousel> createState() => _VideoCarouselState();
+}
+
+class _VideoCarouselState extends State<_VideoCarousel> {
+  int _currentIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return PageView.builder(
+      scrollDirection: Axis.vertical,
+      itemCount: widget.items.length,
+      onPageChanged: (index) => setState(() => _currentIndex = index),
+      itemBuilder: (context, index) => _FullscreenVideoItem(
+        item: widget.items[index],
+        isActive: index == _currentIndex,
+      ),
+    );
+  }
+}
+
+class _FullscreenVideoItem extends StatefulWidget {
+  const _FullscreenVideoItem({required this.item, required this.isActive});
+
+  final VideoFeedItem item;
+  final bool isActive;
+
+  @override
+  State<_FullscreenVideoItem> createState() => _FullscreenVideoItemState();
+}
+
+class _FullscreenVideoItemState extends State<_FullscreenVideoItem> {
+  late final VideoPlayerController _controller;
+  late final Future<void> _initialization;
+  bool _isMuted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.networkUrl(
+      Uri.parse(widget.item.media.sourceUrl),
+    );
+    _initialization = _initialize();
+  }
+
+  Future<void> _initialize() async {
+    await _controller.initialize();
+    await _controller.setLooping(true);
+    if (widget.isActive) await _controller.play();
+  }
+
+  @override
+  void didUpdateWidget(covariant _FullscreenVideoItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isActive == widget.isActive &&
+        oldWidget.item.media.sourceUrl == widget.item.media.sourceUrl) {
+      return;
+    }
+
+    if (!_controller.value.isInitialized) return;
+    if (widget.isActive) {
+      unawaited(_controller.play());
+    } else {
+      unawaited(_controller.pause());
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _togglePlayback() async {
+    if (_controller.value.isPlaying) {
+      await _controller.pause();
+    } else {
+      await _controller.play();
+    }
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _toggleMute() async {
+    _isMuted = !_isMuted;
+    await _controller.setVolume(_isMuted ? 0 : 1);
+    if (mounted) setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<void>(
+      future: _initialization,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Center(
+            child: Text(
+              AppStrings.videoPlaybackFailed,
+              style: TextStyle(color: Colors.white),
+            ),
+          );
+        }
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final size = _controller.value.size;
+        return GestureDetector(
+          onTap: _togglePlayback,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              FittedBox(
+                fit: BoxFit.cover,
+                child: SizedBox(
+                  width: size.width,
+                  height: size.height,
+                  child: VideoPlayer(_controller),
+                ),
+              ),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(
+                    UIConstants.videoOverlayPadding,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.item.post.content.plainText,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Colors.white,
+                          shadows: const [
+                            Shadow(color: Colors.black, blurRadius: 8),
+                          ],
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            tooltip: _controller.value.isPlaying
+                                ? AppStrings.pauseVideo
+                                : AppStrings.playVideo,
+                            onPressed: _togglePlayback,
+                            icon: Icon(
+                              _controller.value.isPlaying
+                                  ? Icons.pause_circle
+                                  : Icons.play_circle,
+                              color: Colors.white,
+                              size: UIConstants.videoActionIconSize,
+                            ),
+                          ),
+                          IconButton(
+                            tooltip: _isMuted
+                                ? AppStrings.unmuteVideo
+                                : AppStrings.muteVideo,
+                            onPressed: _toggleMute,
+                            icon: Icon(
+                              _isMuted ? Icons.volume_off : Icons.volume_up,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
