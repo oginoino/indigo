@@ -113,38 +113,49 @@ class CustomBottomNavigationBar extends StatelessWidget {
         right: UIConstants.bottomNavigationOuterPadding,
         bottom: UIConstants.bottomNavigationBottomPadding,
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(UIConstants.bottomNavigationRadius),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: UIConstants.bottomNavigationBlurSigma,
-            sigmaY: UIConstants.bottomNavigationBlurSigma,
+      child: AnimatedPadding(
+        duration: UIConstants.bottomNavigationAnimationDuration,
+        curve: Curves.easeOutCubic,
+        padding: EdgeInsets.symmetric(
+          horizontal: compact
+              ? UIConstants.bottomNavigationCompactHorizontalInset
+              : UIConstants.spaceNone,
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(
+            UIConstants.bottomNavigationRadius,
           ),
-          child: AnimatedContainer(
-            duration: UIConstants.bottomNavigationAnimationDuration,
-            curve: Curves.easeOutCubic,
-            height: compact
-                ? UIConstants.bottomNavigationCompactHeight
-                : UIConstants.bottomNavigationHeight,
-            padding: const EdgeInsets.all(
-              UIConstants.bottomNavigationContentPadding,
+          child: BackdropFilter(
+            filter: ImageFilter.blur(
+              sigmaX: UIConstants.bottomNavigationBlurSigma,
+              sigmaY: UIConstants.bottomNavigationBlurSigma,
             ),
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              borderRadius: BorderRadius.circular(
-                UIConstants.bottomNavigationRadius,
+            child: AnimatedContainer(
+              duration: UIConstants.bottomNavigationAnimationDuration,
+              curve: Curves.easeOutCubic,
+              height: compact
+                  ? UIConstants.bottomNavigationCompactHeight
+                  : UIConstants.bottomNavigationHeight,
+              padding: const EdgeInsets.all(
+                UIConstants.bottomNavigationContentPadding,
               ),
-              border: Border.all(color: borderColor),
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                borderRadius: BorderRadius.circular(
+                  UIConstants.bottomNavigationRadius,
+                ),
+                border: Border.all(color: borderColor),
+              ),
+              child: isScrollable
+                  ? SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: children,
+                      ),
+                    )
+                  : Row(children: children),
             ),
-            child: isScrollable
-                ? SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: children,
-                    ),
-                  )
-                : Row(children: children),
           ),
         ),
       ),
