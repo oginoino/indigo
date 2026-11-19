@@ -157,9 +157,8 @@ class _HashtagHeader extends StatelessWidget {
     };
 
     return Row(
+      spacing: UIConstants.spaceSm,
       children: [
-        Icon(icon, color: color),
-        const SizedBox(width: UIConstants.spaceSm),
         Expanded(
           child: Text(
             hashtag.displayLabel,
@@ -167,6 +166,7 @@ class _HashtagHeader extends StatelessWidget {
                 ?.copyWith(color: color, fontWeight: FontWeight.w600),
           ),
         ),
+        Icon(icon, color: color),
       ],
     );
   }
