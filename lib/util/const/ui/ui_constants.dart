@@ -49,14 +49,15 @@ class UIConstants {
   );
   static const double bottomNavigationBorderOpacity = 0.55;
 
-  static const double postCardSpacing = spaceMd;
+  static const double postCardSpacing = spaceSm;
+  static const double postCardContentPadding = spaceMd;
   static const double postCardHorizontalInset = spaceSm;
   static const double postCardOuterSpacing = spaceXs;
   static const double postCardRadius = radiusLg;
   static const double postMediaAspectRatio = 1.2;
   static const double postMediaRadius = radiusMd;
-  static const double postHeaderAvatarSize = 44;
-  static const double postHeaderSpacing = spaceMd;
+  static const double postHeaderAvatarSize = 40;
+  static const double postHeaderSpacing = spaceSm;
   static const double postHeaderTextSpacing = space2xs;
   static const double postEngagementIconSize = 20;
   static const double postEngagementItemSpacing = spaceXs;

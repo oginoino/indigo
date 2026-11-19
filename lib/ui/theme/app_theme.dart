@@ -38,7 +38,7 @@ ThemeData _buildTheme({
     ),
     iconTheme: iconTheme,
     cardTheme: CardThemeData(
-      color: colorScheme.surfaceContainerLow,
+      color: colorScheme.surface,
       surfaceTintColor: Colors.transparent,
       shadowColor: Colors.transparent,
       elevation: UIConstants.noElevation,
@@ -48,7 +48,7 @@ ThemeData _buildTheme({
         borderRadius: BorderRadius.circular(UIConstants.postCardRadius),
         side: BorderSide(
           color: colorScheme.outlineVariant.withValues(
-            alpha: isDark ? 0.35 : 0.65,
+            alpha: isDark ? 0.28 : 0.38,
           ),
         ),
       ),
