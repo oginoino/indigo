@@ -12,9 +12,13 @@ class CustomAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return SliverAppBar(
       floating: floating,
       snap: snap,
+      backgroundColor:
+          theme.appBarTheme.backgroundColor ?? theme.scaffoldBackgroundColor,
       title: const Icon(Icons.star),
       leadingWidth: UIConstants.appBarLeadingWidth,
       toolbarHeight: UIConstants.appBarToolbarHeight,
