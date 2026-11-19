@@ -17,12 +17,16 @@ class StoryViewer extends StatefulWidget {
     required this.stories,
     required this.authorFor,
     this.initialIndex = 0,
+    this.seenStoryIds = const <String>{},
+    this.onStorySeen,
     super.key,
   });
 
   final List<Post> stories;
   final UserProfile? Function(Post post) authorFor;
   final int initialIndex;
+  final Set<String> seenStoryIds;
+  final ValueChanged<Post>? onStorySeen;
 
   @override
   State<StoryViewer> createState() => _StoryViewerState();
@@ -32,6 +36,7 @@ class _StoryViewerState extends State<StoryViewer>
     with SingleTickerProviderStateMixin {
   late final PageController _pageController;
   late final AnimationController _progressController;
+  late final Set<String> _seenStoryIds;
   late int _currentIndex;
 
   @override
@@ -39,6 +44,7 @@ class _StoryViewerState extends State<StoryViewer>
     super.initState();
     final lastIndex = widget.stories.length - 1;
     _currentIndex = lastIndex < 0 ? 0 : widget.initialIndex.clamp(0, lastIndex);
+    _seenStoryIds = {...widget.seenStoryIds};
     _pageController = PageController(initialPage: _currentIndex);
     _progressController = AnimationController(
       vsync: this,
@@ -47,9 +53,10 @@ class _StoryViewerState extends State<StoryViewer>
 
     if (widget.stories.isNotEmpty) {
       _progressController.forward();
-      WidgetsBinding.instance.addPostFrameCallback(
-        (_) => _precacheStoryAt(_currentIndex + 1),
-      );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _markSeen(_currentIndex);
+        _precacheStoryAt(_currentIndex + 1);
+      });
     }
   }
 
@@ -61,18 +68,28 @@ class _StoryViewerState extends State<StoryViewer>
   }
 
   void _handleProgressStatus(AnimationStatus status) {
-    if (status == AnimationStatus.completed) _goToNext();
+    if (status == AnimationStatus.completed) _advance();
   }
 
+  /// Avança automaticamente pulando os stories já vistos, indo para o próximo
+  /// story não visto do perfil atual (ou do próximo perfil). Fecha quando não
+  /// restam stories não vistos.
+  void _advance() {
+    final nextIndex = _nextUnseenIndex(_currentIndex + 1);
+    if (nextIndex == -1) {
+      Navigator.of(context).maybePop();
+      return;
+    }
+    _goToIndex(nextIndex);
+  }
+
+  /// Navegação manual para o próximo story, exibindo inclusive os já vistos.
   void _goToNext() {
     if (_currentIndex >= widget.stories.length - 1) {
       Navigator.of(context).maybePop();
       return;
     }
-    _pageController.nextPage(
-      duration: UIConstants.storyViewerTransitionDuration,
-      curve: Curves.easeOut,
-    );
+    _goToIndex(_currentIndex + 1);
   }
 
   void _goToPrevious() {
@@ -86,10 +103,35 @@ class _StoryViewerState extends State<StoryViewer>
     );
   }
 
+  void _goToIndex(int index) {
+    if (index == _currentIndex + 1) {
+      _pageController.nextPage(
+        duration: UIConstants.storyViewerTransitionDuration,
+        curve: Curves.easeOut,
+      );
+      return;
+    }
+    _pageController.jumpToPage(index);
+  }
+
+  int _nextUnseenIndex(int start) {
+    for (var index = start; index < widget.stories.length; index++) {
+      if (!_seenStoryIds.contains(widget.stories[index].id)) return index;
+    }
+    return -1;
+  }
+
   void _handlePageChanged(int index) {
     setState(() => _currentIndex = index);
     _progressController.forward(from: 0);
+    _markSeen(index);
     _precacheStoryAt(index + 1);
+  }
+
+  void _markSeen(int index) {
+    if (index < 0 || index >= widget.stories.length) return;
+    final story = widget.stories[index];
+    if (_seenStoryIds.add(story.id)) widget.onStorySeen?.call(story);
   }
 
   void _precacheStoryAt(int index) {

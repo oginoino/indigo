@@ -9,6 +9,7 @@ import 'bottom_navigation_bar/bottom_navigation_provider.dart';
 import 'feed/feeds_list_provider.dart';
 import 'post/posts_provider.dart';
 import 'social/friends_provider.dart';
+import 'story/story_seen_provider.dart';
 import 'theme/theme_provider.dart';
 
 List<SingleChildWidget> get appProviders => [
@@ -31,6 +32,7 @@ List<SingleChildWidget> get appProviders => [
   ChangeNotifierProvider(
     create: (_) => FriendsProvider(socialDataService: socialDataService),
   ),
+  ChangeNotifierProvider(create: (_) => StorySeenProvider()),
   ChangeNotifierProvider(
     create: (_) => PostsProvider(
       repository: postRepository,

@@ -12,12 +12,16 @@ class StoriesRow extends StatelessWidget {
     required this.stories,
     required this.authorFor,
     this.currentUser,
+    this.seenStoryIds = const <String>{},
+    this.onStorySeen,
     super.key,
   });
 
   final List<Post> stories;
   final UserProfile? Function(Post post) authorFor;
   final UserProfile? currentUser;
+  final Set<String> seenStoryIds;
+  final ValueChanged<Post>? onStorySeen;
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +29,7 @@ class StoriesRow extends StatelessWidget {
     final groups = _groupsByAuthor()
         .where((group) => group.authorRoleId != ownRoleId)
         .toList(growable: false);
-    final orderedStories = <Post>[
-      for (final group in groups) ...group.stories,
-    ];
+    final orderedStories = <Post>[for (final group in groups) ...group.stories];
 
     final items = <Widget>[];
     if (currentUser case final user?) {
@@ -43,11 +45,19 @@ class StoriesRow extends StatelessWidget {
     for (final group in groups) {
       final firstIndex = startIndex;
       startIndex += group.stories.length;
+      final unseenOffset = group.stories.indexWhere(
+        (story) => !seenStoryIds.contains(story.id),
+      );
+      final openIndex = unseenOffset == -1
+          ? firstIndex
+          : firstIndex + unseenOffset;
+      final allSeen = unseenOffset == -1;
       items.add(
         _StoryItem(
           label: group.author?.displayName ?? AppStrings.unknownPostAuthor,
           imageProvider: _avatarProvider(group.author),
-          onTap: () => _openStory(context, orderedStories, firstIndex),
+          isSeen: allSeen,
+          onTap: () => _openStory(context, orderedStories, openIndex),
         ),
       );
     }
@@ -102,6 +112,8 @@ class StoriesRow extends StatelessWidget {
           stories: orderedStories,
           authorFor: authorFor,
           initialIndex: index,
+          seenStoryIds: seenStoryIds,
+          onStorySeen: onStorySeen,
         ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) =>
             FadeTransition(opacity: animation, child: child),
@@ -133,12 +145,14 @@ class _StoryItem extends StatelessWidget {
     required this.label,
     required this.imageProvider,
     this.isOwn = false,
+    this.isSeen = false,
     this.onTap,
   });
 
   final String label;
   final ImageProvider<Object>? imageProvider;
   final bool isOwn;
+  final bool isSeen;
   final VoidCallback? onTap;
 
   @override
@@ -163,6 +177,7 @@ class _StoryItem extends StatelessWidget {
             children: [
               _StoryRing(
                 isOwn: isOwn,
+                isSeen: isSeen,
                 child: Avatar(
                   diameter: avatarDiameter,
                   imageProvider: imageProvider,
@@ -187,15 +202,20 @@ class _StoryItem extends StatelessWidget {
 }
 
 class _StoryRing extends StatelessWidget {
-  const _StoryRing({required this.child, required this.isOwn});
+  const _StoryRing({
+    required this.child,
+    required this.isOwn,
+    this.isSeen = false,
+  });
 
   final Widget child;
   final bool isOwn;
+  final bool isSeen;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final gradient = isOwn
+    final gradient = isOwn || isSeen
         ? null
         : LinearGradient(
             begin: Alignment.topLeft,

@@ -129,6 +129,70 @@ void main() {
     expect(find.byType(StoryViewer), findsNothing);
   });
 
+  testWidgets('skips already seen stories while auto advancing', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => Center(
+              child: ElevatedButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => StoryViewer(
+                      stories: [
+                        _story('story-1', 'role-lucas-user', 'Primeira luz'),
+                        _story('story-2', 'role-lucas-user', 'Segunda luz'),
+                        _story('story-3', 'role-maya-user', 'Ouvindo um disco'),
+                      ],
+                      authorFor: authorFor,
+                      seenStoryIds: const {'story-2'},
+                    ),
+                  ),
+                ),
+                child: const Text('open'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('open'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    final controller = tester
+        .widget<PageView>(find.byType(PageView))
+        .controller!;
+
+    await _pumpUntil(tester, () => controller.page == 2);
+    expect(controller.page, 2);
+
+    await _pumpUntil(tester, () => find.byType(StoryViewer).evaluate().isEmpty);
+    expect(find.byType(StoryViewer), findsNothing);
+  });
+
+  testWidgets('reports each displayed story through onStorySeen', (
+    tester,
+  ) async {
+    final seen = <Post>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StoryViewer(
+          stories: [_story('story-1', 'role-lucas-user', 'Primeira luz')],
+          authorFor: authorFor,
+          onStorySeen: seen.add,
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(seen.map((post) => post.id), ['story-1']);
+  });
+
   testWidgets('closes the viewer with the close button', (tester) async {
     await tester.pumpWidget(
       MaterialApp(

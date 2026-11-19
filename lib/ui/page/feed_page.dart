@@ -8,6 +8,7 @@ import '../../model/feed_item.dart';
 import '../../provider/bottom_navigation_bar/bottom_navigation_provider.dart';
 import '../../provider/post/posts_provider.dart';
 import '../../provider/social/friends_provider.dart';
+import '../../provider/story/story_seen_provider.dart';
 import '../../util/const/app/app_strings.dart';
 import '../../util/const/app/feed_constants.dart';
 import '../../util/const/ui/ui_constants.dart';
@@ -60,9 +61,7 @@ class FeedPage extends StatelessWidget {
             onRefresh: () => _refresh(context, provider),
             slivers: [
               if (isFriendsFeed)
-                SliverToBoxAdapter(
-                  child: _FeedStories(feedRoute: feed.route),
-                ),
+                SliverToBoxAdapter(child: _FeedStories(feedRoute: feed.route)),
               if ((provider.status == PostsLoadStatus.initial ||
                       provider.status == PostsLoadStatus.loading) &&
                   posts.isEmpty)
@@ -144,6 +143,7 @@ class _FeedStories extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<PostsProvider>();
     final currentUser = context.watch<FriendsProvider>().currentUser;
+    final storySeen = context.watch<StorySeenProvider>();
     final stories = provider.stories
         .where((story) => story.feeds.contains(feedRoute))
         .toList(growable: false);
@@ -156,6 +156,8 @@ class _FeedStories extends StatelessWidget {
       stories: stories,
       authorFor: provider.authorFor,
       currentUser: currentUser,
+      seenStoryIds: storySeen.seenStoryIds,
+      onStorySeen: (story) => storySeen.markSeen(story.id),
     );
   }
 }

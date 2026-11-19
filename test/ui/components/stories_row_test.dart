@@ -173,6 +173,80 @@ void main() {
         .controller!;
     expect(controller.page, 2);
   });
+
+  testWidgets('dims only the rings of fully seen profiles', (tester) async {
+    final lucas = _profile('role-lucas-user', 'Lucas Mendes');
+    final maya = _profile('role-maya-user', 'Maya Ribeiro');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StoriesRow(
+            stories: [
+              _story('lucas-1', 'role-lucas-user'),
+              _story('maya-1', 'role-maya-user'),
+            ],
+            authorFor: (post) =>
+                post.authorPartyRoleId == 'role-lucas-user' ? lucas : maya,
+            seenStoryIds: const {'lucas-1'},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(_ringGradient(tester, 'Lucas Mendes'), isNull);
+    expect(_ringGradient(tester, 'Maya Ribeiro'), isNotNull);
+  });
+
+  testWidgets('opens the viewer at the first unseen story of a profile', (
+    tester,
+  ) async {
+    final lucas = _profile('role-lucas-user', 'Lucas Mendes');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StoriesRow(
+            stories: [
+              _story('lucas-1', 'role-lucas-user'),
+              _story('lucas-2', 'role-lucas-user'),
+              _story('lucas-3', 'role-lucas-user'),
+            ],
+            authorFor: (_) => lucas,
+            seenStoryIds: const {'lucas-1'},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Lucas Mendes'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.byType(StoryViewer), findsOneWidget);
+    final controller = tester
+        .widget<PageView>(find.byType(PageView))
+        .controller!;
+    expect(controller.page, 1);
+  });
+}
+
+LinearGradient? _ringGradient(WidgetTester tester, String label) {
+  final ringContainers = find.descendant(
+    of: find
+        .ancestor(of: find.text(label), matching: find.byType(InkWell))
+        .first,
+    matching: find.byType(Container),
+  );
+  for (final container in tester.widgetList<Container>(ringContainers)) {
+    final decoration = container.decoration;
+    if (decoration is BoxDecoration && decoration.shape == BoxShape.circle) {
+      return decoration.gradient as LinearGradient?;
+    }
+  }
+  return null;
 }
 
 Post _story(String id, String authorRoleId) => Post(
