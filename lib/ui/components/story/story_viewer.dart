@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:material_ui/material_ui.dart';
 
 import '../../../model/party/user_profile.dart';
@@ -36,16 +38,19 @@ class _StoryViewerState extends State<StoryViewer>
   void initState() {
     super.initState();
     final lastIndex = widget.stories.length - 1;
-    _currentIndex = lastIndex < 0
-        ? 0
-        : widget.initialIndex.clamp(0, lastIndex);
+    _currentIndex = lastIndex < 0 ? 0 : widget.initialIndex.clamp(0, lastIndex);
     _pageController = PageController(initialPage: _currentIndex);
     _progressController = AnimationController(
       vsync: this,
       duration: UIConstants.storyViewerDisplayDuration,
     )..addStatusListener(_handleProgressStatus);
 
-    if (widget.stories.isNotEmpty) _progressController.forward();
+    if (widget.stories.isNotEmpty) {
+      _progressController.forward();
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _precacheStoryAt(_currentIndex + 1),
+      );
+    }
   }
 
   @override
@@ -84,6 +89,20 @@ class _StoryViewerState extends State<StoryViewer>
   void _handlePageChanged(int index) {
     setState(() => _currentIndex = index);
     _progressController.forward(from: 0);
+    _precacheStoryAt(index + 1);
+  }
+
+  void _precacheStoryAt(int index) {
+    if (!mounted || index < 0 || index >= widget.stories.length) return;
+    final media = widget.stories[index].media;
+    if (media.isEmpty) return;
+    unawaited(
+      precacheImage(
+        NetworkImage(media.first.sourceUrl),
+        context,
+        onError: (error, stackTrace) {},
+      ),
+    );
   }
 
   void _handleTap(TapUpDetails details) {
@@ -195,7 +214,10 @@ class _StoryPage extends StatelessWidget {
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, mediaTheme.gradientBottomColor],
+                    colors: [
+                      Colors.transparent,
+                      mediaTheme.gradientBottomColor,
+                    ],
                   ),
                 ),
                 child: Padding(
