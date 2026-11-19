@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
@@ -7,6 +5,7 @@ import 'package:video_player/video_player.dart';
 import '../../model/party/user_profile.dart';
 import '../../model/post/post.dart';
 import '../../provider/post/posts_provider.dart';
+import '../../service/video_playback_manager.dart';
 import '../../util/const/app/app_strings.dart';
 import '../../util/const/ui/ui_constants.dart';
 import '../../util/log/error_handler.dart';
@@ -86,111 +85,45 @@ class _VideoCarousel extends StatefulWidget {
 }
 
 class _VideoCarouselState extends State<_VideoCarousel> {
-  int _currentIndex = 0;
-  final Map<String, _VideoControllerEntry> _controllers = {};
+  late final VideoPlaybackManager _playbackManager;
 
   @override
   void initState() {
     super.initState();
-    _syncControllerWindow();
+    _playbackManager = VideoPlaybackManager(
+      onError: (error, stackTrace) => ErrorHandler.report(
+        error,
+        stackTrace,
+        message: AppStrings.videoPlaybackFailed,
+      ),
+    )..updateSources(_sourcesFor(widget.items));
   }
 
   @override
   void didUpdateWidget(covariant _VideoCarousel oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (identical(oldWidget.items, widget.items)) return;
-
-    if (_currentIndex >= widget.items.length) {
-      _currentIndex = widget.items.isEmpty ? 0 : widget.items.length - 1;
-    }
-    _syncControllerWindow();
-  }
-
-  String _keyFor(VideoFeedItem item) => '${item.post.id}:${item.media.id}';
-
-  _VideoControllerEntry _ensureController(int index) {
-    final item = widget.items[index];
-    final key = _keyFor(item);
-    final existing = _controllers[key];
-    if (existing != null && existing.sourceUrl == item.media.sourceUrl) {
-      return existing;
-    }
-
-    existing?.dispose();
-    final entry = _VideoControllerEntry(item.media.sourceUrl);
-    _controllers[key] = entry;
-    entry.initialization.then<void>(
-      (_) {
-        if (!mounted ||
-            _currentIndex >= widget.items.length ||
-            _keyFor(widget.items[_currentIndex]) != key ||
-            !identical(_controllers[key], entry)) {
-          return;
-        }
-        _playController(entry.controller);
-      },
-      onError: (Object error, StackTrace stackTrace) {
-        ErrorHandler.report(
-          error,
-          stackTrace,
-          message: AppStrings.videoPlaybackFailed,
-        );
-      },
-    );
-    return entry;
-  }
-
-  void _syncControllerWindow() {
-    if (widget.items.isEmpty) {
-      for (final entry in _controllers.values) {
-        entry.dispose();
-      }
-      _controllers.clear();
-      return;
-    }
-
-    final firstIndex = _currentIndex > 0 ? _currentIndex - 1 : 0;
-    final lastIndex = _currentIndex + 1 < widget.items.length
-        ? _currentIndex + 1
-        : widget.items.length - 1;
-    final retainedKeys = <String>{};
-
-    for (var index = firstIndex; index <= lastIndex; index++) {
-      final item = widget.items[index];
-      retainedKeys.add(_keyFor(item));
-      _ensureController(index);
-    }
-
-    final expiredKeys = _controllers.keys
-        .where((key) => !retainedKeys.contains(key))
-        .toList(growable: false);
-    for (final key in expiredKeys) {
-      _controllers.remove(key)?.dispose();
-    }
+    _playbackManager.updateSources(_sourcesFor(widget.items));
   }
 
   void _handlePageChanged(int index) {
-    setState(() => _currentIndex = index);
-    _syncControllerWindow();
-
-    final entry = _controllers[_keyFor(widget.items[index])];
-    if (entry != null) _playController(entry.controller);
+    setState(() => _playbackManager.setCurrentIndex(index));
   }
 
-  void _retryController(String key) {
-    final index = widget.items.indexWhere((item) => _keyFor(item) == key);
-    if (index < 0) return;
+  void _retryController(String id) =>
+      setState(() => _playbackManager.retry(id));
 
-    _controllers.remove(key)?.dispose();
-    setState(_syncControllerWindow);
-  }
+  List<VideoPlaybackSource> _sourcesFor(List<VideoFeedItem> items) => [
+    for (final item in items)
+      VideoPlaybackSource(
+        id: '${item.post.id}:${item.media.id}',
+        sourceUrl: item.media.sourceUrl,
+      ),
+  ];
 
   @override
   void dispose() {
-    for (final entry in _controllers.values) {
-      entry.dispose();
-    }
-    _controllers.clear();
+    _playbackManager.dispose();
     super.dispose();
   }
 
@@ -198,84 +131,45 @@ class _VideoCarouselState extends State<_VideoCarousel> {
   Widget build(BuildContext context) {
     return PageView.builder(
       scrollDirection: Axis.vertical,
-      itemCount: widget.items.length,
+      itemCount: widget.items.length + 1,
       onPageChanged: _handlePageChanged,
       itemBuilder: (context, index) {
-        if ((index - _currentIndex).abs() > 1) {
+        if (index == widget.items.length) {
+          return const _VideosEndMessage();
+        }
+        if (!_playbackManager.isWithinPreloadWindow(index)) {
           return const SizedBox.expand();
         }
         final item = widget.items[index];
-        final key = _keyFor(item);
-        final entry = _ensureController(index);
+        final id = '${item.post.id}:${item.media.id}';
+        final entry = _playbackManager.entryAt(index);
         return _FullscreenVideoItem(
-          key: ValueKey(key),
+          key: ValueKey(id),
           item: item,
           author: widget.authorFor(item.post),
           entry: entry,
-          isActive: index == _currentIndex,
-          onRetry: () => _retryController(key),
+          onRetry: () => _retryController(id),
         );
       },
     );
   }
 }
 
-class _VideoControllerEntry {
-  _VideoControllerEntry(this.sourceUrl)
-    : controller = VideoPlayerController.networkUrl(Uri.parse(sourceUrl)) {
-    initialization = _initialize();
-  }
+class _VideosEndMessage extends StatelessWidget {
+  const _VideosEndMessage();
 
-  final String sourceUrl;
-  final VideoPlayerController controller;
-  late final Future<void> initialization;
-  bool _isDisposed = false;
-
-  Future<void> _initialize() async {
-    await controller.initialize();
-    await controller.setLooping(true);
-  }
-
-  void dispose() {
-    if (_isDisposed) return;
-    _isDisposed = true;
-
-    final release = initialization.then<void>(
-      (_) => controller.dispose(),
-      onError: (Object error, StackTrace stackTrace) => controller.dispose(),
-    );
-    unawaited(
-      release.catchError((Object error, StackTrace stackTrace) {
-        ErrorHandler.report(error, stackTrace);
-      }),
+  @override
+  Widget build(BuildContext context) {
+    final mediaTheme = MediaOverlayTheme.of(context);
+    return Center(
+      child: Text(
+        AppStrings.videosEndReached,
+        textAlign: TextAlign.center,
+        style: Theme.of(context).textTheme.bodyMedium
+            ?.copyWith(color: mediaTheme.foregroundColor),
+      ),
     );
   }
-}
-
-void _playController(VideoPlayerController controller) {
-  if (!controller.value.isInitialized || controller.value.isPlaying) return;
-  unawaited(
-    controller.play().catchError((Object error, StackTrace stackTrace) {
-      ErrorHandler.report(
-        error,
-        stackTrace,
-        message: AppStrings.videoPlaybackFailed,
-      );
-    }),
-  );
-}
-
-void _pauseController(VideoPlayerController controller) {
-  if (!controller.value.isInitialized || !controller.value.isPlaying) return;
-  unawaited(
-    controller.pause().catchError((Object error, StackTrace stackTrace) {
-      ErrorHandler.report(
-        error,
-        stackTrace,
-        message: AppStrings.videoPlaybackFailed,
-      );
-    }),
-  );
 }
 
 class _FullscreenVideoItem extends StatefulWidget {
@@ -284,14 +178,12 @@ class _FullscreenVideoItem extends StatefulWidget {
     required this.item,
     required this.author,
     required this.entry,
-    required this.isActive,
     required this.onRetry,
   });
 
   final VideoFeedItem item;
   final UserProfile? author;
-  final _VideoControllerEntry entry;
-  final bool isActive;
+  final VideoPlaybackEntry entry;
   final VoidCallback onRetry;
 
   @override
@@ -310,14 +202,6 @@ class _FullscreenVideoItemState extends State<_FullscreenVideoItem> {
     if (!identical(oldWidget.entry, widget.entry)) {
       _isMuted = false;
       _playbackError = null;
-    }
-
-    if (oldWidget.isActive == widget.isActive) return;
-    if (!_controller.value.isInitialized) return;
-    if (widget.isActive) {
-      _playController(_controller);
-    } else {
-      _pauseController(_controller);
     }
   }
 

@@ -56,6 +56,33 @@ void main() {
       expect(posts.map((post) => post.id), isNot(contains('stale-post')));
     });
 
+    test(
+      'invalidates an older fixture cache after its version changes',
+      () async {
+        await localPersistence.savePosts(
+          schemaVersion: socialDataService.data.schemaVersion - 1,
+          posts: const [
+            {'id': 'stale-post'},
+          ],
+        );
+        final repository = AssetPostRepository(
+          socialDataService: socialDataService,
+          localPersistence: localPersistence,
+        );
+
+        final posts = await repository.loadPosts();
+        final videoPost = posts.singleWhere(
+          (post) => post.id == 'post-long-video',
+        );
+
+        expect(posts.map((post) => post.id), isNot(contains('stale-post')));
+        expect(
+          videoPost.media.single.sourceUrl,
+          contains('interactive-examples'),
+        );
+      },
+    );
+
     test('loads post pages with a continuation flag', () async {
       final repository = AssetPostRepository(
         socialDataService: socialDataService,

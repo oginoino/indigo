@@ -10,6 +10,7 @@ import 'package:indigo/provider/post/posts_provider.dart';
 import 'package:indigo/service/post_repository.dart';
 import 'package:indigo/service/social_data_service.dart';
 import 'package:indigo/ui/page/videos_page.dart';
+import 'package:indigo/util/const/app/app_strings.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player_platform_interface/video_player_platform_interface.dart';
@@ -19,6 +20,12 @@ void main() {
 
   late VideoPlayerPlatform originalPlatform;
   late _FakeVideoPlayerPlatform fakePlatform;
+  late AssetSocialDataService socialDataService;
+
+  setUpAll(() async {
+    socialDataService = AssetSocialDataService();
+    await socialDataService.load();
+  });
 
   setUp(() {
     originalPlatform = VideoPlayerPlatform.instance;
@@ -34,8 +41,6 @@ void main() {
     'preloads the next video and shows loading while it initializes',
     (tester) async {
       fakePlatform.failuresRemaining['https://example.test/video-0.mp4'] = 1;
-      final socialDataService = AssetSocialDataService();
-      await socialDataService.load();
       final provider = PostsProvider(
         repository: _FakePostRepository([
           for (var index = 0; index < 3; index++) _videoPost(index),
@@ -93,6 +98,41 @@ void main() {
       await tester.pump();
     },
   );
+
+  testWidgets('shows an end message after the final video', (tester) async {
+    final provider = PostsProvider(
+      repository: _FakePostRepository([_videoPost(0)]),
+      socialDataService: socialDataService,
+      clock: () => DateTime.utc(2026, 2),
+    );
+    await provider.load();
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: provider),
+          ChangeNotifierProvider(
+            create: (_) => BottomNavigationProvider(const []),
+          ),
+        ],
+        child: const MaterialApp(home: VideosPage()),
+      ),
+    );
+    await tester.pump();
+
+    try {
+      await tester.drag(find.byType(PageView), const Offset(0, -700));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.text(AppStrings.videosEndReached), findsOneWidget);
+    } finally {
+      fakePlatform.initializeAll();
+      await tester.pump();
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+    }
+  });
 }
 
 Post _videoPost(int index) => Post(
@@ -188,7 +228,7 @@ class _FakeVideoPlayerPlatform extends VideoPlayerPlatform {
       const SizedBox.expand();
 
   void initializeAll() {
-    for (final eventController in _events.values) {
+    for (final eventController in _events.values.toList()) {
       eventController.add(
         VideoEvent(
           eventType: VideoEventType.initialized,
