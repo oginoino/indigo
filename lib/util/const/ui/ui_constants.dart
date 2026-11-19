@@ -110,4 +110,6 @@ class UIConstants {
   static const Color darkBackgroundColor = Color(0xFF121212);
   static const Color lightTextColor = Color(0xFF121212);
   static const Color darkTextColor = Color(0xFFF8F8F8);
+  static const Color lightHashtagLinkColor = Color(0xFF1565C0);
+  static const Color darkHashtagLinkColor = Color(0xFF90CAF9);
 }

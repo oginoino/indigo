@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../../model/hashtag.dart';
 import '../../../model/post/post_content.dart';
 import '../../../provider/feed/feeds_list_provider.dart';
+import '../../../util/const/ui/ui_constants.dart';
 
 class PostContentText extends StatefulWidget {
   const PostContentText({
@@ -32,7 +33,9 @@ class PostContentText extends StatefulWidget {
       if (entity?.type != PostTextEntityType.hashtag) return segment.text;
 
       final hashtag = feeds.hashtagById(entity!.id ?? entity.value);
-      return '${hashtag?.emoji == null ? '' : '${hashtag!.emoji} '}${segment.text}';
+      return hashtag == null
+          ? segment.text
+          : _HashtagTextParts(hashtag, segment.text).fullText;
     }).join();
   }
 
@@ -72,17 +75,33 @@ class _PostContentTextState extends State<PostContentText> {
       final style = _styleFor(
         baseStyle,
         segment.styles,
-        theme.colorScheme,
+        theme.brightness,
         hashtag,
       );
-      final recognizer = hashtag == null
-          ? null
-          : _recognizerFor(index, hashtag, context, activeRecognizers);
-      final displayText =
-          '${hashtag?.emoji == null ? '' : '${hashtag!.emoji} '}${segment.text}';
+      if (hashtag == null || segment.text.trim().isEmpty) {
+        spans.add(TextSpan(text: segment.text, style: style));
+        continue;
+      }
+
+      final parts = _HashtagTextParts(hashtag, segment.text);
+      if (parts.leading.isNotEmpty) {
+        spans.add(TextSpan(text: parts.leading, style: baseStyle));
+      }
       spans.add(
-        TextSpan(text: displayText, style: style, recognizer: recognizer),
+        TextSpan(
+          text: parts.linkedText,
+          style: style,
+          recognizer: _recognizerFor(
+            index,
+            hashtag,
+            context,
+            activeRecognizers,
+          ),
+        ),
       );
+      if (parts.trailing.isNotEmpty) {
+        spans.add(TextSpan(text: parts.trailing, style: baseStyle));
+      }
     }
 
     for (final index in _recognizers.keys.toList()) {
@@ -129,7 +148,7 @@ class _PostContentTextState extends State<PostContentText> {
   TextStyle? _styleFor(
     TextStyle? baseStyle,
     Set<PostTextStyle> styles,
-    ColorScheme colorScheme,
+    Brightness brightness,
     Hashtag? hashtag,
   ) {
     var style = baseStyle;
@@ -150,16 +169,35 @@ class _PostContentTextState extends State<PostContentText> {
     }
     if (hashtag == null) return style;
 
-    final color = switch (hashtag.type) {
-      HashtagType.user => colorScheme.primary,
-      HashtagType.official => colorScheme.tertiary,
-      HashtagType.community => colorScheme.secondary,
-    };
+    final color = brightness == Brightness.dark
+        ? UIConstants.darkHashtagLinkColor
+        : UIConstants.lightHashtagLinkColor;
     return style?.copyWith(
       color: color,
-      fontWeight: FontWeight.w600,
-      decoration: TextDecoration.underline,
-      decorationColor: color,
+      fontWeight: FontWeight.bold,
+      decoration: TextDecoration.none,
     );
   }
+}
+
+class _HashtagTextParts {
+  _HashtagTextParts(Hashtag hashtag, String rawText)
+    : _rawText = rawText,
+      _leadingLength = rawText.length - rawText.trimLeft().length,
+      _trailingLength = rawText.length - rawText.trimRight().length,
+      text = rawText.trim(),
+      emoji = hashtag.emoji == null ? '' : '${hashtag.emoji}\u00A0';
+
+  final String _rawText;
+  final int _leadingLength;
+  final int _trailingLength;
+  final String text;
+  final String emoji;
+
+  String get leading => _rawText.substring(0, _leadingLength);
+  String get trailing => _trailingLength == 0
+      ? ''
+      : _rawText.substring(_rawText.length - _trailingLength);
+  String get linkedText => '$emoji$text';
+  String get fullText => '$leading$linkedText$trailing';
 }
