@@ -11,7 +11,7 @@ void main() {
       await service.load();
 
       final data = service.data;
-      expect(data.schemaVersion, 1);
+      expect(data.schemaVersion, 2);
       expect(data.profileForParty(data.currentUserPartyId), isNotNull);
       expect(data.postById('post-river-walk'), isNotNull);
       expect(data.commentsForPost('post-river-walk'), hasLength(2));
@@ -39,6 +39,20 @@ void main() {
           .map((media) => (media as JsonObject)['type'])
           .toSet();
       expect(mediaTypes, containsAll(['image', 'gif', 'video']));
+      final videoSourceUrls = data.posts
+          .expand((post) => post['media'] as List<dynamic>)
+          .where((media) => (media as JsonObject)['type'] == 'video')
+          .map((media) => (media as JsonObject)['source_url'] as String)
+          .toList();
+      expect(videoSourceUrls, hasLength(4));
+      expect(
+        videoSourceUrls,
+        isNot(
+          contains(
+            'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+          ),
+        ),
+      );
     });
 
     test('fixture references resolve across its domain sections', () async {

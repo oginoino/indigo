@@ -10,6 +10,7 @@ class AppStrings {
   static const postsLoadFailed = 'Não foi possível carregar as publicações.';
   static const noPostsAvailable = 'Nenhuma publicação disponível.';
   static const postsEndReached = 'Você chegou ao fim das publicações.';
+  static const videosEndReached = 'Você chegou ao fim dos vídeos.';
   static const loadingMorePosts = 'Carregando mais publicações...';
   static const retry = 'Tentar novamente';
   static const videoPlaybackFailed = 'Não foi possível reproduzir este vídeo.';
