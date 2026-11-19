@@ -9,6 +9,7 @@ import '../../model/post/post.dart';
 import '../../provider/post/posts_provider.dart';
 import '../../util/const/app/app_strings.dart';
 import '../../util/const/ui/ui_constants.dart';
+import '../../util/log/error_handler.dart';
 import '../components/app_bottom_navigation_bar.dart';
 import '../components/post/fullscreen_post_layout.dart';
 import '../components/post/post_engagement_bar.dart';
@@ -86,103 +87,258 @@ class _VideoCarousel extends StatefulWidget {
 
 class _VideoCarouselState extends State<_VideoCarousel> {
   int _currentIndex = 0;
+  final Map<String, _VideoControllerEntry> _controllers = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _syncControllerWindow();
+  }
+
+  @override
+  void didUpdateWidget(covariant _VideoCarousel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (identical(oldWidget.items, widget.items)) return;
+
+    if (_currentIndex >= widget.items.length) {
+      _currentIndex = widget.items.isEmpty ? 0 : widget.items.length - 1;
+    }
+    _syncControllerWindow();
+  }
+
+  String _keyFor(VideoFeedItem item) => '${item.post.id}:${item.media.id}';
+
+  _VideoControllerEntry _ensureController(int index) {
+    final item = widget.items[index];
+    final key = _keyFor(item);
+    final existing = _controllers[key];
+    if (existing != null && existing.sourceUrl == item.media.sourceUrl) {
+      return existing;
+    }
+
+    existing?.dispose();
+    final entry = _VideoControllerEntry(item.media.sourceUrl);
+    _controllers[key] = entry;
+    entry.initialization.then<void>(
+      (_) {
+        if (!mounted ||
+            _currentIndex >= widget.items.length ||
+            _keyFor(widget.items[_currentIndex]) != key ||
+            !identical(_controllers[key], entry)) {
+          return;
+        }
+        _playController(entry.controller);
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        ErrorHandler.report(
+          error,
+          stackTrace,
+          message: AppStrings.videoPlaybackFailed,
+        );
+      },
+    );
+    return entry;
+  }
+
+  void _syncControllerWindow() {
+    if (widget.items.isEmpty) {
+      for (final entry in _controllers.values) {
+        entry.dispose();
+      }
+      _controllers.clear();
+      return;
+    }
+
+    final firstIndex = _currentIndex > 0 ? _currentIndex - 1 : 0;
+    final lastIndex = _currentIndex + 1 < widget.items.length
+        ? _currentIndex + 1
+        : widget.items.length - 1;
+    final retainedKeys = <String>{};
+
+    for (var index = firstIndex; index <= lastIndex; index++) {
+      final item = widget.items[index];
+      retainedKeys.add(_keyFor(item));
+      _ensureController(index);
+    }
+
+    final expiredKeys = _controllers.keys
+        .where((key) => !retainedKeys.contains(key))
+        .toList(growable: false);
+    for (final key in expiredKeys) {
+      _controllers.remove(key)?.dispose();
+    }
+  }
+
+  void _handlePageChanged(int index) {
+    setState(() => _currentIndex = index);
+    _syncControllerWindow();
+
+    final entry = _controllers[_keyFor(widget.items[index])];
+    if (entry != null) _playController(entry.controller);
+  }
+
+  void _retryController(String key) {
+    final index = widget.items.indexWhere((item) => _keyFor(item) == key);
+    if (index < 0) return;
+
+    _controllers.remove(key)?.dispose();
+    setState(_syncControllerWindow);
+  }
+
+  @override
+  void dispose() {
+    for (final entry in _controllers.values) {
+      entry.dispose();
+    }
+    _controllers.clear();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return PageView.builder(
       scrollDirection: Axis.vertical,
       itemCount: widget.items.length,
-      onPageChanged: (index) => setState(() => _currentIndex = index),
-      itemBuilder: (context, index) => _FullscreenVideoItem(
-        item: widget.items[index],
-        author: widget.authorFor(widget.items[index].post),
-        isActive: index == _currentIndex,
-      ),
+      onPageChanged: _handlePageChanged,
+      itemBuilder: (context, index) {
+        if ((index - _currentIndex).abs() > 1) {
+          return const SizedBox.expand();
+        }
+        final item = widget.items[index];
+        final key = _keyFor(item);
+        final entry = _ensureController(index);
+        return _FullscreenVideoItem(
+          key: ValueKey(key),
+          item: item,
+          author: widget.authorFor(item.post),
+          entry: entry,
+          isActive: index == _currentIndex,
+          onRetry: () => _retryController(key),
+        );
+      },
     );
   }
 }
 
+class _VideoControllerEntry {
+  _VideoControllerEntry(this.sourceUrl)
+    : controller = VideoPlayerController.networkUrl(Uri.parse(sourceUrl)) {
+    initialization = _initialize();
+  }
+
+  final String sourceUrl;
+  final VideoPlayerController controller;
+  late final Future<void> initialization;
+  bool _isDisposed = false;
+
+  Future<void> _initialize() async {
+    await controller.initialize();
+    await controller.setLooping(true);
+  }
+
+  void dispose() {
+    if (_isDisposed) return;
+    _isDisposed = true;
+
+    final release = initialization.then<void>(
+      (_) => controller.dispose(),
+      onError: (Object error, StackTrace stackTrace) => controller.dispose(),
+    );
+    unawaited(
+      release.catchError((Object error, StackTrace stackTrace) {
+        ErrorHandler.report(error, stackTrace);
+      }),
+    );
+  }
+}
+
+void _playController(VideoPlayerController controller) {
+  if (!controller.value.isInitialized || controller.value.isPlaying) return;
+  unawaited(
+    controller.play().catchError((Object error, StackTrace stackTrace) {
+      ErrorHandler.report(
+        error,
+        stackTrace,
+        message: AppStrings.videoPlaybackFailed,
+      );
+    }),
+  );
+}
+
+void _pauseController(VideoPlayerController controller) {
+  if (!controller.value.isInitialized || !controller.value.isPlaying) return;
+  unawaited(
+    controller.pause().catchError((Object error, StackTrace stackTrace) {
+      ErrorHandler.report(
+        error,
+        stackTrace,
+        message: AppStrings.videoPlaybackFailed,
+      );
+    }),
+  );
+}
+
 class _FullscreenVideoItem extends StatefulWidget {
   const _FullscreenVideoItem({
+    super.key,
     required this.item,
     required this.author,
+    required this.entry,
     required this.isActive,
+    required this.onRetry,
   });
 
   final VideoFeedItem item;
   final UserProfile? author;
+  final _VideoControllerEntry entry;
   final bool isActive;
+  final VoidCallback onRetry;
 
   @override
   State<_FullscreenVideoItem> createState() => _FullscreenVideoItemState();
 }
 
 class _FullscreenVideoItemState extends State<_FullscreenVideoItem> {
-  late VideoPlayerController _controller;
-  late Future<void> _initialization;
   bool _isMuted = false;
+  Object? _playbackError;
 
-  @override
-  void initState() {
-    super.initState();
-    _createController();
-  }
-
-  void _createController() {
-    _controller = VideoPlayerController.networkUrl(
-      Uri.parse(widget.item.media.sourceUrl),
-    );
-    _initialization = _initialize();
-  }
-
-  Future<void> _initialize() async {
-    await _controller.initialize();
-    await _controller.setLooping(true);
-    if (widget.isActive) await _controller.play();
-  }
+  VideoPlayerController get _controller => widget.entry.controller;
 
   @override
   void didUpdateWidget(covariant _FullscreenVideoItem oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.item.media.sourceUrl != widget.item.media.sourceUrl) {
-      final previousController = _controller;
+    if (!identical(oldWidget.entry, widget.entry)) {
       _isMuted = false;
-      _createController();
-      unawaited(previousController.dispose());
-      return;
+      _playbackError = null;
     }
 
     if (oldWidget.isActive == widget.isActive) return;
     if (!_controller.value.isInitialized) return;
     if (widget.isActive) {
-      unawaited(_controller.play());
+      _playController(_controller);
     } else {
-      unawaited(_controller.pause());
+      _pauseController(_controller);
     }
   }
 
-  void _retryInitialization() {
-    final previousController = _controller;
-    setState(() {
-      _isMuted = false;
-      _createController();
-    });
-    unawaited(previousController.dispose());
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  void _retryInitialization() => widget.onRetry();
 
   Future<void> _togglePlayback() async {
-    if (_controller.value.isPlaying) {
-      await _controller.pause();
-    } else {
-      await _controller.play();
+    try {
+      if (_controller.value.isPlaying) {
+        await _controller.pause();
+      } else {
+        await _controller.play();
+      }
+      if (mounted) setState(() {});
+    } catch (error, stackTrace) {
+      ErrorHandler.report(
+        error,
+        stackTrace,
+        message: AppStrings.videoPlaybackFailed,
+      );
+      if (mounted) setState(() => _playbackError = error);
     }
-    if (mounted) setState(() {});
   }
 
   Widget _buildPlaybackButton(Color foregroundColor) => IconButton(
@@ -205,9 +361,17 @@ class _FullscreenVideoItemState extends State<_FullscreenVideoItem> {
   );
 
   Future<void> _toggleMute() async {
-    _isMuted = !_isMuted;
-    await _controller.setVolume(_isMuted ? 0 : 1);
-    if (mounted) setState(() {});
+    final isMuted = !_isMuted;
+    try {
+      await _controller.setVolume(isMuted ? 0 : 1);
+      if (mounted) setState(() => _isMuted = isMuted);
+    } catch (error, stackTrace) {
+      ErrorHandler.report(
+        error,
+        stackTrace,
+        message: AppStrings.videoPlaybackFailed,
+      );
+    }
   }
 
   @override
@@ -215,8 +379,17 @@ class _FullscreenVideoItemState extends State<_FullscreenVideoItem> {
     final mediaTheme = MediaOverlayTheme.of(context);
 
     return FutureBuilder<void>(
-      future: _initialization,
+      key: ObjectKey(widget.entry),
+      future: widget.entry.initialization,
       builder: (context, snapshot) {
+        if (_playbackError != null) {
+          return PostMediaLoadError(
+            message: AppStrings.videoPlaybackFailed,
+            icon: Icons.video_file_outlined,
+            onDarkBackground: true,
+            onRetry: _retryInitialization,
+          );
+        }
         if (snapshot.hasError) {
           return PostMediaLoadError(
             message: AppStrings.videoPlaybackFailed,
