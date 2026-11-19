@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../provider/post/posts_provider.dart';
 import '../../util/const/app/app_strings.dart';
+import '../../util/const/ui/ui_constants.dart';
 import '../components/app_bar/app_bar.dart';
 import '../components/post/post_card.dart';
 import '../components/screen.dart';
@@ -42,7 +43,7 @@ class HomePage extends StatelessWidget {
 
           return RefreshIndicator(
             onRefresh: () => provider.load(refresh: true),
-            child: ListView.builder(
+            child: ListView.separated(
               primary: false,
               padding: EdgeInsets.zero,
               physics: const AlwaysScrollableScrollPhysics(),
@@ -50,6 +51,15 @@ class HomePage extends StatelessWidget {
               itemBuilder: (context, index) => PostCard(
                 post: posts[index],
                 author: provider.authorFor(posts[index]),
+              ),
+              separatorBuilder: (context, index) => Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: UIConstants.postCardHorizontalInset,
+                ),
+                child: const Divider(
+                  height: UIConstants.postFeedDividerHeight,
+                  thickness: UIConstants.postFeedDividerThickness,
+                ),
               ),
             ),
           );
