@@ -1,4 +1,3 @@
-
 {
     "feed_items": [
         {
@@ -52,10 +51,35 @@
         }
     ],
     "bottom_navigation_items": [
-    {"id": 1, "name": "Descobrir", "icon": "home_rounded", "route": "/"},
-    {"id": 2, "name": "Videos", "icon": "video_library_rounded", "route": "/videos"},
-    {"id": 3, "name": "Criar", "icon": "add_circle_outline_rounded", "route": "/create"},
-    {"id": 4, "name": "Mensagens", "icon": "send_rounded", "route": "/messages"},
-    {"id": 5, "name": "Perfil", "icon": "person_rounded", "route": "/profile"}
-  ]
+        {
+            "id": 1,
+            "name": "Descobrir",
+            "icon": "home_rounded",
+            "route": "/"
+        },
+        {
+            "id": 2,
+            "name": "Videos",
+            "icon": "video_library_rounded",
+            "route": "/videos"
+        },
+        {
+            "id": 3,
+            "name": "Criar",
+            "icon": "add_circle_outline_rounded",
+            "route": "/create"
+        },
+        {
+            "id": 4,
+            "name": "Mensagens",
+            "icon": "send_rounded",
+            "route": "/messages"
+        },
+        {
+            "id": 5,
+            "name": "Perfil",
+            "icon": "person_rounded",
+            "route": "/profile"
+        }
+    ]
 }
