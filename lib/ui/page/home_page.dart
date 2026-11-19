@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
@@ -13,56 +15,150 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Screen(
-      appBar: const CustomAppBar(),
-      child: Consumer<PostsProvider>(
-        builder: (context, provider, _) {
-          if (provider.status == PostsLoadStatus.loading ||
-              provider.status == PostsLoadStatus.initial) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (provider.status == PostsLoadStatus.error) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(AppStrings.postsLoadFailed),
-                  TextButton(
-                    onPressed: provider.load,
-                    child: const Text(AppStrings.retry),
+    return Consumer<PostsProvider>(
+      builder: (context, provider, _) {
+        final posts = provider.feedPosts;
+
+        return NotificationListener<Notification>(
+          onNotification: (notification) {
+            final metrics = switch (notification) {
+              ScrollNotification(:final metrics) => metrics,
+              ScrollMetricsNotification(:final metrics) => metrics,
+              _ => null,
+            };
+            if (metrics != null &&
+                metrics.axis == Axis.vertical &&
+                metrics.extentAfter < UIConstants.postFeedLoadMoreExtent) {
+              unawaited(provider.loadMore());
+            }
+            return false;
+          },
+          child: Screen(
+            appBar: const CustomAppBar(floating: true, snap: true),
+            onRefresh: () => _refresh(context, provider),
+            slivers: [
+              if ((provider.status == PostsLoadStatus.initial ||
+                      provider.status == PostsLoadStatus.loading) &&
+                  posts.isEmpty)
+                const SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else if (provider.status == PostsLoadStatus.error &&
+                  posts.isEmpty)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(AppStrings.postsLoadFailed),
+                        TextButton(
+                          onPressed: provider.load,
+                          child: const Text(AppStrings.retry),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-            );
-          }
+                )
+              else if (posts.isEmpty)
+                const SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(child: Text(AppStrings.noPostsAvailable)),
+                )
+              else
+                SliverList(
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    if (index.isOdd) {
+                      final postIndex = index ~/ 2;
+                      if (postIndex < posts.length - 1) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: UIConstants.postCardHorizontalInset,
+                          ),
+                          child: const Divider(
+                            height: UIConstants.postFeedDividerHeight,
+                            thickness: UIConstants.postFeedDividerThickness,
+                          ),
+                        );
+                      }
+                      return _FeedFooter(provider: provider);
+                    }
 
-          final posts = provider.feedPosts;
-          if (posts.isEmpty) {
-            return const Center(child: Text(AppStrings.noPostsAvailable));
-          }
+                    final postIndex = index ~/ 2;
+                    final post = posts[postIndex];
+                    return PostCard(
+                      post: post,
+                      author: provider.authorFor(post),
+                    );
+                  }, childCount: posts.length * 2),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
-          return RefreshIndicator(
-            onRefresh: () => provider.load(refresh: true),
-            child: ListView.separated(
-              primary: false,
-              padding: EdgeInsets.zero,
-              physics: const AlwaysScrollableScrollPhysics(),
-              itemCount: posts.length,
-              itemBuilder: (context, index) => PostCard(
-                post: posts[index],
-                author: provider.authorFor(posts[index]),
+  Future<void> _refresh(BuildContext context, PostsProvider provider) async {
+    await provider.load(refresh: true);
+    if (!context.mounted || provider.error == null) return;
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text(AppStrings.postsLoadFailed)));
+  }
+}
+
+class _FeedFooter extends StatelessWidget {
+  const _FeedFooter({required this.provider});
+
+  final PostsProvider provider;
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomPadding =
+        UIConstants.bottomNavigationHeight +
+        UIConstants.bottomNavigationOuterPadding +
+        UIConstants.bottomNavigationBottomPadding +
+        UIConstants.spaceLg;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        UIConstants.postCardContentPadding,
+        UIConstants.postArticleSectionSpacing,
+        UIConstants.postCardContentPadding,
+        bottomPadding,
+      ),
+      child: Center(
+        child: switch ((
+          provider.isLoadingMore,
+          provider.loadMoreError,
+          provider.hasMore,
+        )) {
+          (true, _, _) => const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: UIConstants.postCardSpacing),
+              Text(AppStrings.loadingMorePosts),
+            ],
+          ),
+          (false, Object _, _) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(AppStrings.postsLoadFailed),
+              TextButton(
+                onPressed: provider.loadMore,
+                child: const Text(AppStrings.retry),
               ),
-              separatorBuilder: (context, index) => Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: UIConstants.postCardHorizontalInset,
-                ),
-                child: const Divider(
-                  height: UIConstants.postFeedDividerHeight,
-                  thickness: UIConstants.postFeedDividerThickness,
-                ),
-              ),
-            ),
-          );
+            ],
+          ),
+          (false, null, false) => Text(
+            AppStrings.postsEndReached,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          _ => const SizedBox(height: UIConstants.postCardSpacing),
         },
       ),
     );

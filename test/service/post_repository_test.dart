@@ -56,6 +56,24 @@ void main() {
       expect(posts.map((post) => post.id), isNot(contains('stale-post')));
     });
 
+    test('loads post pages with a continuation flag', () async {
+      final repository = AssetPostRepository(
+        socialDataService: socialDataService,
+        localPersistence: localPersistence,
+      );
+
+      final firstPage = await repository.loadPostPage(offset: 0, limit: 2);
+      final secondPage = await repository.loadPostPage(offset: 2, limit: 2);
+
+      expect(firstPage.posts, hasLength(2));
+      expect(firstPage.hasMore, isTrue);
+      expect(secondPage.posts, isNotEmpty);
+      expect(
+        secondPage.posts.map((post) => post.id),
+        isNot(contains(firstPage.posts.first.id)),
+      );
+    });
+
     test(
       'loads persisted post data without replacing it from the fixture',
       () async {

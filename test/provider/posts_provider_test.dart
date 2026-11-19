@@ -65,6 +65,37 @@ void main() {
         );
       },
     );
+
+    test(
+      'loads long feeds in pages and exposes the end of the queue',
+      () async {
+        final socialDataService = AssetSocialDataService();
+        await socialDataService.load();
+        final provider = PostsProvider(
+          repository: _FakePostRepository([
+            for (var index = 0; index < PostsProvider.pageSize + 1; index++)
+              _post(id: 'post-$index'),
+          ]),
+          socialDataService: socialDataService,
+        );
+
+        await provider.load();
+
+        expect(provider.feedPosts, hasLength(PostsProvider.pageSize));
+        expect(provider.hasMore, isTrue);
+
+        await provider.loadMore();
+
+        expect(provider.feedPosts, hasLength(PostsProvider.pageSize + 1));
+        expect(provider.hasMore, isFalse);
+        expect(provider.isLoadingMore, isFalse);
+
+        await provider.load(refresh: true);
+
+        expect(provider.feedPosts, hasLength(PostsProvider.pageSize));
+        expect(provider.hasMore, isTrue);
+      },
+    );
   });
 }
 
@@ -90,4 +121,17 @@ class _FakePostRepository implements PostRepository {
 
   @override
   Future<List<Post>> loadPosts({bool refresh = false}) async => posts;
+
+  @override
+  Future<PostPage> loadPostPage({
+    bool refresh = false,
+    required int offset,
+    required int limit,
+  }) async {
+    final page = posts.skip(offset).take(limit + 1).toList();
+    return PostPage(
+      posts: page.take(limit).toList(),
+      hasMore: page.length > limit,
+    );
+  }
 }

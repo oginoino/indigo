@@ -56,6 +56,7 @@ class UIConstants {
   static const double postCardRadius = radiusLg;
   static const double postFeedDividerHeight = spaceLg;
   static const double postFeedDividerThickness = 0.5;
+  static const double postFeedLoadMoreExtent = 600;
   static const int postPreviewMaxLines = 5;
   static const double postArticleMaxWidth = 720;
   static const double postArticleHorizontalPadding = spaceLg;
