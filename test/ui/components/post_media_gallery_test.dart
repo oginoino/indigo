@@ -6,6 +6,7 @@ import 'package:indigo/model/post/post_content.dart';
 import 'package:indigo/model/post/post_engagement_summary.dart';
 import 'package:indigo/model/post/post_media.dart';
 import 'package:indigo/ui/components/post/post_media_gallery.dart';
+import 'package:indigo/util/const/app/app_strings.dart';
 
 void main() {
   group('PostMediaGallery', () {
@@ -43,6 +44,20 @@ void main() {
       await tester.pumpWidget(_galleryApp(_photos(5)));
 
       expect(find.text('+1'), findsOneWidget);
+    });
+
+    testWidgets('offers a retry when a media image fails to load', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_galleryApp(_photos(1)));
+      await tester.pumpAndSettle();
+
+      expect(find.byTooltip(AppStrings.retry), findsOneWidget);
+
+      await tester.tap(find.byTooltip(AppStrings.retry));
+      await tester.pumpAndSettle();
+
+      expect(find.byTooltip(AppStrings.retry), findsOneWidget);
     });
   });
 }

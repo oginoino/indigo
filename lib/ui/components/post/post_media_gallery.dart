@@ -7,6 +7,7 @@ import '../../../model/post/post_media.dart';
 import '../../../route/routes.dart';
 import '../../../util/const/app/app_strings.dart';
 import '../../../util/const/ui/ui_constants.dart';
+import 'post_media_load_error.dart';
 import 'post_engagement_bar.dart';
 import 'post_media_information.dart';
 
@@ -167,6 +168,10 @@ class _PhotoCollection extends StatelessWidget {
                   child: _NetworkPhoto(
                     media: photo,
                     fit: BoxFit.cover,
+                    sourceUrl: photo.thumbnailUrl,
+                    fallbackSourceUrl: photo.thumbnailUrl == null
+                        ? null
+                        : photo.sourceUrl,
                     semanticLabel: label,
                   ),
                 ),
@@ -407,11 +412,12 @@ class _VideoPreview extends StatelessWidget {
   }
 }
 
-class _NetworkPhoto extends StatelessWidget {
+class _NetworkPhoto extends StatefulWidget {
   const _NetworkPhoto({
     required this.media,
     required this.fit,
     this.sourceUrl,
+    this.fallbackSourceUrl,
     this.semanticLabel,
     this.loadingColor,
   });
@@ -419,30 +425,59 @@ class _NetworkPhoto extends StatelessWidget {
   final PostMedia media;
   final BoxFit fit;
   final String? sourceUrl;
+  final String? fallbackSourceUrl;
   final String? semanticLabel;
   final Color? loadingColor;
 
   @override
+  State<_NetworkPhoto> createState() => _NetworkPhotoState();
+}
+
+class _NetworkPhotoState extends State<_NetworkPhoto> {
+  int _requestVersion = 0;
+  bool _usingFallbackSource = false;
+
+  @override
+  void didUpdateWidget(covariant _NetworkPhoto oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.media.sourceUrl == widget.media.sourceUrl &&
+        oldWidget.sourceUrl == widget.sourceUrl &&
+        oldWidget.fallbackSourceUrl == widget.fallbackSourceUrl) {
+      return;
+    }
+
+    _usingFallbackSource = false;
+    _requestVersion++;
+  }
+
+  void _retryImage() {
+    setState(() {
+      _usingFallbackSource =
+          widget.fallbackSourceUrl != null && !_usingFallbackSource;
+      _requestVersion++;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) => Image.network(
-    sourceUrl ?? media.sourceUrl,
-    fit: fit,
-    semanticLabel: semanticLabel,
+    _usingFallbackSource
+        ? widget.fallbackSourceUrl!
+        : widget.sourceUrl ?? widget.media.sourceUrl,
+    key: ValueKey(_requestVersion),
+    fit: widget.fit,
+    semanticLabel: widget.semanticLabel,
     loadingBuilder: (context, child, progress) {
       if (progress == null) return child;
       return Center(
         child: CircularProgressIndicator(
-          color: loadingColor ?? Theme.of(context).colorScheme.primary,
+          color: widget.loadingColor ?? Theme.of(context).colorScheme.primary,
         ),
       );
     },
-    errorBuilder: (context, error, stackTrace) => Tooltip(
+    errorBuilder: (context, error, stackTrace) => PostMediaLoadError(
       message: AppStrings.imageLoadFailed,
-      child: Center(
-        child: Icon(
-          Icons.broken_image_outlined,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-        ),
-      ),
+      icon: Icons.broken_image_outlined,
+      onRetry: _retryImage,
     ),
   );
 }

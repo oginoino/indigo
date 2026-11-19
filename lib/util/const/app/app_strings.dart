@@ -39,6 +39,8 @@ class AppStrings {
   static const closeImageViewer = 'Fechar visualização';
   static const imageViewerCounter = '{current} / {total}';
   static const imageLoadFailed = 'Não foi possível carregar esta imagem.';
+  static const postReadMore = 'Ler mais';
+  static const postArticleTitle = 'Publicação';
   static const playVideo = 'Reproduzir vídeo';
   static const pauseVideo = 'Pausar vídeo';
   static const muteVideo = 'Silenciar vídeo';
