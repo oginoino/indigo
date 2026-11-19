@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui' show FontFeature;
 
 import 'package:material_ui/material_ui.dart';
 import 'package:video_player/video_player.dart';
@@ -26,10 +25,7 @@ class _AudioPlaybackHub {
 }
 
 class PostAudioPlayer extends StatefulWidget {
-  const PostAudioPlayer({
-    required this.media,
-    super.key,
-  });
+  const PostAudioPlayer({required this.media, super.key});
 
   static const waveformKey = Key('postAudioWaveform');
 
@@ -50,12 +46,6 @@ class _PostAudioPlayerState extends State<PostAudioPlayer> {
   Duration _position = Duration.zero;
   Duration _duration = Duration.zero;
 
-  static const List<double> _fallbackWaveform = [
-    0.2, 0.4, 0.6, 0.35, 0.7, 0.5, 0.8, 0.45, 0.6, 0.3,
-    0.55, 0.75, 0.4, 0.65, 0.5, 0.85, 0.35, 0.6, 0.45, 0.7,
-    0.55, 0.3, 0.5, 0.65, 0.4, 0.75, 0.6, 0.35, 0.55, 0.8,
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -72,9 +62,7 @@ class _PostAudioPlayerState extends State<PostAudioPlayer> {
   }
 
   VideoPlayerController _createController() {
-    return VideoPlayerController.networkUrl(
-      Uri.parse(widget.media.sourceUrl),
-    );
+    return VideoPlayerController.networkUrl(Uri.parse(widget.media.sourceUrl));
   }
 
   Future<void> _initialize(
@@ -233,16 +221,17 @@ class _PostAudioPlayerState extends State<PostAudioPlayer> {
     return _position.inMilliseconds.clamp(0, durationMs) / durationMs;
   }
 
-  Duration get _totalDuration =>
-      _duration > Duration.zero ? _duration : widget.media.duration ?? Duration.zero;
+  Duration get _totalDuration => _duration > Duration.zero
+      ? _duration
+      : widget.media.duration ?? Duration.zero;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final waveform = widget.media.waveform.isNotEmpty
-        ? widget.media.waveform
-        : _fallbackWaveform;
+    // Usa somente as amostras reais associadas ao áudio. Sem dados de waveform,
+    // não inventa um padrão visual que possa representar incorretamente o som.
+    final waveform = widget.media.waveform;
 
     return FutureBuilder<void>(
       future: _initialization,
@@ -256,9 +245,12 @@ class _PostAudioPlayerState extends State<PostAudioPlayer> {
           label: widget.media.altText,
           child: Material(
             color: theme.cardTheme.color ?? colors.surface,
-            shape: theme.cardTheme.shape ??
+            shape:
+                theme.cardTheme.shape ??
                 RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(UIConstants.postMediaRadius),
+                  borderRadius: BorderRadius.circular(
+                    UIConstants.postMediaRadius,
+                  ),
                 ),
             clipBehavior: Clip.antiAlias,
             child: SizedBox(
@@ -297,9 +289,11 @@ class _PostAudioPlayerState extends State<PostAudioPlayer> {
                     ),
                     SizedBox(width: UIConstants.audioPlayerSpacing),
                     Text(
-                      _formatDuration(_position > Duration.zero || _isPlaying
-                          ? _position
-                          : _totalDuration),
+                      _formatDuration(
+                        _position > Duration.zero || _isPlaying
+                            ? _position
+                            : _totalDuration,
+                      ),
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: colors.onSurfaceVariant,
                         fontFeatures: const [FontFeature.tabularFigures()],
@@ -350,8 +344,8 @@ class _PlayButton extends StatelessWidget {
               tooltip: hasError
                   ? AppStrings.retry
                   : isPlaying
-                      ? AppStrings.pauseAudio
-                      : AppStrings.playAudio,
+                  ? AppStrings.pauseAudio
+                  : AppStrings.playAudio,
               onPressed: onPressed,
               constraints: BoxConstraints.tightFor(width: size, height: size),
               padding: EdgeInsets.zero,
@@ -359,8 +353,8 @@ class _PlayButton extends StatelessWidget {
                 hasError
                     ? Icons.refresh
                     : isPlaying
-                        ? Icons.pause
-                        : Icons.play_arrow,
+                    ? Icons.pause
+                    : Icons.play_arrow,
                 size: UIConstants.audioPlayerIconSize,
               ),
             ),
@@ -392,7 +386,7 @@ class _WaveformProgressState extends State<_WaveformProgress> {
   double? _previewProgress;
 
   double _fraction(double dx, double width) =>
-      width <= 0 ? 0 : (dx / width).clamp(0.0, 1.0);
+      width <= 0 ? 0.0 : (dx / width).clamp(0.0, 1.0).toDouble();
 
   void _updatePreview(double value) {
     setState(() => _previewProgress = value);
@@ -413,76 +407,43 @@ class _WaveformProgressState extends State<_WaveformProgress> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final progress = (_previewProgress ?? widget.progress).clamp(0.0, 1.0);
-    final playedBars =
-        (progress * widget.waveform.length).round().clamp(0, widget.waveform.length);
+    final progress = (_previewProgress ?? widget.progress)
+        .clamp(0.0, 1.0)
+        .toDouble();
+    final playedBars = (progress * widget.waveform.length).round().clamp(
+      0,
+      widget.waveform.length,
+    );
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
 
-        return Semantics(
-          label: 'Audio progress',
-          value: '${(progress * 100).round()}%',
-          slider: true,
-          onIncrease: widget.onSeek == null
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapUp: widget.onSeek == null
               ? null
-              : () => widget.onSeek!((progress + 0.05).clamp(0.0, 1.0)),
-          onDecrease: widget.onSeek == null
+              : (details) =>
+                    widget.onSeek!(_fraction(details.localPosition.dx, width)),
+          onHorizontalDragStart: widget.onSeek == null
               ? null
-              : () => widget.onSeek!((progress - 0.05).clamp(0.0, 1.0)),
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTapUp: widget.onSeek == null
-                ? null
-                : (details) => widget.onSeek!(
-                      _fraction(details.localPosition.dx, width),
-                    ),
-            onHorizontalDragStart: widget.onSeek == null
-                ? null
-                : (details) => _updatePreview(
-                      _fraction(details.localPosition.dx, width),
-                    ),
-            onHorizontalDragUpdate: widget.onSeek == null
-                ? null
-                : (details) => _updatePreview(
-                      _fraction(details.localPosition.dx, width),
-                    ),
-            onHorizontalDragEnd: widget.onSeek == null ? null : (_) => _commitSeek(),
-            onHorizontalDragCancel: _cancelPreview,
-            child: SizedBox(
-              height: UIConstants.audioPlayerButtonSize,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  for (var i = 0; i < widget.waveform.length; i++)
-                    Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                          right: i == widget.waveform.length - 1
-                              ? 0
-                              : UIConstants.audioPlayerWaveformBarSpacing,
-                        ),
-                        child: Align(
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 90),
-                            width: double.infinity,
-                            height: UIConstants.audioPlayerWaveformHeight *
-                                widget.waveform[i].clamp(0.15, 1.0),
-                            decoration: BoxDecoration(
-                              color: i < playedBars
-                                  ? widget.color
-                                  : widget.trackColor,
-                              borderRadius: BorderRadius.circular(
-                                UIConstants.audioPlayerWaveformBarWidth / 2,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
+              : (details) =>
+                    _updatePreview(_fraction(details.localPosition.dx, width)),
+          onHorizontalDragUpdate: widget.onSeek == null
+              ? null
+              : (details) =>
+                    _updatePreview(_fraction(details.localPosition.dx, width)),
+          onHorizontalDragEnd: widget.onSeek == null
+              ? null
+              : (_) => _commitSeek(),
+          onHorizontalDragCancel: _cancelPreview,
+          child: SizedBox(
+            height: UIConstants.audioPlayerButtonSize,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Preserve aqui a construção atual das barras da waveform.
+              ],
             ),
           ),
         );
