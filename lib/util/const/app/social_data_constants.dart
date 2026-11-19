@@ -21,6 +21,7 @@ class SocialDataConstants {
   static const partyRolesKey = 'party_roles';
   static const friendshipsKey = 'friendships';
   static const communitiesKey = 'communities';
+  static const hashtagsKey = 'hashtags';
   static const conversationsKey = 'conversations';
   static const conversationMessagesKey = 'conversation_messages';
   static const postThemesKey = 'post_themes';
@@ -45,6 +46,7 @@ class SocialDataConstants {
     partyRolesKey,
     friendshipsKey,
     communitiesKey,
+    hashtagsKey,
     conversationsKey,
     conversationMessagesKey,
     postThemesKey,

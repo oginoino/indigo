@@ -193,6 +193,11 @@ representa a duração de vídeo em segundos. `schema_version` identifica a vers
 do formato do fixture. As seções e chaves estão em
 `lib/util/const/app/social_data_constants.dart`.
 
+Hashtags são declaradas na seção `hashtags` com tipo (`user`, `official` ou
+`community`), emoji e, para comunidades, o ID da comunidade relacionada. Posts
+referenciam hashtags por ID em entidades de texto e tags; a navegação mantém
+feeds temporários enquanto abertos e persiste apenas os feeds fixados.
+
 O serviço preserva o formato JSON como DTO de mock; a conversão para modelos de
 domínio fica para a camada de mapeamento quando os consumidores da interface
 forem definidos.

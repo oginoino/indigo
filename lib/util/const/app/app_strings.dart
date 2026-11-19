@@ -12,6 +12,7 @@ class AppStrings {
   static const postsEndReached = 'Você chegou ao fim das publicações.';
   static const videosEndReached = 'Você chegou ao fim dos vídeos.';
   static const loadingMorePosts = 'Carregando mais publicações...';
+  static const loadMorePosts = 'Carregar mais publicações';
   static const retry = 'Tentar novamente';
   static const videoPlaybackFailed = 'Não foi possível reproduzir este vídeo.';
   static const noVideosAvailable = 'Nenhum vídeo disponível.';
@@ -51,6 +52,11 @@ class AppStrings {
   static const createTitle = 'Criar';
   static const messagesTitle = 'Mensagens';
   static const profileTitle = 'Perfil';
+  static const pinHashtag = 'Fixar hashtag';
+  static const unpinHashtag = 'Desfixar hashtag';
+  static const hashtagPinSaveFailed =
+      'Não foi possível salvar a hashtag fixada.';
+  static const noHashtagPosts = 'Ainda não há publicações com esta hashtag.';
 
   static const invalidAppData = 'App data must be a JSON object.';
   static const missingAppDataSection = 'App data is missing {section}.';

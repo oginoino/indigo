@@ -1,5 +1,5 @@
 {
-    "schema_version": 2,
+    "schema_version": 3,
     "current_user_party_id": "party-ana",
     "parties": [
         {
@@ -236,6 +236,87 @@
             "visibility": "public"
         }
     ],
+    "hashtags": [
+        {
+            "id": "tag-dias-leves",
+            "label": "diasleves",
+            "type": "user",
+            "emoji": "🌿"
+        },
+        {
+            "id": "tag-fotografia",
+            "label": "fotografia",
+            "type": "official",
+            "emoji": "📷"
+        },
+        {
+            "id": "tag-brasil",
+            "label": "brasil",
+            "type": "official",
+            "emoji": "🇧🇷"
+        },
+        {
+            "id": "tag-design-movimento",
+            "label": "designemmovimento",
+            "type": "community",
+            "emoji": "🎨",
+            "community_id": "community-design"
+        },
+        {
+            "id": "tag-caminhar-com-calma",
+            "label": "caminharcomcalma",
+            "type": "user",
+            "emoji": "🚶"
+        },
+        {
+            "id": "tag-cidade",
+            "label": "cidade",
+            "type": "user",
+            "emoji": "🏙️"
+        },
+        {
+            "id": "tag-cidade-a-noite",
+            "label": "cidadeanoite",
+            "type": "user",
+            "emoji": "🌃"
+        },
+        {
+            "id": "tag-cozinha-afetiva",
+            "label": "cozinhaafetiva",
+            "type": "user",
+            "emoji": "🍲"
+        },
+        {
+            "id": "tag-fim-de-semana",
+            "label": "fimdesemana",
+            "type": "user",
+            "emoji": "☀️"
+        },
+        {
+            "id": "tag-natureza",
+            "label": "natureza",
+            "type": "official",
+            "emoji": "🌿"
+        },
+        {
+            "id": "tag-receita",
+            "label": "receita",
+            "type": "official",
+            "emoji": "🥘"
+        },
+        {
+            "id": "tag-trilha",
+            "label": "trilha",
+            "type": "official",
+            "emoji": "🥾"
+        },
+        {
+            "id": "tag-video-criativo",
+            "label": "videocriativo",
+            "type": "official",
+            "emoji": "🎬"
+        }
+    ],
     "conversations": [
         {
             "id": "conversation-ana-lucas",
@@ -367,12 +448,43 @@
                         ]
                     },
                     {
-                        "text": " e olhar em volta. 🌿",
+                        "text": " e olhar em volta. 🌿 ",
+                        "styles": []
+                    },
+                    {
+                        "text": "#diasleves",
                         "styles": [],
                         "entity": {
                             "type": "hashtag",
                             "value": "diasleves",
                             "id": "tag-dias-leves"
+                        }
+                    },
+                    {
+                        "text": " #fotografia",
+                        "styles": [],
+                        "entity": {
+                            "type": "hashtag",
+                            "value": "fotografia",
+                            "id": "tag-fotografia"
+                        }
+                    },
+                    {
+                        "text": " #brasil",
+                        "styles": [],
+                        "entity": {
+                            "type": "hashtag",
+                            "value": "brasil",
+                            "id": "tag-brasil"
+                        }
+                    },
+                    {
+                        "text": " #designemmovimento",
+                        "styles": [],
+                        "entity": {
+                            "type": "hashtag",
+                            "value": "designemmovimento",
+                            "id": "tag-design-movimento"
                         }
                     }
                 ]
@@ -427,6 +539,16 @@
                     "id": "tag-lucas",
                     "label": "lucas.design",
                     "type": "user"
+                },
+                {
+                    "id": "tag-brasil",
+                    "label": "brasil",
+                    "type": "topic"
+                },
+                {
+                    "id": "tag-design-movimento",
+                    "label": "designemmovimento",
+                    "type": "hashtag"
                 }
             ],
             "stickers": [
@@ -538,7 +660,7 @@
                 },
                 {
                     "id": "tag-video-criativo",
-                    "label": "vídeo criativo",
+                    "label": "videocriativo",
                     "type": "topic"
                 }
             ],
@@ -842,6 +964,10 @@
                     },
                     {
                         "text": "Às vezes basta perceber a luz mudando nas fachadas, ouvir o barulho das folhas depois da chuva e cumprimentar quem abre a padaria antes do sol nascer.\n\nNo sábado encontrei uma pequena trilha perto da cidade. Caminhei devagar, parei para beber água e fiquei alguns minutos observando o movimento das nuvens. Não tirei muitas fotos; preferi guardar alguns detalhes na memória.\n\nVoltei para casa com menos pressa e com uma ideia simples para a semana: reservar um pedaço do dia para fazer uma coisa de cada vez. Se você também anda precisando desacelerar, talvez uma volta curta já seja um bom começo. ",
+                        "styles": []
+                    },
+                    {
+                        "text": "#caminharcomcalma",
                         "styles": [],
                         "entity": {
                             "type": "hashtag",

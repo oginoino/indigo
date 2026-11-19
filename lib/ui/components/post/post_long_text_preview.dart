@@ -5,6 +5,7 @@ import '../../../model/post/post.dart';
 import '../../../util/const/app/app_strings.dart';
 import '../../../util/const/app/post_constants.dart';
 import '../../page/post_article_page.dart';
+import 'post_content_text.dart';
 
 class PostLongTextPreview extends StatelessWidget {
   const PostLongTextPreview({
@@ -25,11 +26,15 @@ class PostLongTextPreview extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (!constraints.hasBoundedWidth) {
-          return Text(text, style: theme.textTheme.bodyLarge);
+          return PostContentText(
+            content: post.content,
+            style: theme.textTheme.bodyLarge,
+          );
         }
 
+        final displayText = PostContentText.displayText(context, post.content);
         final textPainter = TextPainter(
-          text: TextSpan(text: text, style: theme.textTheme.bodyLarge),
+          text: TextSpan(text: displayText, style: theme.textTheme.bodyLarge),
           maxLines: PostConstants.previewMaxLines,
           textDirection: Directionality.of(context),
           textScaler: MediaQuery.textScalerOf(context),
@@ -40,11 +45,11 @@ class PostLongTextPreview extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              text,
+            PostContentText(
+              content: post.content,
+              style: theme.textTheme.bodyLarge,
               maxLines: hasMore ? PostConstants.previewMaxLines : null,
               overflow: hasMore ? TextOverflow.ellipsis : TextOverflow.clip,
-              style: theme.textTheme.bodyLarge,
             ),
             if (hasMore)
               Align(

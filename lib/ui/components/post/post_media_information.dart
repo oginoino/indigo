@@ -6,6 +6,7 @@ import '../../../util/const/app/post_constants.dart';
 import '../../../util/const/ui/ui_constants.dart';
 import '../../theme/media_overlay_theme.dart';
 import 'post_author_header.dart';
+import 'post_content_text.dart';
 
 class PostMediaInformation extends StatelessWidget {
   const PostMediaInformation({
@@ -51,8 +52,8 @@ class PostMediaInformation extends StatelessWidget {
         ],
         if (content.isNotEmpty) ...[
           const SizedBox(height: UIConstants.postHeaderTextSpacing),
-          Text(
-            content,
+          PostContentText(
+            content: post.content,
             maxLines: PostConstants.fullscreenCaptionMaxLines,
             overflow: TextOverflow.ellipsis,
             style: contentStyle,

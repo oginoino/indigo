@@ -11,7 +11,7 @@ void main() {
       await service.load();
 
       final data = service.data;
-      expect(data.schemaVersion, 2);
+      expect(data.schemaVersion, 3);
       expect(data.profileForParty(data.currentUserPartyId), isNotNull);
       expect(data.postById('post-river-walk'), isNotNull);
       expect(data.commentsForPost('post-river-walk'), hasLength(2));
@@ -69,6 +69,10 @@ void main() {
       final liveSessionIds = _ids(data.liveSessions);
       final liveMessageIds = _ids(data.liveChatMessages);
       final themeIds = _ids(data.postThemes);
+      final hashtagIds = _ids(data.hashtags);
+      final hashtagsById = {
+        for (final hashtag in data.hashtags) hashtag['id'] as String: hashtag,
+      };
       final stickerAssetIds = _ids(data.stickerAssets);
 
       expect(partyIds, contains(data.currentUserPartyId));
@@ -78,6 +82,12 @@ void main() {
       }
       for (final community in data.communities) {
         expect(roleIds, contains(community['created_by_party_role_id']));
+      }
+      for (final hashtag in data.hashtags) {
+        final communityId = hashtag['community_id'];
+        if (communityId != null) {
+          expect(communityIds, contains(communityId));
+        }
       }
       for (final conversation in data.conversations) {
         expect(roleIds, contains(conversation['created_by_party_role_id']));
@@ -101,6 +111,21 @@ void main() {
       }
       for (final post in data.posts) {
         expect(roleIds, contains(post['author_party_role_id']));
+        for (final tag in post['tags'] as List<dynamic>) {
+          final tagData = tag as JsonObject;
+          if (tagData['type'] != 'user') {
+            expect(hashtagIds, contains(tagData['id']));
+            expect(hashtagsById[tagData['id']]?['label'], tagData['label']);
+          }
+        }
+        final content = post['content'] as JsonObject;
+        for (final segment in content['segments'] as List<dynamic>) {
+          final entity = (segment as JsonObject)['entity'];
+          if (entity is JsonObject && entity['type'] == 'hashtag') {
+            expect(hashtagIds, contains(entity['id']));
+            expect(hashtagsById[entity['id']]?['label'], entity['value']);
+          }
+        }
         final themeId = post['theme_id'];
         if (themeId != null) expect(themeIds, contains(themeId));
         final mediaIds = {

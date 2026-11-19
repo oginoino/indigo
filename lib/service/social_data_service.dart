@@ -87,6 +87,7 @@ class SocialMockData {
       _sections[SocialDataConstants.friendshipsKey]!;
   List<JsonObject> get communities =>
       _sections[SocialDataConstants.communitiesKey]!;
+  List<JsonObject> get hashtags => _sections[SocialDataConstants.hashtagsKey]!;
   List<JsonObject> get conversations =>
       _sections[SocialDataConstants.conversationsKey]!;
   List<JsonObject> get conversationMessages =>
@@ -121,6 +122,8 @@ class SocialMockData {
       _sections[SocialDataConstants.liveRecordingsKey]!;
 
   JsonObject? postById(String id) => _findById(posts, id);
+
+  JsonObject? hashtagById(String id) => _findById(hashtags, id);
 
   JsonObject? profileForParty(String partyId) =>
       _firstByValue(userProfiles, SocialDataConstants.partyIdKey, partyId);

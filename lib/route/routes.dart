@@ -13,6 +13,7 @@ class RouteNames {
   static const create = 'create';
   static const messages = 'messages';
   static const profile = 'profile';
+  static const hashtags = 'hashtags';
 }
 
 class Routes {
@@ -24,6 +25,7 @@ class Routes {
   static const String create = '/create';
   static const String messages = '/messages';
   static const String profile = '/profile';
+  static const String hashtags = '/hashtags/:hashtagId';
 
   static const List<RouteInfo> routes = [
     RouteInfo(name: RouteNames.home, path: home),
@@ -31,6 +33,7 @@ class Routes {
     RouteInfo(name: RouteNames.create, path: create),
     RouteInfo(name: RouteNames.messages, path: messages),
     RouteInfo(name: RouteNames.profile, path: profile),
+    RouteInfo(name: RouteNames.hashtags, path: hashtags),
   ];
 
   static List<String> get allRouteNames =>
