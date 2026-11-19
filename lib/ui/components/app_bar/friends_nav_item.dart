@@ -8,6 +8,7 @@ import '../../../util/const/app/app_strings.dart';
 import '../../../util/const/ui/ui_constants.dart';
 import '../../components/avatar.dart';
 import '../../components/avatar_group.dart';
+import 'nav_motion.dart';
 
 class FriendsNavItem extends StatelessWidget {
   const FriendsNavItem({required this.feedItem, super.key});
@@ -18,25 +19,39 @@ class FriendsNavItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final friends = context.watch<FriendsProvider>().friends;
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        AvatarGroup(
-          size: AvatarSize.xSmall,
-          members: [
-            for (final friend in friends)
-              AvatarGroupMember(
-                imageProvider: _avatarProvider(friend),
-                label: friend.displayName,
-              ),
+    // O tamanho anima quando a lista de amigos muda (por exemplo, quando o
+    // rótulo aparece depois do carregamento), em vez de "estalar".
+    return AnimatedSize(
+      duration: NavMotion.of(context, NavMotion.medium),
+      curve: NavMotion.emphasized,
+      alignment: Alignment.centerLeft,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AvatarGroup(
+            size: AvatarSize.xSmall,
+            members: [
+              for (final friend in friends)
+                AvatarGroupMember(
+                  imageProvider: _avatarProvider(friend),
+                  label: friend.displayName,
+                ),
+            ],
+            emptyState: const _AddFriendsCta(),
+          ),
+          if (friends.isNotEmpty) ...[
+            const SizedBox(width: UIConstants.spaceSm),
+            TweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: 0, end: 1),
+              duration: NavMotion.of(context, NavMotion.medium),
+              curve: NavMotion.emphasized,
+              child: Text(feedItem.name, textAlign: TextAlign.left),
+              builder: (context, opacity, child) =>
+                  Opacity(opacity: opacity, child: child),
+            ),
           ],
-          emptyState: const _AddFriendsCta(),
-        ),
-        if (friends.isNotEmpty) ...[
-          const SizedBox(width: UIConstants.spaceSm),
-          Text(feedItem.name, textAlign: TextAlign.left),
         ],
-      ],
+      ),
     );
   }
 

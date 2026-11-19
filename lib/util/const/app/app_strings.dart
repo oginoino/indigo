@@ -4,6 +4,7 @@ class AppStrings {
   static const empty = '';
   static const genericError = 'Error';
   static const startupFailed = 'App startup failed';
+  static const scrollToTopLabel = 'Voltar ao topo';
 
   static const noFeedsAvailable = 'Nenhum feed encontrado';
   static const videosTitle = 'Vídeos';
