@@ -3,8 +3,8 @@ import 'package:indigo/model/post/post.dart';
 import 'package:indigo/model/post/post_content.dart';
 import 'package:indigo/model/post/post_media.dart';
 import 'package:indigo/provider/post/posts_provider.dart';
-import 'package:indigo/service/post_repository.dart';
 import 'package:indigo/service/mapper/post_json_mapper.dart';
+import 'package:indigo/service/post_repository.dart';
 import 'package:indigo/service/social_data_service.dart';
 
 void main() {

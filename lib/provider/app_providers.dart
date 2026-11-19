@@ -2,8 +2,8 @@ import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
 import '../di/di.dart';
-import '../service/persistence/avatar_image_service.dart';
 import '../service/mapper/hashtag_json_mapper.dart';
+import '../service/persistence/avatar_image_service.dart';
 import '../service/social_data_service.dart';
 import 'bottom_navigation_bar/bottom_navigation_provider.dart';
 import 'feed/feeds_list_provider.dart';

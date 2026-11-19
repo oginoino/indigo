@@ -23,10 +23,9 @@ class PostPage {
 
 class AssetPostRepository implements PostRepository {
   const AssetPostRepository({
-    required SocialDataService socialDataService,
-    required PostLocalPersistenceService localPersistence,
-  }) : _socialDataService = socialDataService,
-       _localPersistence = localPersistence;
+    required this._socialDataService,
+    required this._localPersistence,
+  });
 
   final SocialDataService _socialDataService;
   final PostLocalPersistenceService _localPersistence;

@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 
+import '../../model/party/user_profile.dart';
 import '../../model/post/post.dart';
 import '../../model/post/post_content.dart';
 import '../../model/post/post_media.dart';
-import '../../model/party/user_profile.dart';
 import '../../service/mapper/user_profile_json_mapper.dart';
 import '../../service/post_repository.dart';
 import '../../service/social_data_service.dart';
@@ -21,12 +21,10 @@ class PostsProvider extends ChangeNotifier {
   static const int pageSize = 20;
 
   PostsProvider({
-    required PostRepository repository,
-    required SocialDataService socialDataService,
+    required this._repository,
+    required this._socialDataService,
     DateTime Function()? clock,
-  }) : _repository = repository,
-       _socialDataService = socialDataService,
-       _clock = clock ?? DateTime.now;
+  }) : _clock = clock ?? DateTime.now;
 
   final PostRepository _repository;
   final SocialDataService _socialDataService;

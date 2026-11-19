@@ -7,10 +7,9 @@ import '../../util/const/app/app_strings.dart';
 
 class AvatarImageService {
   AvatarImageService({
-    required SharedPreferences preferences,
-    required Directory storageDirectory,
-  }) : _preferences = preferences,
-       _storageDirectory = storageDirectory;
+    required this._preferences,
+    required this._storageDirectory,
+  });
 
   static const _imagePathKey = 'profileAvatarImagePath';
   static const _fileName = 'profile_avatar';

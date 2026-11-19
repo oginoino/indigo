@@ -1,4 +1,3 @@
-import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:indigo/model/party/user_profile.dart';
@@ -11,6 +10,7 @@ import 'package:indigo/ui/components/post/post_engagement_bar.dart';
 import 'package:indigo/ui/components/post/post_media_gallery.dart';
 import 'package:indigo/util/const/app/app_strings.dart';
 import 'package:indigo/util/const/ui/ui_constants.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   group('PostMediaGallery', () {

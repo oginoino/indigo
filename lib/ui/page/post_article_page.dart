@@ -5,9 +5,9 @@ import '../../model/post/post.dart';
 import '../../util/const/app/app_strings.dart';
 import '../../util/const/ui/ui_constants.dart';
 import '../components/post/post_author_header.dart';
+import '../components/post/post_content_text.dart';
 import '../components/post/post_engagement_bar.dart';
 import '../components/post/post_media_gallery.dart';
-import '../components/post/post_content_text.dart';
 
 class PostArticlePage extends StatelessWidget {
   const PostArticlePage({required this.post, required this.author, super.key});

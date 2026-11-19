@@ -12,8 +12,8 @@ import '../../util/log/error_handler.dart';
 import '../components/app_bottom_navigation_bar.dart';
 import '../components/post/fullscreen_post_layout.dart';
 import '../components/post/post_engagement_bar.dart';
-import '../components/post/post_media_load_error.dart';
 import '../components/post/post_media_information.dart';
+import '../components/post/post_media_load_error.dart';
 import '../theme/media_overlay_theme.dart';
 
 class VideosPage extends StatelessWidget {

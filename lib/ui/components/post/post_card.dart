@@ -5,8 +5,8 @@ import '../../../model/post/post.dart';
 import '../../../util/const/ui/ui_constants.dart';
 import 'post_author_header.dart';
 import 'post_engagement_bar.dart';
-import 'post_media_gallery.dart';
 import 'post_long_text_preview.dart';
+import 'post_media_gallery.dart';
 
 class PostCard extends StatelessWidget {
   const PostCard({required this.post, required this.author, super.key});

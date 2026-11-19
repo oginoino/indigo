@@ -4,8 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../service/app_data_service.dart';
 import '../service/persistence/avatar_image_service.dart';
-import '../service/persistence/post_local_persistence_service.dart';
 import '../service/persistence/persistence_service.dart';
+import '../service/persistence/post_local_persistence_service.dart';
 import '../service/post_repository.dart';
 import '../service/social_data_service.dart';
 

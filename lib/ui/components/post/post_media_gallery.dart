@@ -10,8 +10,8 @@ import '../../../util/const/ui/ui_constants.dart';
 import '../../theme/media_overlay_theme.dart';
 import 'fullscreen_post_layout.dart';
 import 'post_engagement_bar.dart';
-import 'post_media_load_error.dart';
 import 'post_media_information.dart';
+import 'post_media_load_error.dart';
 
 class PostMediaGallery extends StatelessWidget {
   const PostMediaGallery({required this.post, required this.author, super.key});

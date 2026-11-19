@@ -4,8 +4,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
 import '../../model/hashtag.dart';
-import '../../provider/post/posts_provider.dart';
 import '../../provider/feed/feeds_list_provider.dart';
+import '../../provider/post/posts_provider.dart';
 import '../../util/const/app/app_strings.dart';
 import '../../util/const/app/feed_constants.dart';
 import '../../util/const/ui/ui_constants.dart';

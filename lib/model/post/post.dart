@@ -1,8 +1,8 @@
 import 'post_content.dart';
 import 'post_engagement_summary.dart';
+import 'post_location.dart';
 import 'post_media.dart';
 import 'post_relationship.dart';
-import 'post_location.dart';
 import 'post_sticker.dart';
 import 'post_tag.dart';
 
