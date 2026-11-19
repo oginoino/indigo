@@ -64,8 +64,8 @@ ThemeData _buildTheme({
             ? UIConstants.darkBottomNavigationBackgroundOpacity
             : UIConstants.lightBottomNavigationBackgroundOpacity,
       ),
-      selectedItemColor: foregroundColor,
-      unselectedItemColor: foregroundColor,
+      selectedItemColor: colorScheme.onSurface,
+      unselectedItemColor: colorScheme.onSurfaceVariant,
       selectedIconTheme: navigationIconTheme,
       unselectedIconTheme: navigationIconTheme,
       elevation: UIConstants.noElevation,

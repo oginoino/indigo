@@ -44,6 +44,7 @@ class HomePage extends StatelessWidget {
             onRefresh: () => provider.load(refresh: true),
             child: ListView.builder(
               primary: false,
+              padding: EdgeInsets.zero,
               physics: const AlwaysScrollableScrollPhysics(),
               itemCount: posts.length,
               itemBuilder: (context, index) => PostCard(

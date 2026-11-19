@@ -20,7 +20,7 @@ class PostCard extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: UIConstants.defaultPadding,
+        horizontal: UIConstants.postCardHorizontalInset,
         vertical: UIConstants.postCardOuterSpacing,
       ),
       child: Card(
