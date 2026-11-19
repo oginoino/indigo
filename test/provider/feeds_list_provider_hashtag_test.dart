@@ -9,6 +9,20 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   const home = FeedItem(id: 1, name: 'Início', icon: '', route: '/');
+  const discover = FeedItem(
+    id: 10,
+    name: 'Descobrir',
+    icon: '',
+    route: '/discover',
+  );
+  const friends = FeedItem(id: 11, name: 'Amigos', icon: '', route: '/friends');
+  const communities = FeedItem(
+    id: 12,
+    name: 'Comunidades',
+    icon: '',
+    route: '/communities',
+  );
+  const news = FeedItem(id: 13, name: 'Notícias', icon: '', route: '/news');
   const hashtag = Hashtag(
     id: 'tag-design',
     label: 'design',
@@ -78,4 +92,101 @@ void main() {
       restored.dispose();
     },
   );
+
+  test(
+    'keeps Discover and Friends fixed when reordering standard feeds',
+    () async {
+      final provider = FeedsListProvider([
+        discover,
+        friends,
+        communities,
+        news,
+      ]);
+
+      expect(provider.isFeedReorderable(discover), isFalse);
+      expect(provider.isFeedReorderable(friends), isFalse);
+      expect(provider.isFeedReorderable(communities), isTrue);
+
+      await provider.reorderFeeds(3, 2);
+      expect(provider.feeds.map((feed) => feed.route), [
+        '/discover',
+        '/friends',
+        '/news',
+        '/communities',
+      ]);
+
+      await provider.reorderFeeds(0, 3);
+      await provider.reorderFeeds(2, 0);
+      expect(provider.feeds.map((feed) => feed.route), [
+        '/discover',
+        '/friends',
+        '/news',
+        '/communities',
+      ]);
+      provider.dispose();
+    },
+  );
+
+  test('persists order for standard and pinned hashtag feeds', () async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+    final persistence = PersistenceService(preferences);
+    final provider = FeedsListProvider(
+      [discover, friends, communities, news],
+      hashtags: [hashtag],
+      persistenceService: persistence,
+    );
+
+    provider.openHashtag(hashtag);
+    expect(provider.isFeedReorderable(provider.selectedFeed!), isFalse);
+    await provider.toggleHashtagPin(hashtag);
+    expect(provider.isFeedReorderable(provider.selectedFeed!), isTrue);
+    await provider.reorderFeeds(4, 2);
+    provider.dispose();
+
+    final restored = FeedsListProvider(
+      [discover, friends, communities, news],
+      hashtags: [hashtag],
+      persistenceService: persistence,
+    );
+    expect(restored.feeds.map((feed) => feed.route), [
+      '/discover',
+      '/friends',
+      hashtag.route,
+      '/communities',
+      '/news',
+    ]);
+    restored.dispose();
+  });
+
+  test('allows standard feeds to move past a temporary hashtag tab', () async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+    final provider = FeedsListProvider(
+      [discover, friends, communities, news],
+      hashtags: [hashtag],
+      persistenceService: PersistenceService(preferences),
+    );
+
+    provider.openHashtag(hashtag);
+    await provider.reorderFeeds(2, 4);
+
+    expect(provider.feeds.map((feed) => feed.route), [
+      '/discover',
+      '/friends',
+      '/news',
+      hashtag.route,
+      '/communities',
+    ]);
+    expect(provider.isFeedReorderable(provider.selectedFeed!), isFalse);
+
+    provider.selectFeed(discover.id);
+    expect(provider.feeds.map((feed) => feed.route), [
+      '/discover',
+      '/friends',
+      '/news',
+      '/communities',
+    ]);
+    provider.dispose();
+  });
 }

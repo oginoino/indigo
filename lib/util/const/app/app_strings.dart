@@ -57,6 +57,8 @@ class AppStrings {
   static const hashtagOptions = 'Opções da hashtag';
   static const hashtagPinSaveFailed =
       'Não foi possível salvar a hashtag fixada.';
+  static const navFeedOrderSaveFailed =
+      'Não foi possível salvar a ordem da navegação.';
   static const noHashtagPosts = 'Ainda não há publicações com esta hashtag.';
 
   static const invalidAppData = 'App data must be a JSON object.';

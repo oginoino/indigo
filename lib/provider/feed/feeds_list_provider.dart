@@ -6,6 +6,8 @@ import '../../service/persistence/persistence_service.dart';
 import '../../util/const/ui/ui_constants.dart';
 
 class FeedsListProvider extends ChangeNotifier {
+  static const _fixedFeedRoutes = {'/discover', '/friends'};
+
   FeedsListProvider(
     List<FeedItem> feeds, {
     List<Hashtag> hashtags = const [],
@@ -26,6 +28,7 @@ class FeedsListProvider extends ChangeNotifier {
       if (hashtag == null || !_pinnedHashtagIds.add(id)) continue;
       _feedsList.add(_createHashtagFeed(hashtag));
     }
+    _restoreFeedOrder();
   }
 
   final List<FeedItem> _feedsList;
@@ -80,6 +83,38 @@ class FeedsListProvider extends ChangeNotifier {
   }
 
   bool isHashtagPinned(String id) => _pinnedHashtagIds.contains(id);
+  bool isFeedReorderable(FeedItem feed) =>
+      !_fixedFeedRoutes.contains(feed.route) &&
+      (feed.hashtag == null || isHashtagPinned(feed.hashtag!.id));
+
+  Future<void> reorderFeeds(int oldIndex, int newIndex) async {
+    if (oldIndex < 0 ||
+        oldIndex >= _feedsList.length ||
+        newIndex < 0 ||
+        newIndex >= _feedsList.length ||
+        oldIndex == newIndex) {
+      return;
+    }
+
+    final movingFeed = _feedsList[oldIndex];
+    final targetFeed = _feedsList[newIndex];
+    if (!isFeedReorderable(movingFeed) ||
+        _fixedFeedRoutes.contains(targetFeed.route)) {
+      return;
+    }
+
+    final reorderedFeeds = [..._feedsList];
+    reorderedFeeds.removeAt(oldIndex);
+    reorderedFeeds.insert(newIndex, movingFeed);
+    await _persistenceService?.setNavFeedOrder(
+      _persistentFeedRoutes(reorderedFeeds),
+    );
+    _feedsList
+      ..clear()
+      ..addAll(reorderedFeeds);
+    notifyListeners();
+  }
+
   Hashtag? hashtagById(String id) =>
       _hashtags[id] ??
       _hashtags.values.where((hashtag) => hashtag.label == id).firstOrNull;
@@ -130,6 +165,51 @@ class FeedsListProvider extends ChangeNotifier {
     route: hashtag.route,
     hashtag: hashtag,
   );
+
+  void _restoreFeedOrder() {
+    final savedRoutes = _persistenceService?.getNavFeedOrder() ?? const [];
+    if (savedRoutes.isEmpty) return;
+
+    final savedIndices = {
+      for (var index = 0; index < savedRoutes.length; index++)
+        savedRoutes[index]: index,
+    };
+    final initialIndices = {
+      for (var index = 0; index < _feedsList.length; index++)
+        _feedsList[index].route: index,
+    };
+    final fixedFeeds = _feedsList
+        .where((feed) => _fixedFeedRoutes.contains(feed.route))
+        .toList();
+    final reorderableFeeds =
+        _feedsList
+            .where((feed) => !_fixedFeedRoutes.contains(feed.route))
+            .toList()
+          ..sort((first, second) {
+            final firstSavedIndex = savedIndices[first.route];
+            final secondSavedIndex = savedIndices[second.route];
+            if (firstSavedIndex == null && secondSavedIndex == null) {
+              return initialIndices[first.route]!.compareTo(
+                initialIndices[second.route]!,
+              );
+            }
+            if (firstSavedIndex == null) return 1;
+            if (secondSavedIndex == null) return -1;
+            return firstSavedIndex.compareTo(secondSavedIndex);
+          });
+
+    _feedsList
+      ..clear()
+      ..addAll(fixedFeeds)
+      ..addAll(reorderableFeeds);
+  }
+
+  List<String> _persistentFeedRoutes(List<FeedItem> feeds) => feeds
+      .where(
+        (feed) => feed.hashtag == null || isHashtagPinned(feed.hashtag!.id),
+      )
+      .map((feed) => feed.route)
+      .toList();
 
   void _removeTemporaryHashtagFeed() {
     final id = _temporaryHashtagId;
