@@ -151,32 +151,54 @@ class _NavBarState extends State<NavBar> {
       _scrollToItem(selectedId);
     }
 
+    final children = <Widget>[
+      for (var index = 0; index < feedItems.length; index++)
+        ReorderableDelayedDragStartListener(
+          key: _keyForItem(feedItems[index].id.toString()),
+          index: index,
+          enabled: provider.isFeedReorderable(feedItems[index]),
+          child: Padding(
+            padding: const EdgeInsets.only(
+              right: UIConstants.navBarItemSpacing,
+            ),
+            child: NavItem(feedItem: feedItems[index]),
+          ),
+        ),
+      IconButton(
+        key: const ValueKey('nav-bar-theme-toggle'),
+        onPressed: context.read<ThemeProvider>().toggleTheme,
+        icon: const Icon(Icons.add),
+      ),
+    ];
+
     return Align(
       alignment: Alignment.centerLeft,
       child: SizedBox(
         height: UIConstants.navBarHeight,
-        child: SingleChildScrollView(
+        child: ReorderableListView(
           key: _viewportKey,
-          controller: _scrollController,
           scrollDirection: Axis.horizontal,
+          scrollController: _scrollController,
+          buildDefaultDragHandles: false,
           padding: const EdgeInsets.symmetric(
             horizontal: UIConstants.navBarHorizontalPadding,
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.start,
-            spacing: UIConstants.navBarItemSpacing,
-            children: [
-              ...feedItems.map((item) {
-                final id = item.id.toString();
-                return NavItem(key: _keyForItem(id), feedItem: item);
-              }),
-              IconButton(
-                onPressed: context.read<ThemeProvider>().toggleTheme,
-                icon: const Icon(Icons.add),
-              ),
-            ],
-          ),
+          onReorderItem: (oldIndex, newIndex) async {
+            if (oldIndex >= feedItems.length) return;
+
+            final targetIndex = newIndex.clamp(0, feedItems.length - 1);
+            try {
+              await provider.reorderFeeds(oldIndex, targetIndex);
+            } catch (_) {
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(AppStrings.navFeedOrderSaveFailed),
+                ),
+              );
+            }
+          },
+          children: children,
         ),
       ),
     );

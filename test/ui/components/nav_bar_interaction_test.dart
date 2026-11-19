@@ -67,11 +67,17 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.drag(find.byType(CustomScrollView), const Offset(0, -600));
+    await tester.drag(
+      find.byType(CustomScrollView).first,
+      const Offset(0, -600),
+    );
     await tester.pumpAndSettle();
     expect(find.text('Novidades'), findsNothing);
 
-    await tester.drag(find.byType(CustomScrollView), const Offset(0, 360));
+    await tester.drag(
+      find.byType(CustomScrollView).first,
+      const Offset(0, 360),
+    );
     await tester.pumpAndSettle();
     final newsTab = find.text('Novidades');
     expect(newsTab, findsOneWidget);
