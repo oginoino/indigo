@@ -54,6 +54,7 @@ class AppStrings {
   static const profileTitle = 'Perfil';
   static const pinHashtag = 'Fixar hashtag';
   static const unpinHashtag = 'Desfixar hashtag';
+  static const hashtagOptions = 'Opções da hashtag';
   static const hashtagPinSaveFailed =
       'Não foi possível salvar a hashtag fixada.';
   static const noHashtagPosts = 'Ainda não há publicações com esta hashtag.';
