@@ -27,4 +27,5 @@ class PostMedia {
 
   bool get isVideo => type == PostMediaType.video;
   bool get isAudio => type == PostMediaType.audio;
+  bool get isVisual => type == PostMediaType.image || type == PostMediaType.gif;
 }

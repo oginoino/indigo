@@ -11,7 +11,7 @@ void main() {
       await service.load();
 
       final data = service.data;
-      expect(data.schemaVersion, 4);
+      expect(data.schemaVersion, 6);
       expect(data.profileForParty(data.currentUserPartyId), isNotNull);
       expect(data.postById('post-river-walk'), isNotNull);
       expect(data.commentsForPost('post-river-walk'), hasLength(2));
@@ -38,7 +38,7 @@ void main() {
           .expand((post) => post['media'] as List<dynamic>)
           .map((media) => (media as JsonObject)['type'])
           .toSet();
-      expect(mediaTypes, containsAll(['image', 'gif', 'video']));
+      expect(mediaTypes, containsAll(['image', 'gif', 'video', 'audio']));
       final videoSourceUrls = data.posts
           .expand((post) => post['media'] as List<dynamic>)
           .where((media) => (media as JsonObject)['type'] == 'video')

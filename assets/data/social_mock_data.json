@@ -1,5 +1,5 @@
 {
-    "schema_version": 5,
+    "schema_version": 6,
     "current_user_party_id": "party-ana",
     "parties": [
         {
@@ -439,6 +439,76 @@
         }
     ],
     "posts": [
+        {
+            "id": "post-voice-note",
+            "feeds": [
+                "/discover",
+                "/friends"
+            ],
+            "author_party_role_id": "role-maya-user",
+            "title": "Um recado curto",
+            "content": {
+                "segments": [
+                    {
+                        "text": "Gravei o trecho que estava tocando na vitrola. ",
+                        "styles": []
+                    },
+                    {
+                        "text": "Aperta o play",
+                        "styles": [
+                            "bold"
+                        ]
+                    },
+                    {
+                        "text": " 🎧",
+                        "styles": []
+                    }
+                ]
+            },
+            "theme_id": "theme-paper",
+            "media": [
+                {
+                    "id": "media-voice-cover",
+                    "type": "image",
+                    "source_url": "https://picsum.photos/id/1084/1200/900",
+                    "thumbnail_url": "https://picsum.photos/id/1084/640/480",
+                    "alt_text": "Vitrola tocando um disco",
+                    "mime_type": "image/jpeg",
+                    "width": 1200,
+                    "height": 900
+                },
+                {
+                    "id": "media-voice-note",
+                    "type": "audio",
+                    "source_url": "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3",
+                    "alt_text": "Rugido curto de demonstração",
+                    "mime_type": "audio/mpeg",
+                    "duration_seconds": 2,
+                    "waveform": [
+                        0.2, 0.35, 0.55, 0.4, 0.7, 0.9, 0.6, 0.45, 0.8, 0.5,
+                        0.3, 0.65, 0.85, 0.4, 0.55, 0.25, 0.7, 0.95, 0.6, 0.35,
+                        0.5, 0.75, 0.4, 0.3
+                    ]
+                }
+            ],
+            "tags": [],
+            "stickers": [],
+            "engagement": {
+                "reaction_count": 31,
+                "comment_count": 4,
+                "save_count": 9,
+                "share_count": 3,
+                "view_count": 640,
+                "viewer": {
+                    "reaction": null,
+                    "is_saved": false,
+                    "is_shared": false
+                }
+            },
+            "visibility": "public",
+            "status": "published",
+            "created_at": "2026-11-18T16:10:00Z"
+        },
         {
             "id": "post-river-walk",
             "feeds": [

@@ -42,7 +42,7 @@ class PostMediaGallery extends StatelessWidget {
       }
 
       final photos = <PostMedia>[];
-      while (index < media.length && !media[index].isVideo) {
+      while (index < media.length && media[index].isVisual) {
         photos.add(media[index]);
         index++;
       }

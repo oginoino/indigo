@@ -77,7 +77,7 @@ conversa e papéis de live (`liveHost`, `liveModerator`, `liveSpeaker`,
 | `PostContent` | `segments` | Texto formatado; `plainText` concatena o texto dos segmentos. |
 | `PostTextSegment` | `text`, `styles`, `entity?` | Trecho com estilos e entidade opcional (menção, hashtag ou link). |
 | `PostTextEntity` | `type`, `value`, `id?` | Destino de um trecho especial. |
-| `PostMedia` | `id`, `type`, `sourceUrl`, `thumbnailUrl?`, `altText?`, `mimeType?`, `width?`, `height?`, `duration?` | Mídia de imagem, GIF ou vídeo; `isVideo`. |
+| `PostMedia` | `id`, `type`, `sourceUrl`, `thumbnailUrl?`, `altText?`, `mimeType?`, `width?`, `height?`, `duration?`, `waveform` | Mídia de imagem, GIF, vídeo ou áudio; `isVideo`, `isAudio`, `isVisual`. `waveform` guarda amplitudes normalizadas entre 0 e 1. |
 | `PostTag` | `id`, `label`, `type` | Hashtag, tópico ou usuário marcado. Tópicos editoriais ficam aqui, não em `PostTheme`. |
 | `PostRelationship` | `type`, `targetPostId` | Resposta ou citação de outra publicação. |
 | `PostComment` | `id`, `postId`, `parentCommentId?`, `authorPartyRoleId`, `content`, `media`, `engagement`, `createdAt` | Pertence a um post e pode responder a outro comentário; `isReply`. |
@@ -88,7 +88,7 @@ conversa e papéis de live (`liveHost`, `liveModerator`, `liveSpeaker`,
 | `PostStatus` | `draft`, `published`, `archived`, `deleted` |
 | `PostTextStyle` | `bold`, `italic`, `underline`, `strikethrough`, `code` |
 | `PostTextEntityType` | `mention`, `hashtag`, `link` |
-| `PostMediaType` | `image`, `gif`, `video` |
+| `PostMediaType` | `image`, `gif`, `video`, `audio` |
 | `PostTagType` | `hashtag`, `topic`, `user` |
 | `PostRelationshipType` | `reply`, `quote` |
 
@@ -187,10 +187,11 @@ perfis, comentários, conversas e mensagens de live. O serviço é registrado na
 injeção de dependências e disponibilizado por `Provider<SocialDataService>`.
 
 O fixture usa IDs cruzados entre as seções, timestamps ISO-8601 em UTC e enums
-serializados pelos nomes Dart. Mídias de imagem JPEG, GIF e vídeo MP4 apontam
-para URLs de demonstração e exigem rede para renderização; `duration_seconds`
-representa a duração de vídeo em segundos. `schema_version` identifica a versão
-do formato do fixture. As seções e chaves estão em
+serializados pelos nomes Dart. Mídias de imagem JPEG, GIF, vídeo MP4 e áudio
+MP3 apontam para URLs de demonstração e exigem rede para renderização;
+`duration_seconds` representa a duração de vídeo ou áudio em segundos, e
+`waveform` lista amplitudes normalizadas do áudio. `schema_version` identifica
+a versão do formato do fixture. As seções e chaves estão em
 `lib/util/const/app/social_data_constants.dart`.
 
 Hashtags são declaradas na seção `hashtags` com tipo (`user`, `official` ou

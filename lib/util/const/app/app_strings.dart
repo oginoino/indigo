@@ -54,6 +54,8 @@ class AppStrings {
   static const unmuteVideo = 'Ativar som do vídeo';
   static const playAudio = 'Reproduzir áudio';
   static const pauseAudio = 'Pausar áudio';
+  static const rewindAudio = 'Retroceder áudio';
+  static const forwardAudio = 'Avançar áudio';
   static const audioPlaybackFailed = 'Não foi possível reproduzir este áudio.';
   static const audioDurationFormat = '{minutes}:{seconds}';
   static const createTitle = 'Criar';

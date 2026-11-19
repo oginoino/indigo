@@ -34,8 +34,14 @@ void main() {
       );
       final videoMedia = videoPost.media.singleWhere((media) => media.isVideo);
 
+      final audioPost = posts.singleWhere((post) => post.id == 'post-voice-note');
+      final audioMedia = audioPost.media.singleWhere((media) => media.isAudio);
+
       expect(posts, isNotEmpty);
       expect(videoMedia.duration, const Duration(seconds: 18));
+      expect(audioMedia.duration, const Duration(seconds: 2));
+      expect(audioMedia.waveform, isNotEmpty);
+      expect(audioPost.media.where((media) => media.isVisual), isNotEmpty);
       expect(preferences.getString('socialPostsCache'), isNotNull);
     });
 
