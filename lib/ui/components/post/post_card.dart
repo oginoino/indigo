@@ -39,7 +39,7 @@ class PostCard extends StatelessWidget {
             ],
             if (content.isNotEmpty)
               Text(content, style: theme.textTheme.bodyLarge),
-            PostMediaGallery(postId: post.id, media: post.media),
+            PostMediaGallery(post: post, author: author),
             const SizedBox(height: UIConstants.postCardSpacing),
             Divider(color: theme.colorScheme.outlineVariant),
             PostEngagementBar(post: post),

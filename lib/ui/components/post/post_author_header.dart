@@ -10,16 +10,20 @@ class PostAuthorHeader extends StatelessWidget {
   const PostAuthorHeader({
     required this.author,
     required this.publishedAt,
+    this.onMedia = false,
     super.key,
   });
 
   final UserProfile? author;
   final DateTime publishedAt;
+  final bool onMedia;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final absoluteTime = PostTimeFormatter.formatAbsolute(publishedAt);
+    final titleColor = onMedia ? Colors.white : null;
+    final detailColor = onMedia ? Colors.white70 : null;
     final semanticLabel = AppStrings.postPublishedOn.replaceAll(
       '{date}',
       absoluteTime,
@@ -34,6 +38,15 @@ class PostAuthorHeader extends StatelessWidget {
               ? null
               : NetworkImage(avatarUrl),
           useSavedImage: false,
+          decoration: onMedia
+              ? BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white,
+                    width: UIConstants.postMediaBorderWidth,
+                  ),
+                )
+              : null,
         ),
         const SizedBox(width: UIConstants.postHeaderSpacing),
         Expanded(
@@ -44,7 +57,10 @@ class PostAuthorHeader extends StatelessWidget {
                 author?.displayName ?? AppStrings.unknownPostAuthor,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleSmall,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: titleColor,
+                  shadows: onMedia ? UIConstants.postMediaTextShadows : null,
+                ),
               ),
               const SizedBox(height: UIConstants.postHeaderTextSpacing),
               Row(
@@ -56,7 +72,12 @@ class PostAuthorHeader extends StatelessWidget {
                           : '@${author!.username}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: detailColor,
+                        shadows: onMedia
+                            ? UIConstants.postMediaTextShadows
+                            : null,
+                      ),
                     ),
                   ),
                   const Padding(
@@ -71,7 +92,12 @@ class PostAuthorHeader extends StatelessWidget {
                       message: absoluteTime,
                       child: Text(
                         PostTimeFormatter.formatRelative(publishedAt),
-                        style: theme.textTheme.bodySmall,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: detailColor,
+                          shadows: onMedia
+                              ? UIConstants.postMediaTextShadows
+                              : null,
+                        ),
                       ),
                     ),
                   ),

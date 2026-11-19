@@ -4,10 +4,14 @@ import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../model/party/user_profile.dart';
+import '../../model/post/post.dart';
 import '../../provider/post/posts_provider.dart';
 import '../../util/const/app/app_strings.dart';
 import '../../util/const/ui/ui_constants.dart';
 import '../components/app_bottom_navigation_bar.dart';
+import '../components/post/post_engagement_bar.dart';
+import '../components/post/post_media_information.dart';
 
 class VideosPage extends StatelessWidget {
   const VideosPage({super.key});
@@ -51,7 +55,7 @@ class VideosPage extends StatelessWidget {
             );
           }
 
-          return _VideoCarousel(items: videos);
+          return _VideoCarousel(items: videos, authorFor: provider.authorFor);
         },
       ),
       bottomNavigationBar: const AppBottomNavigationBar(),
@@ -60,9 +64,10 @@ class VideosPage extends StatelessWidget {
 }
 
 class _VideoCarousel extends StatefulWidget {
-  const _VideoCarousel({required this.items});
+  const _VideoCarousel({required this.items, required this.authorFor});
 
   final List<VideoFeedItem> items;
+  final UserProfile? Function(Post post) authorFor;
 
   @override
   State<_VideoCarousel> createState() => _VideoCarouselState();
@@ -79,6 +84,7 @@ class _VideoCarouselState extends State<_VideoCarousel> {
       onPageChanged: (index) => setState(() => _currentIndex = index),
       itemBuilder: (context, index) => _FullscreenVideoItem(
         item: widget.items[index],
+        author: widget.authorFor(widget.items[index].post),
         isActive: index == _currentIndex,
       ),
     );
@@ -86,9 +92,14 @@ class _VideoCarouselState extends State<_VideoCarousel> {
 }
 
 class _FullscreenVideoItem extends StatefulWidget {
-  const _FullscreenVideoItem({required this.item, required this.isActive});
+  const _FullscreenVideoItem({
+    required this.item,
+    required this.author,
+    required this.isActive,
+  });
 
   final VideoFeedItem item;
+  final UserProfile? author;
   final bool isActive;
 
   @override
@@ -183,53 +194,86 @@ class _FullscreenVideoItemState extends State<_FullscreenVideoItem> {
                   child: VideoPlayer(_controller),
                 ),
               ),
+              const Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      stops: [0, 0.4, 1],
+                      colors: [
+                        Colors.black38,
+                        Colors.transparent,
+                        Colors.black87,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.all(
+                  padding: const EdgeInsets.fromLTRB(
                     UIConstants.videoOverlayPadding,
+                    UIConstants.videoOverlayPadding,
+                    UIConstants.videoOverlayPadding,
+                    UIConstants.fullscreenVideoBottomInset,
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.item.post.content.plainText,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.white,
-                          shadows: const [
-                            Shadow(color: Colors.black, blurRadius: 8),
-                          ],
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {},
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: PostMediaInformation(
+                            post: widget.item.post,
+                            author: widget.author,
+                          ),
                         ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          IconButton(
-                            tooltip: _controller.value.isPlaying
-                                ? AppStrings.pauseVideo
-                                : AppStrings.playVideo,
-                            onPressed: _togglePlayback,
-                            icon: Icon(
-                              _controller.value.isPlaying
-                                  ? Icons.pause_circle
-                                  : Icons.play_circle,
-                              color: Colors.white,
-                              size: UIConstants.videoActionIconSize,
-                            ),
+                        const SizedBox(
+                          width: UIConstants.fullscreenOverlayContentSpacing,
+                        ),
+                        SizedBox(
+                          width: UIConstants.fullscreenEngagementRailWidth,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              PostEngagementBar(
+                                post: widget.item.post,
+                                layout: PostEngagementLayout.vertical,
+                                onMedia: true,
+                              ),
+                              const SizedBox(
+                                height: UIConstants.fullscreenEngagementSpacing,
+                              ),
+                              IconButton(
+                                tooltip: _controller.value.isPlaying
+                                    ? AppStrings.pauseVideo
+                                    : AppStrings.playVideo,
+                                onPressed: _togglePlayback,
+                                color: Colors.white,
+                                icon: Icon(
+                                  _controller.value.isPlaying
+                                      ? Icons.pause_circle
+                                      : Icons.play_circle,
+                                  size: UIConstants.videoActionIconSize,
+                                ),
+                              ),
+                              IconButton(
+                                tooltip: _isMuted
+                                    ? AppStrings.unmuteVideo
+                                    : AppStrings.muteVideo,
+                                onPressed: _toggleMute,
+                                color: Colors.white,
+                                icon: Icon(
+                                  _isMuted ? Icons.volume_off : Icons.volume_up,
+                                ),
+                              ),
+                            ],
                           ),
-                          IconButton(
-                            tooltip: _isMuted
-                                ? AppStrings.unmuteVideo
-                                : AppStrings.muteVideo,
-                            onPressed: _toggleMute,
-                            icon: Icon(
-                              _isMuted ? Icons.volume_off : Icons.volume_up,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
