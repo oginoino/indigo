@@ -16,7 +16,8 @@ class PostCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final content = post.content.plainText;
+    final title = post.title?.trim();
+    final content = post.content.plainText.trim();
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -25,19 +26,20 @@ class PostCard extends StatelessWidget {
       ),
       child: Card(
         child: Padding(
-          padding: const EdgeInsets.all(UIConstants.defaultPadding),
+          padding: const EdgeInsets.all(UIConstants.postCardContentPadding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               PostAuthorHeader(author: author, publishedAt: post.createdAt),
               const SizedBox(height: UIConstants.postCardSpacing),
-              if (post.title case final title?) ...[
+              if (title != null && title.isNotEmpty) ...[
                 Text(title, style: theme.textTheme.titleMedium),
                 const SizedBox(height: UIConstants.postCardSpacing),
               ],
               if (content.isNotEmpty)
                 Text(content, style: theme.textTheme.bodyLarge),
-              PostMediaGallery(post: post, author: author),
+              if (post.media.isNotEmpty)
+                PostMediaGallery(post: post, author: author),
               const SizedBox(height: UIConstants.postCardSpacing),
               const Divider(),
               PostEngagementBar(post: post),

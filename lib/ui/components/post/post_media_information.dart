@@ -17,7 +17,12 @@ class PostMediaInformation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
+    final textTheme = Theme.of(context).textTheme;
+    final titleStyle = textTheme.titleMedium?.copyWith(
+      color: Colors.white,
+      shadows: UIConstants.postMediaTextShadows,
+    );
+    final contentStyle = textTheme.bodyMedium?.copyWith(
       color: Colors.white,
       shadows: UIConstants.postMediaTextShadows,
     );
@@ -38,7 +43,7 @@ class PostMediaInformation extends StatelessWidget {
             title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: textStyle,
+            style: titleStyle,
           ),
         ],
         if (content.isNotEmpty) ...[
@@ -47,7 +52,7 @@ class PostMediaInformation extends StatelessWidget {
             content,
             maxLines: UIConstants.postMediaCaptionMaxLines,
             overflow: TextOverflow.ellipsis,
-            style: textStyle,
+            style: contentStyle,
           ),
         ],
       ],

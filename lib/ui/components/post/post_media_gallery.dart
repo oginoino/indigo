@@ -19,6 +19,8 @@ class PostMediaGallery extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final media = post.media;
+    if (media.isEmpty) return const SizedBox.shrink();
+
     final children = <Widget>[];
     var index = 0;
     var imageOffset = 0;
@@ -47,6 +49,7 @@ class PostMediaGallery extends StatelessWidget {
     }
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         for (final child in children)
           Padding(
