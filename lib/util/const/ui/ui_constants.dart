@@ -18,6 +18,7 @@ class UIConstants {
   static const double radiusPill = 40;
 
   static const double defaultPadding = spaceLg;
+  static const double avatarXSmallSize = 24;
   static const double avatarSmallSize = 32;
   static const double avatarMediumSize = 48;
   static const double avatarLargeSize = 72;

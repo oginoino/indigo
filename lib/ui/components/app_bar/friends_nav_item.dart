@@ -6,6 +6,7 @@ import '../../../model/party/user_profile.dart';
 import '../../../provider/social/friends_provider.dart';
 import '../../../util/const/app/app_strings.dart';
 import '../../../util/const/ui/ui_constants.dart';
+import '../../components/avatar.dart';
 import '../../components/avatar_group.dart';
 
 class FriendsNavItem extends StatelessWidget {
@@ -21,6 +22,7 @@ class FriendsNavItem extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         AvatarGroup(
+          size: AvatarSize.xSmall,
           members: [
             for (final friend in friends)
               AvatarGroupMember(
