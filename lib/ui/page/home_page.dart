@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter/rendering.dart' show ScrollDirection;
 import 'package:provider/provider.dart';
 
+import '../../provider/bottom_navigation_bar/bottom_navigation_provider.dart';
 import '../../provider/post/posts_provider.dart';
 import '../../util/const/app/app_strings.dart';
 import '../../util/const/ui/ui_constants.dart';
@@ -21,6 +23,18 @@ class HomePage extends StatelessWidget {
 
         return NotificationListener<Notification>(
           onNotification: (notification) {
+            if (notification is UserScrollNotification &&
+                notification.metrics.axis == Axis.vertical) {
+              final isCompact = switch (notification.direction) {
+                ScrollDirection.reverse => true,
+                ScrollDirection.forward => false,
+                ScrollDirection.idle => null,
+              };
+              if (isCompact != null) {
+                context.read<BottomNavigationProvider>().setCompact(isCompact);
+              }
+            }
+
             final metrics = switch (notification) {
               ScrollNotification(:final metrics) => metrics,
               ScrollMetricsNotification(:final metrics) => metrics,

@@ -9,19 +9,30 @@ class BottomNavigationProvider extends ChangeNotifier {
 
   final List<BottomNavigationItem> _items;
   BottomNavigationItem? _selectedItem;
+  bool _isCompact = false;
 
   List<BottomNavigationItem> get items => _items;
   BottomNavigationItem? get selectedItem => _selectedItem;
+  bool get isCompact => _isCompact;
 
   void selectItem(BottomNavigationItem item) {
     final index = _items.indexWhere((candidate) => candidate.id == item.id);
 
     if (index == -1) return;
 
-    if (_selectedItem?.id == item.id) return;
+    final selectionChanged = _selectedItem?.id != item.id;
+    if (!selectionChanged && !_isCompact) return;
 
     _selectedItem = _items[index];
+    _isCompact = false;
 
+    notifyListeners();
+  }
+
+  void setCompact(bool isCompact) {
+    if (_isCompact == isCompact) return;
+
+    _isCompact = isCompact;
     notifyListeners();
   }
 }
