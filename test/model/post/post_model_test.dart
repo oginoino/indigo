@@ -71,6 +71,8 @@ void main() {
         );
         expect(post.media, hasLength(2));
         expect(post.media.last.isVideo, isTrue);
+        expect(post.media.last.isAudio, isFalse);
+        expect(post.media.first.isVisual, isTrue);
         expect(post.tags.single.label, 'design');
         expect(post.authorPartyRoleId, 'user-role-1');
         expect(post.engagement.viewer.isReacted, isTrue);

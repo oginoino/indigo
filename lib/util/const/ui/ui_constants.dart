@@ -18,10 +18,15 @@ class UIConstants {
   static const double radiusPill = 40;
 
   static const double defaultPadding = spaceLg;
+  static const double avatarXSmallSize = 24;
   static const double avatarSmallSize = 32;
   static const double avatarMediumSize = 48;
   static const double avatarLargeSize = 72;
   static const double avatarPlaceholderIconScale = 0.6;
+  static const int avatarGroupMaxVisible = 3;
+  static const double avatarGroupOverlapRatio = 0.3;
+  static const double avatarGroupRingWidth = 2;
+  static const double friendsNavCtaIconSize = 20;
   static const double navigationIconSize = 28;
   static const double appBarLeadingWidth = 56;
   static const double appBarToolbarHeight = 56;
@@ -97,9 +102,47 @@ class UIConstants {
   static const double videoActionIconSize = 32;
   static const double videoOverlayPadding = spaceLg;
   static const double videoOverlayGradientMiddleStop = 0.4;
+  static const double audioPlayerHeight = 48;
+  static const double audioPlayerHorizontalPadding = spaceSm;
+  static const double audioPlayerButtonSize = 40;
+  static const double audioPlayerIconSize = 22;
+  static const double audioPlayerSpacing = spaceSm;
+  static const double audioPlayerWaveformBarWidth = 2;
+  static const double audioPlayerWaveformBarSpacing = 2;
+  static const double audioPlayerWaveformHeight = 20;
+  static const Duration audioPlayerSeekStep = Duration(seconds: 5);
   static const Duration imageViewerTransitionDuration = Duration(
     milliseconds: 220,
   );
+
+  static const double storyAvatarSize = 64;
+  static const double storyRingWidth = 3;
+  static const double storyRingGap = 2;
+  static const double storyItemWidth = 76;
+  static const double storyItemSpacing = spaceMd;
+  static const double storyLabelSpacing = spaceXs;
+  static const double storyRowVerticalPadding = spaceMd;
+  static const double storyRowHeight = 108;
+  static const double storyAddBadgeSize = 20;
+  static const double storyAddIconSize = 14;
+  static const int storyLabelMaxLines = 1;
+
+  static const Duration storyViewerDisplayDuration = Duration(seconds: 5);
+  static const Duration storyViewerTransitionDuration = Duration(
+    milliseconds: 220,
+  );
+  static const double storyViewerProgressHeight = 3;
+  static const double storyViewerProgressRadius = 2;
+  static const double storyViewerProgressSpacing = spaceXs;
+  static const double storyViewerProgressTrackOpacity = 0.35;
+  static const double storyViewerTopPadding = spaceMd;
+  static const double storyViewerHorizontalPadding = spaceMd;
+  static const double storyViewerHeaderSpacing = spaceSm;
+  static const double storyViewerAvatarSize = avatarSmallSize;
+  static const double storyViewerCloseIconSize = 24;
+  static const double storyViewerFallbackIconSize = 48;
+  static const double storyViewerCaptionBottomPadding = space2xl;
+  static const double storyViewerCaptionSpacing = spaceXl;
 
   static const double lightBottomNavigationBackgroundOpacity = 0.66;
   static const double darkBottomNavigationBackgroundOpacity = 0.72;

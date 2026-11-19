@@ -6,6 +6,7 @@ import 'package:indigo/model/post/post_content.dart';
 import 'package:indigo/model/post/post_engagement_summary.dart';
 import 'package:indigo/model/post/post_media.dart';
 import 'package:indigo/route/routes.dart';
+import 'package:indigo/ui/components/post/post_audio_player.dart';
 import 'package:indigo/ui/components/post/post_engagement_bar.dart';
 import 'package:indigo/ui/components/post/post_media_gallery.dart';
 import 'package:indigo/util/const/app/app_strings.dart';
@@ -145,6 +146,37 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('post-video:media-video'), findsOneWidget);
+    });
+
+    testWidgets('keeps audio out of the photo grid', (tester) async {
+      await tester.pumpWidget(
+        _galleryApp([
+          const PostMedia(
+            id: 'photo-a',
+            type: PostMediaType.image,
+            sourceUrl: 'https://example.test/photo-a.jpg',
+          ),
+          const PostMedia(
+            id: 'audio-1',
+            type: PostMediaType.audio,
+            sourceUrl: 'https://example.test/note.mp3',
+            duration: Duration(seconds: 12),
+            waveform: [0.2, 0.8, 0.4],
+          ),
+          const PostMedia(
+            id: 'photo-b',
+            type: PostMediaType.image,
+            sourceUrl: 'https://example.test/photo-b.jpg',
+          ),
+        ]),
+      );
+      await tester.pump();
+
+      expect(find.byType(PostAudioPlayer), findsOneWidget);
+      expect(find.text('0:12'), findsOneWidget);
+      expect(find.byTooltip('Visualizar imagem 1'), findsOneWidget);
+      expect(find.byTooltip('Visualizar imagem 2'), findsOneWidget);
+      expect(find.byTooltip('Visualizar imagem 3'), findsNothing);
     });
 
     testWidgets('offers a retry when a media image fails to load', (

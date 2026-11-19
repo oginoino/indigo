@@ -98,6 +98,40 @@ void main() {
       },
     );
 
+    test('filters posts by feed and separates ephemeral stories', () async {
+      final socialDataService = AssetSocialDataService();
+      await socialDataService.load();
+      final provider = PostsProvider(
+        repository: _FakePostRepository([
+          _post(id: 'discover-post', feeds: ['/discover']),
+          _post(id: 'friends-post', feeds: ['/friends', '/discover']),
+          _post(
+            id: 'story',
+            feeds: ['/friends'],
+            expiresAt: DateTime.utc(2026, 6),
+          ),
+        ]),
+        socialDataService: socialDataService,
+        clock: () => DateTime.utc(2026),
+      );
+
+      await provider.load();
+
+      expect(provider.feedPosts.map((post) => post.id), [
+        'discover-post',
+        'friends-post',
+      ]);
+      expect(provider.postsForFeed('/friends').map((post) => post.id), [
+        'friends-post',
+      ]);
+      expect(provider.postsForFeed('/discover').map((post) => post.id), [
+        'discover-post',
+        'friends-post',
+      ]);
+      expect(provider.postsForFeed('/news'), isEmpty);
+      expect(provider.stories.map((post) => post.id), ['story']);
+    });
+
     test('filters posts by hashtag tag and text entity ids', () async {
       final socialDataService = AssetSocialDataService();
       await socialDataService.load();
@@ -149,6 +183,7 @@ Post _post({
   required String id,
   PostContent? content,
   List<PostMedia> media = const [],
+  List<String> feeds = const [],
   PostStatus status = PostStatus.published,
   DateTime? expiresAt,
 }) => Post(
@@ -156,6 +191,7 @@ Post _post({
   authorPartyRoleId: 'role-ana-user',
   content: content ?? PostContent(segments: [PostTextSegment(text: id)]),
   media: media,
+  feeds: feeds,
   status: status,
   createdAt: DateTime.utc(2026),
   expiresAt: expiresAt,

@@ -43,7 +43,9 @@ class PostJsonMapper {
   static const _widthKey = 'width';
   static const _heightKey = 'height';
   static const _durationSecondsKey = 'duration_seconds';
+  static const _waveformKey = 'waveform';
   static const _tagsKey = 'tags';
+  static const _feedsKey = 'feeds';
   static const _labelKey = 'label';
   static const _stickersKey = 'stickers';
   static const _positionKey = 'position';
@@ -98,6 +100,7 @@ class PostJsonMapper {
         _stickersKey,
       ).map(_sticker).toList(growable: false),
       tags: _objects(json, _tagsKey).map(_tag).toList(growable: false),
+      feeds: _stringList(json, _feedsKey),
       engagement: _engagement(_object(json, _engagementKey)),
       relationship: relationship == null
           ? null
@@ -151,7 +154,17 @@ class PostJsonMapper {
     width: _optionalInt(json, _widthKey),
     height: _optionalInt(json, _heightKey),
     duration: _duration(json),
+    waveform: _waveform(json),
   );
+
+  static List<double> _waveform(JsonObject json) {
+    final raw = json[_waveformKey];
+    if (raw is! List) return const [];
+    return [
+      for (final value in raw)
+        if (value is num) value.toDouble(),
+    ];
+  }
 
   static Duration? _duration(JsonObject json) {
     final seconds = _optionalInt(json, _durationSecondsKey);
@@ -313,6 +326,18 @@ class PostJsonMapper {
     if (value == null) return null;
     if (value is! String) throw _invalidField(key);
     return value;
+  }
+
+  static List<String> _stringList(JsonObject json, String key) {
+    final value = json[key];
+    if (value == null) return const [];
+    if (value is! List) throw _invalidField(key);
+    return List.unmodifiable(
+      value.map((item) {
+        if (item is! String) throw _invalidField(key);
+        return item;
+      }),
+    );
   }
 
   static int? _optionalInt(JsonObject json, String key) {

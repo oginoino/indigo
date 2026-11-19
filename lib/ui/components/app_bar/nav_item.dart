@@ -5,7 +5,9 @@ import 'package:provider/provider.dart';
 import '../../../model/feed_item.dart';
 import '../../../provider/feed/feeds_list_provider.dart';
 import '../../../util/const/app/app_strings.dart';
+import '../../../util/const/app/feed_constants.dart';
 import '../../../util/const/ui/ui_constants.dart';
+import 'friends_nav_item.dart';
 
 enum _HashtagMenuAction { togglePin }
 
@@ -58,7 +60,9 @@ class NavItem extends StatelessWidget {
                         ),
                       ),
                     ),
-                    child: Text(feedItem.name, textAlign: TextAlign.left),
+                    child: feedItem.route == FeedConstants.friendsFeedRoute
+                        ? FriendsNavItem(feedItem: feedItem)
+                        : Text(feedItem.name, textAlign: TextAlign.left),
                   ),
                 ],
               ),

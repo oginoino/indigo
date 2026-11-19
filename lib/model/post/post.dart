@@ -22,6 +22,7 @@ class Post {
     List<PostMedia> media = const [],
     List<PostSticker> stickers = const [],
     List<PostTag> tags = const [],
+    List<String> feeds = const [],
     this.engagement = const PostEngagementSummary(),
     this.relationship,
     this.visibility = PostVisibility.public,
@@ -30,7 +31,8 @@ class Post {
     this.expiresAt,
   }) : media = List.unmodifiable(media),
        stickers = List.unmodifiable(stickers),
-       tags = List.unmodifiable(tags) {
+       tags = List.unmodifiable(tags),
+       feeds = List.unmodifiable(feeds) {
     final mediaIds = this.media.map((item) => item.id).toSet();
     for (final sticker in this.stickers) {
       final targetMediaId = sticker.targetMediaId;
@@ -49,6 +51,7 @@ class Post {
   final List<PostMedia> media;
   final List<PostSticker> stickers;
   final List<PostTag> tags;
+  final List<String> feeds;
   final PostEngagementSummary engagement;
   final PostRelationship? relationship;
   final PostVisibility visibility;

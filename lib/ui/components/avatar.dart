@@ -7,6 +7,7 @@ import '../../service/persistence/avatar_image_service.dart';
 import '../../util/const/ui/ui_constants.dart';
 
 enum AvatarSize {
+  xSmall(UIConstants.avatarXSmallSize),
   small(UIConstants.avatarSmallSize),
   medium(UIConstants.avatarMediumSize),
   large(UIConstants.avatarLargeSize);

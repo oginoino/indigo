@@ -2,7 +2,7 @@ import 'package:go_router/go_router.dart';
 
 import '../di/di.dart';
 import '../ui/components/app_bar/app_bar.dart';
-import '../ui/components/app_bar/feed_app_bar_resolver.dart';
+import '../ui/page/feed_page.dart';
 import '../ui/page/hashtag_feed_page.dart';
 import '../ui/page/home_page.dart';
 import '../ui/page/placeholder_page.dart';
@@ -34,13 +34,7 @@ List<GoRoute> _buildRoutes() {
       );
     }
 
-    return AppRoute(
-      feed.route,
-      (context, state) => PlaceholderPage(
-        title: feed.name,
-        appBar: FeedAppBarResolver.resolve(feed.appBar, feed.name),
-      ),
-    );
+    return AppRoute(feed.route, (context, state) => FeedPage(feed: feed));
   });
 
   return [

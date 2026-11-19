@@ -40,6 +40,8 @@ class AppStrings {
   static const postSaves = 'Salvamentos';
   static const invalidSocialUserProfileField =
       'Invalid {field} in social user profile data.';
+  static const invalidSocialFriendshipField =
+      'Invalid {field} in social friendship data.';
   static const viewPostImage = 'Visualizar imagem {index}';
   static const closeImageViewer = 'Fechar visualização';
   static const imageViewerCounter = '{current} / {total}';
@@ -50,6 +52,12 @@ class AppStrings {
   static const pauseVideo = 'Pausar vídeo';
   static const muteVideo = 'Silenciar vídeo';
   static const unmuteVideo = 'Ativar som do vídeo';
+  static const playAudio = 'Reproduzir áudio';
+  static const pauseAudio = 'Pausar áudio';
+  static const rewindAudio = 'Retroceder áudio';
+  static const forwardAudio = 'Avançar áudio';
+  static const audioPlaybackFailed = 'Não foi possível reproduzir este áudio.';
+  static const audioDurationFormat = '{minutes}:{seconds}';
   static const createTitle = 'Criar';
   static const messagesTitle = 'Mensagens';
   static const profileTitle = 'Perfil';
@@ -61,6 +69,16 @@ class AppStrings {
   static const navFeedOrderSaveFailed =
       'Não foi possível salvar a ordem da navegação.';
   static const noHashtagPosts = 'Ainda não há publicações com esta hashtag.';
+  static const addFriends = 'Adicionar amigos';
+  static const avatarGroupOverflow = '+{count}';
+  static const yourStory = 'Seu story';
+  static const addStory = 'Adicionar story';
+  static const openStory = 'Abrir story de {name}';
+  static const closeStoryViewer = 'Fechar story';
+  static const storyViewerPrevious = 'Story anterior';
+  static const storyViewerNext = 'Próximo story';
+  static const storyMediaUnavailable = 'Este story não possui mídia.';
+  static const storyViewerCounter = '{current} de {total}';
 
   static const invalidAppData = 'App data must be a JSON object.';
   static const missingAppDataSection = 'App data is missing {section}.';
