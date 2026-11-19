@@ -4,6 +4,8 @@ import 'package:indigo/model/post/post.dart';
 import 'package:indigo/model/post/post_content.dart';
 import 'package:indigo/model/post/post_engagement_summary.dart';
 import 'package:indigo/model/post/post_interaction.dart';
+import 'package:indigo/model/post/post_location.dart';
+import 'package:indigo/ui/components/post/post_author_header.dart';
 import 'package:indigo/ui/components/post/post_card.dart';
 import 'package:indigo/ui/theme/app_theme.dart';
 import 'package:material_ui/material_ui.dart';
@@ -19,6 +21,7 @@ void main() {
       authorPartyRoleId: 'role-ana-user',
       content: PostContent(segments: [PostTextSegment(text: 'Hello feed')]),
       createdAt: publishedAt,
+      location: const PostLocation(name: 'Parque Ibirapuera'),
       engagement: const PostEngagementSummary(
         commentCount: 8,
         reactionCount: 74,
@@ -51,6 +54,12 @@ void main() {
     expect(find.text('@ana.costa'), findsOneWidget);
     expect(find.text('há 2 h'), findsOneWidget);
     expect(find.text('Hello feed'), findsOneWidget);
+    expect(find.text('Parque Ibirapuera'), findsOneWidget);
+    expect(find.byIcon(Icons.location_on_outlined), findsOneWidget);
+    expect(
+      find.bySemanticsLabel('Localização: Parque Ibirapuera'),
+      findsOneWidget,
+    );
     expect(find.byIcon(Icons.mode_comment_outlined), findsOneWidget);
     expect(find.byIcon(Icons.favorite), findsOneWidget);
     expect(find.byIcon(Icons.repeat), findsOneWidget);
@@ -87,6 +96,32 @@ void main() {
       expect(cardTheme.elevation, 0);
       expect(shape.side, BorderSide.none);
       expect(find.byType(Divider), findsNothing);
+      expect(find.byIcon(Icons.location_on_outlined), findsNothing);
     }
   });
+
+  testWidgets(
+    'truncates location metadata without overflowing a narrow header',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 190,
+              child: PostAuthorHeader(
+                author: null,
+                publishedAt: DateTime.utc(2026),
+                location: const PostLocation(
+                  name: 'Parque Nacional da Serra da Cantareira, São Paulo, Brasil',
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.location_on_outlined), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 }

@@ -69,6 +69,8 @@ class UIConstants {
   static const double postHeaderAvatarSize = 40;
   static const double postHeaderSpacing = spaceSm;
   static const double postHeaderTextSpacing = space2xs;
+  static const double postLocationIconSize = 14;
+  static const double postLocationIconSpacing = space2xs;
   static const double minimumInteractiveTargetSize = 48;
   static const double postEngagementButtonSize = minimumInteractiveTargetSize;
   static const double postEngagementIconSize = 20;

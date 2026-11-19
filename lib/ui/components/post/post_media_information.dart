@@ -39,6 +39,7 @@ class PostMediaInformation extends StatelessWidget {
         PostAuthorHeader(
           author: author,
           publishedAt: post.createdAt,
+          location: post.location,
           onMedia: true,
         ),
         if (post.title case final title?) ...[

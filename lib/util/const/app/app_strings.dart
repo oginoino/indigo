@@ -16,7 +16,7 @@ class AppStrings {
   static const retry = 'Tentar novamente';
   static const videoPlaybackFailed = 'Não foi possível reproduzir este vídeo.';
   static const noVideosAvailable = 'Nenhum vídeo disponível.';
-  static const postEngagementSeparator = '  ·  ';
+  static const postEngagementSeparator = '·';
   static const unknownPostAuthor = 'Usuário desconhecido';
   static const unknownUsername = '@usuario';
   static const postTimeNow = 'agora';
@@ -33,6 +33,7 @@ class AppStrings {
   static const postTimeYear = 'há 1 ano';
   static const postTimeYears = 'há {count} anos';
   static const postPublishedOn = 'Publicado em {date}';
+  static const postLocation = 'Localização: {location}';
   static const postComments = 'Comentários';
   static const postLikes = 'Curtidas';
   static const postReposts = 'Republicações';
