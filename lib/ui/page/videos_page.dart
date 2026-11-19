@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
@@ -175,6 +176,25 @@ class _FullscreenVideoItemState extends State<_FullscreenVideoItem> {
     if (mounted) setState(() {});
   }
 
+  Widget _buildPlaybackButton() => IconButton(
+    tooltip: _controller.value.isPlaying
+        ? AppStrings.pauseVideo
+        : AppStrings.playVideo,
+    onPressed: _togglePlayback,
+    color: Colors.white,
+    icon: Icon(
+      _controller.value.isPlaying ? Icons.pause_circle : Icons.play_circle,
+      size: UIConstants.videoActionIconSize,
+    ),
+  );
+
+  Widget _buildMuteButton() => IconButton(
+    tooltip: _isMuted ? AppStrings.unmuteVideo : AppStrings.muteVideo,
+    onPressed: _toggleMute,
+    color: Colors.white,
+    icon: Icon(_isMuted ? Icons.volume_off : Icons.volume_up),
+  );
+
   Future<void> _toggleMute() async {
     _isMuted = !_isMuted;
     await _controller.setVolume(_isMuted ? 0 : 1);
@@ -231,70 +251,79 @@ class _FullscreenVideoItemState extends State<_FullscreenVideoItem> {
                 ),
               ),
               SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    UIConstants.videoOverlayPadding,
-                    UIConstants.videoOverlayPadding,
-                    UIConstants.videoOverlayPadding,
-                    UIConstants.fullscreenVideoBottomGap,
-                  ),
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () {},
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Expanded(
-                          child: PostMediaInformation(
-                            post: widget.item.post,
-                            author: widget.author,
-                          ),
-                        ),
-                        const SizedBox(
-                          width: UIConstants.fullscreenOverlayContentSpacing,
-                        ),
-                        SizedBox(
-                          width: UIConstants.fullscreenEngagementRailWidth,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              PostEngagementBar(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final isLandscape =
+                        constraints.maxWidth > constraints.maxHeight;
+                    final actionRailWidth = isLandscape
+                        ? math.min(
+                            constraints.maxWidth *
+                                UIConstants
+                                    .fullscreenLandscapeActionRailWidthFactor,
+                            UIConstants.fullscreenLandscapeActionRailMaxWidth,
+                          )
+                        : UIConstants.fullscreenEngagementRailWidth;
+
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        UIConstants.videoOverlayPadding,
+                        UIConstants.videoOverlayPadding,
+                        UIConstants.fullscreenEngagementRightInset,
+                        UIConstants.fullscreenVideoBottomGap,
+                      ),
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {},
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              child: PostMediaInformation(
                                 post: widget.item.post,
-                                layout: PostEngagementLayout.vertical,
-                                onMedia: true,
+                                author: widget.author,
                               ),
-                              const SizedBox(
-                                height: UIConstants.fullscreenEngagementSpacing,
+                            ),
+                            const SizedBox(
+                              width:
+                                  UIConstants.fullscreenOverlayContentSpacing,
+                            ),
+                            SizedBox(
+                              width: actionRailWidth,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  PostEngagementBar(
+                                    post: widget.item.post,
+                                    layout: isLandscape
+                                        ? PostEngagementLayout.horizontal
+                                        : PostEngagementLayout.vertical,
+                                    onMedia: true,
+                                  ),
+                                  const SizedBox(
+                                    height:
+                                        UIConstants.fullscreenEngagementSpacing,
+                                  ),
+                                  if (isLandscape)
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        _buildPlaybackButton(),
+                                        _buildMuteButton(),
+                                      ],
+                                    )
+                                  else ...[
+                                    _buildPlaybackButton(),
+                                    _buildMuteButton(),
+                                  ],
+                                ],
                               ),
-                              IconButton(
-                                tooltip: _controller.value.isPlaying
-                                    ? AppStrings.pauseVideo
-                                    : AppStrings.playVideo,
-                                onPressed: _togglePlayback,
-                                color: Colors.white,
-                                icon: Icon(
-                                  _controller.value.isPlaying
-                                      ? Icons.pause_circle
-                                      : Icons.play_circle,
-                                  size: UIConstants.videoActionIconSize,
-                                ),
-                              ),
-                              IconButton(
-                                tooltip: _isMuted
-                                    ? AppStrings.unmuteVideo
-                                    : AppStrings.muteVideo,
-                                onPressed: _toggleMute,
-                                color: Colors.white,
-                                icon: Icon(
-                                  _isMuted ? Icons.volume_off : Icons.volume_up,
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ],

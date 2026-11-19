@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -322,47 +324,70 @@ class _FullscreenPhotoViewerState extends State<_FullscreenPhotoViewer> {
             alignment: Alignment.bottomCenter,
             child: SafeArea(
               top: false,
-              child: Padding(
-                padding: const EdgeInsets.all(UIConstants.videoOverlayPadding),
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: IgnorePointer(
-                        child: DecoratedBox(
-                          decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [Colors.transparent, Colors.black87],
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final isLandscape =
+                      constraints.maxWidth > constraints.maxHeight;
+                  final actionRailWidth = isLandscape
+                      ? math.min(
+                          constraints.maxWidth *
+                              UIConstants
+                                  .fullscreenLandscapeActionRailWidthFactor,
+                          UIConstants.fullscreenLandscapeActionRailMaxWidth,
+                        )
+                      : UIConstants.fullscreenEngagementRailWidth;
+
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      UIConstants.videoOverlayPadding,
+                      UIConstants.videoOverlayPadding,
+                      UIConstants.fullscreenEngagementRightInset,
+                      UIConstants.videoOverlayPadding,
+                    ),
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: IgnorePointer(
+                            child: DecoratedBox(
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [Colors.transparent, Colors.black87],
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Expanded(
-                          child: PostMediaInformation(
-                            post: widget.post,
-                            author: widget.author,
-                          ),
-                        ),
-                        const SizedBox(
-                          width: UIConstants.fullscreenOverlayContentSpacing,
-                        ),
-                        SizedBox(
-                          width: UIConstants.fullscreenEngagementRailWidth,
-                          child: PostEngagementBar(
-                            post: widget.post,
-                            layout: PostEngagementLayout.vertical,
-                            onMedia: true,
-                          ),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              child: PostMediaInformation(
+                                post: widget.post,
+                                author: widget.author,
+                              ),
+                            ),
+                            const SizedBox(
+                              width:
+                                  UIConstants.fullscreenOverlayContentSpacing,
+                            ),
+                            SizedBox(
+                              width: actionRailWidth,
+                              child: PostEngagementBar(
+                                post: widget.post,
+                                layout: isLandscape
+                                    ? PostEngagementLayout.horizontal
+                                    : PostEngagementLayout.vertical,
+                                onMedia: true,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
           ),
