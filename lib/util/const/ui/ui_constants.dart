@@ -118,6 +118,23 @@ class UIConstants {
   static const double storyAddIconSize = 14;
   static const int storyLabelMaxLines = 1;
 
+  static const Duration storyViewerDisplayDuration = Duration(seconds: 5);
+  static const Duration storyViewerTransitionDuration = Duration(
+    milliseconds: 220,
+  );
+  static const double storyViewerProgressHeight = 3;
+  static const double storyViewerProgressRadius = 2;
+  static const double storyViewerProgressSpacing = spaceXs;
+  static const double storyViewerProgressTrackOpacity = 0.35;
+  static const double storyViewerTopPadding = spaceMd;
+  static const double storyViewerHorizontalPadding = spaceMd;
+  static const double storyViewerHeaderSpacing = spaceSm;
+  static const double storyViewerAvatarSize = avatarSmallSize;
+  static const double storyViewerCloseIconSize = 24;
+  static const double storyViewerFallbackIconSize = 48;
+  static const double storyViewerCaptionBottomPadding = space2xl;
+  static const double storyViewerCaptionSpacing = spaceXl;
+
   static const double lightBottomNavigationBackgroundOpacity = 0.66;
   static const double darkBottomNavigationBackgroundOpacity = 0.72;
   static const double lightBottomNavigationSelectionOpacity = 0.1;

@@ -4,6 +4,7 @@ import 'package:indigo/model/post/post.dart';
 import 'package:indigo/model/post/post_content.dart';
 import 'package:indigo/ui/components/avatar.dart';
 import 'package:indigo/ui/components/story/stories_row.dart';
+import 'package:indigo/ui/components/story/story_viewer.dart';
 import 'package:indigo/util/const/app/app_strings.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -64,6 +65,26 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text(AppStrings.unknownPostAuthor), findsOneWidget);
+  });
+
+  testWidgets('opens the story viewer when a story is tapped', (tester) async {
+    final author = _profile('role-lucas-user', 'Lucas Mendes');
+    final story = _story('story-1', 'role-lucas-user');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StoriesRow(stories: [story], authorFor: (_) => author),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Lucas Mendes'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.byType(StoryViewer), findsOneWidget);
   });
 }
 

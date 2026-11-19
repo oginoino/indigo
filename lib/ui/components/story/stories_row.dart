@@ -5,6 +5,7 @@ import '../../../model/post/post.dart';
 import '../../../util/const/app/app_strings.dart';
 import '../../../util/const/ui/ui_constants.dart';
 import '../avatar.dart';
+import 'story_viewer.dart';
 
 class StoriesRow extends StatelessWidget {
   const StoriesRow({
@@ -27,10 +28,13 @@ class StoriesRow extends StatelessWidget {
           imageProvider: _avatarProvider(user),
           isOwn: true,
         ),
-      for (final story in stories)
+      for (var index = 0; index < stories.length; index++)
         _StoryItem(
-          label: authorFor(story)?.displayName ?? AppStrings.unknownPostAuthor,
-          imageProvider: _avatarProvider(authorFor(story)),
+          label:
+              authorFor(stories[index])?.displayName ??
+              AppStrings.unknownPostAuthor,
+          imageProvider: _avatarProvider(authorFor(stories[index])),
+          onTap: () => _openStory(context, index),
         ),
     ];
 
@@ -52,6 +56,22 @@ class StoriesRow extends StatelessWidget {
     );
   }
 
+  void _openStory(BuildContext context, int index) {
+    Navigator.of(context).push<void>(
+      PageRouteBuilder<void>(
+        opaque: true,
+        transitionDuration: UIConstants.storyViewerTransitionDuration,
+        pageBuilder: (context, animation, secondaryAnimation) => StoryViewer(
+          stories: stories,
+          authorFor: authorFor,
+          initialIndex: index,
+        ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+            FadeTransition(opacity: animation, child: child),
+      ),
+    );
+  }
+
   static ImageProvider<Object>? _avatarProvider(UserProfile? user) {
     final avatarUrl = user?.avatarUrl;
     if (avatarUrl == null || avatarUrl.isEmpty) return null;
@@ -64,11 +84,13 @@ class _StoryItem extends StatelessWidget {
     required this.label,
     required this.imageProvider,
     this.isOwn = false,
+    this.onTap,
   });
 
   final String label;
   final ImageProvider<Object>? imageProvider;
   final bool isOwn;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -79,27 +101,37 @@ class _StoryItem extends StatelessWidget {
 
     return SizedBox(
       width: UIConstants.storyItemWidth,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _StoryRing(
-            isOwn: isOwn,
-            child: Avatar(
-              diameter: avatarDiameter,
-              imageProvider: imageProvider,
-              useSavedImage: false,
-              badge: isOwn ? const _AddBadge() : null,
-            ),
+      child: Semantics(
+        button: onTap != null,
+        label: onTap == null
+            ? label
+            : AppStrings.openStory.replaceAll('{name}', label),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(UIConstants.postMediaRadius),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _StoryRing(
+                isOwn: isOwn,
+                child: Avatar(
+                  diameter: avatarDiameter,
+                  imageProvider: imageProvider,
+                  useSavedImage: false,
+                  badge: isOwn ? const _AddBadge() : null,
+                ),
+              ),
+              const SizedBox(height: UIConstants.storyLabelSpacing),
+              Text(
+                label,
+                maxLines: UIConstants.storyLabelMaxLines,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.labelSmall,
+              ),
+            ],
           ),
-          const SizedBox(height: UIConstants.storyLabelSpacing),
-          Text(
-            label,
-            maxLines: UIConstants.storyLabelMaxLines,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.labelSmall,
-          ),
-        ],
+        ),
       ),
     );
   }

@@ -67,6 +67,12 @@ class AppStrings {
   static const avatarGroupOverflow = '+{count}';
   static const yourStory = 'Seu story';
   static const addStory = 'Adicionar story';
+  static const openStory = 'Abrir story de {name}';
+  static const closeStoryViewer = 'Fechar story';
+  static const storyViewerPrevious = 'Story anterior';
+  static const storyViewerNext = 'Próximo story';
+  static const storyMediaUnavailable = 'Este story não possui mídia.';
+  static const storyViewerCounter = '{current} de {total}';
 
   static const invalidAppData = 'App data must be a JSON object.';
   static const missingAppDataSection = 'App data is missing {section}.';
