@@ -318,24 +318,28 @@ class _FullscreenPhotoViewerState extends State<_FullscreenPhotoViewer> {
               ),
             ),
           ),
-          IgnorePointer(
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: DecoratedBox(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Colors.black87],
-                  ),
-                ),
-                child: SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: const EdgeInsets.all(
-                      UIConstants.videoOverlayPadding,
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.all(UIConstants.videoOverlayPadding),
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: DecoratedBox(
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [Colors.transparent, Colors.black87],
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                    child: Row(
+                    Row(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Expanded(
@@ -357,7 +361,7 @@ class _FullscreenPhotoViewerState extends State<_FullscreenPhotoViewer> {
                         ),
                       ],
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
