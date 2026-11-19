@@ -43,6 +43,7 @@ class PostJsonMapper {
   static const _widthKey = 'width';
   static const _heightKey = 'height';
   static const _durationSecondsKey = 'duration_seconds';
+  static const _waveformKey = 'waveform';
   static const _tagsKey = 'tags';
   static const _feedsKey = 'feeds';
   static const _labelKey = 'label';
@@ -153,7 +154,17 @@ class PostJsonMapper {
     width: _optionalInt(json, _widthKey),
     height: _optionalInt(json, _heightKey),
     duration: _duration(json),
+    waveform: _waveform(json),
   );
+
+  static List<double> _waveform(JsonObject json) {
+    final raw = json[_waveformKey];
+    if (raw is! List) return const [];
+    return [
+      for (final value in raw)
+        if (value is num) value.toDouble(),
+    ];
+  }
 
   static Duration? _duration(JsonObject json) {
     final seconds = _optionalInt(json, _durationSecondsKey);

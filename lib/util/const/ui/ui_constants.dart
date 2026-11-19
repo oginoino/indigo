@@ -102,6 +102,15 @@ class UIConstants {
   static const double videoActionIconSize = 32;
   static const double videoOverlayPadding = spaceLg;
   static const double videoOverlayGradientMiddleStop = 0.4;
+  static const double audioPlayerHeight = 48;
+  static const double audioPlayerHorizontalPadding = spaceSm;
+  static const double audioPlayerButtonSize = 40;
+  static const double audioPlayerIconSize = 22;
+  static const double audioPlayerSpacing = spaceSm;
+  static const double audioPlayerWaveformBarWidth = 2;
+  static const double audioPlayerWaveformBarSpacing = 2;
+  static const double audioPlayerWaveformHeight = 20;
+  static const Duration audioPlayerSeekStep = Duration(seconds: 5);
   static const Duration imageViewerTransitionDuration = Duration(
     milliseconds: 220,
   );

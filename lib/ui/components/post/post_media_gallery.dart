@@ -9,6 +9,7 @@ import '../../../util/const/app/app_strings.dart';
 import '../../../util/const/ui/ui_constants.dart';
 import '../../theme/media_overlay_theme.dart';
 import 'fullscreen_post_layout.dart';
+import 'post_audio_player.dart';
 import 'post_engagement_bar.dart';
 import 'post_media_information.dart';
 import 'post_media_load_error.dart';
@@ -29,6 +30,11 @@ class PostMediaGallery extends StatelessWidget {
     var imageOffset = 0;
 
     while (index < media.length) {
+      if (media[index].isAudio) {
+        children.add(PostAudioPlayer(media: media[index]));
+        index++;
+        continue;
+      }
       if (media[index].isVideo) {
         children.add(_VideoPreview(postId: post.id, media: media[index]));
         index++;

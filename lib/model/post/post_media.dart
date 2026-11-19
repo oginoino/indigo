@@ -1,4 +1,4 @@
-enum PostMediaType { image, gif, video }
+enum PostMediaType { image, gif, video, audio }
 
 class PostMedia {
   const PostMedia({
@@ -11,6 +11,7 @@ class PostMedia {
     this.width,
     this.height,
     this.duration,
+    this.waveform = const <double>[],
   });
 
   final String id;
@@ -22,6 +23,8 @@ class PostMedia {
   final int? width;
   final int? height;
   final Duration? duration;
+  final List<double> waveform;
 
   bool get isVideo => type == PostMediaType.video;
+  bool get isAudio => type == PostMediaType.audio;
 }

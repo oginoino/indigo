@@ -52,6 +52,10 @@ class AppStrings {
   static const pauseVideo = 'Pausar vídeo';
   static const muteVideo = 'Silenciar vídeo';
   static const unmuteVideo = 'Ativar som do vídeo';
+  static const playAudio = 'Reproduzir áudio';
+  static const pauseAudio = 'Pausar áudio';
+  static const audioPlaybackFailed = 'Não foi possível reproduzir este áudio.';
+  static const audioDurationFormat = '{minutes}:{seconds}';
   static const createTitle = 'Criar';
   static const messagesTitle = 'Mensagens';
   static const profileTitle = 'Perfil';
