@@ -75,19 +75,30 @@ class CustomBottomNavigationBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(
               UIConstants.bottomNavigationRadius,
             ),
-            child: AnimatedContainer(
+            child: AnimatedPadding(
               duration: UIConstants.bottomNavigationAnimationDuration,
               curve: Curves.easeOutCubic,
-              decoration: BoxDecoration(
-                color: selected ? selectedBackgroundColor : Colors.transparent,
-                borderRadius: BorderRadius.circular(
-                  UIConstants.bottomNavigationRadius,
-                ),
+              padding: EdgeInsets.symmetric(
+                vertical: compact
+                    ? UIConstants.bottomNavigationContentPadding
+                    : UIConstants.spaceNone,
               ),
-              child: Center(
-                child: IconTheme(
-                  data: iconTheme,
-                  child: selected ? item.activeIcon : item.icon,
+              child: AnimatedContainer(
+                duration: UIConstants.bottomNavigationAnimationDuration,
+                curve: Curves.easeOutCubic,
+                decoration: BoxDecoration(
+                  color: selected
+                      ? selectedBackgroundColor
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(
+                    UIConstants.bottomNavigationRadius,
+                  ),
+                ),
+                child: Center(
+                  child: IconTheme(
+                    data: iconTheme,
+                    child: selected ? item.activeIcon : item.icon,
+                  ),
                 ),
               ),
             ),

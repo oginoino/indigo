@@ -91,6 +91,15 @@ void main() {
         matching: find.byType(InkWell),
       );
       expect(tester.getSize(compactTapTarget).height, greaterThanOrEqualTo(48));
+      final compactSelection = find.descendant(
+        of: find.byTooltip('Início'),
+        matching: find.byType(AnimatedContainer),
+      );
+      expect(
+        tester.getSize(compactSelection).height,
+        UIConstants.bottomNavigationCompactHeight -
+            2 * UIConstants.bottomNavigationContentPadding,
+      );
       await tester.tap(find.byTooltip('Início'));
       await tester.pumpAndSettle();
       expect(selectedIndex, 0);
