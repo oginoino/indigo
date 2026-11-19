@@ -72,7 +72,11 @@ void main() {
 
       final compactSize = tester.getSize(surface);
       expect(compactSize.height, UIConstants.bottomNavigationCompactHeight);
-      expect(compactSize.width, lessThan(expandedSize.width));
+      expect(
+        compactSize.width,
+        expandedSize.width -
+            2 * UIConstants.bottomNavigationCompactHorizontalInset,
+      );
 
       await tester.tap(find.byTooltip('Início'));
       await tester.pumpAndSettle();

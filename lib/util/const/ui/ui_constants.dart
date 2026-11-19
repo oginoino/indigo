@@ -40,7 +40,7 @@ class UIConstants {
   static const double bottomNavigationCompactHeight = 48;
   static const double bottomNavigationRadius = radiusPill;
   static const double bottomNavigationCompactIconSize = 24;
-  static const double bottomNavigationCompactHorizontalInset = spaceSm;
+  static const double bottomNavigationCompactHorizontalInset = spaceMd;
   static const int bottomNavigationMaxVisibleItems = 5;
   static const double bottomNavigationItemWidth = 64;
   static const double bottomNavigationOuterPadding = spaceSm;
@@ -78,6 +78,9 @@ class UIConstants {
   static const double fullscreenEngagementSpacing = spaceSm;
   static const double fullscreenEngagementRailWidth = 56;
   static const double fullscreenOverlayContentSpacing = spaceLg;
+  static const double fullscreenEngagementRightInset = spaceSm;
+  static const double fullscreenLandscapeActionRailWidthFactor = 0.42;
+  static const double fullscreenLandscapeActionRailMaxWidth = 320;
   static const double postMediaBorderWidth = 2;
   static const List<Shadow> postMediaTextShadows = [
     Shadow(color: Color(0xB3000000), blurRadius: 3, offset: Offset(0, 1)),

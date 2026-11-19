@@ -5,8 +5,10 @@ import 'package:indigo/model/post/post.dart';
 import 'package:indigo/model/post/post_content.dart';
 import 'package:indigo/model/post/post_engagement_summary.dart';
 import 'package:indigo/model/post/post_media.dart';
+import 'package:indigo/ui/components/post/post_engagement_bar.dart';
 import 'package:indigo/ui/components/post/post_media_gallery.dart';
 import 'package:indigo/util/const/app/app_strings.dart';
+import 'package:indigo/util/const/ui/ui_constants.dart';
 
 void main() {
   group('PostMediaGallery', () {
@@ -26,6 +28,24 @@ void main() {
       expect(find.byIcon(Icons.favorite_border), findsOneWidget);
       expect(find.byIcon(Icons.repeat), findsOneWidget);
       expect(find.byIcon(Icons.bookmark_border), findsOneWidget);
+      expect(
+        tester.widget<PostEngagementBar>(find.byType(PostEngagementBar)).layout,
+        PostEngagementLayout.horizontal,
+      );
+      expect(
+        find.byWidgetPredicate(
+          (widget) =>
+              widget is Padding &&
+              widget.padding ==
+                  const EdgeInsets.fromLTRB(
+                    UIConstants.videoOverlayPadding,
+                    UIConstants.videoOverlayPadding,
+                    UIConstants.fullscreenEngagementRightInset,
+                    UIConstants.videoOverlayPadding,
+                  ),
+        ),
+        findsOneWidget,
+      );
 
       await tester.drag(find.byType(PageView), const Offset(-700, 0));
       await tester.pumpAndSettle();
@@ -36,6 +56,34 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('3 / 3'), findsNothing);
+    });
+
+    testWidgets('adapts fullscreen post actions when the device rotates', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(900, 400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(_galleryApp(_photos(1)));
+      await tester.tap(find.byTooltip('Visualizar imagem 1'));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.widget<PostEngagementBar>(find.byType(PostEngagementBar)).layout,
+        PostEngagementLayout.horizontal,
+      );
+      expect(tester.takeException(), isNull);
+
+      tester.view.physicalSize = const Size(400, 900);
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.widget<PostEngagementBar>(find.byType(PostEngagementBar)).layout,
+        PostEngagementLayout.vertical,
+      );
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('shows an overflow count after the four-tile grid limit', (
