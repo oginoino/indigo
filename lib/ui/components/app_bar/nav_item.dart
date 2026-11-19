@@ -7,6 +7,8 @@ import '../../../provider/feed/feeds_list_provider.dart';
 import '../../../util/const/app/app_strings.dart';
 import '../../../util/const/ui/ui_constants.dart';
 
+enum _HashtagMenuAction { togglePin }
+
 class NavItem extends StatelessWidget {
   const NavItem({required this.feedItem, super.key});
 
@@ -58,21 +60,15 @@ class NavItem extends StatelessWidget {
                     ),
                     child: Text(feedItem.name, textAlign: TextAlign.left),
                   ),
-                  if (isSelected) const Icon(Icons.keyboard_arrow_down),
                 ],
               ),
             ),
           ),
-          if (hashtag != null)
-            IconButton(
-              tooltip: provider.isHashtagPinned(hashtag.id)
-                  ? AppStrings.unpinHashtag
-                  : AppStrings.pinHashtag,
-              constraints: const BoxConstraints(
-                minWidth: UIConstants.navBarHeight,
-                minHeight: UIConstants.navBarHeight,
-              ),
-              onPressed: () async {
+          if (isSelected && hashtag != null)
+            PopupMenuButton<_HashtagMenuAction>(
+              tooltip: AppStrings.hashtagOptions,
+              icon: const Icon(Icons.keyboard_arrow_down),
+              onSelected: (_) async {
                 try {
                   await provider.toggleHashtagPin(hashtag);
                 } catch (_) {
@@ -84,11 +80,35 @@ class NavItem extends StatelessWidget {
                   );
                 }
               },
-              icon: Icon(
-                provider.isHashtagPinned(hashtag.id)
-                    ? Icons.push_pin
-                    : Icons.push_pin_outlined,
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: _HashtagMenuAction.togglePin,
+                  child: Row(
+                    children: [
+                      Icon(
+                        provider.isHashtagPinned(hashtag.id)
+                            ? Icons.push_pin_outlined
+                            : Icons.push_pin,
+                      ),
+                      const SizedBox(width: UIConstants.spaceSm),
+                      Flexible(
+                        child: Text(
+                          provider.isHashtagPinned(hashtag.id)
+                              ? AppStrings.unpinHashtag
+                              : AppStrings.pinHashtag,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            )
+          else if (isSelected)
+            const Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: UIConstants.navBarItemSpacing,
               ),
+              child: Icon(Icons.keyboard_arrow_down),
             ),
         ],
       ),
