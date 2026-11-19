@@ -28,7 +28,7 @@ ThemeData _buildTheme({
     colorScheme: colorScheme,
     scaffoldBackgroundColor: backgroundColor,
     appBarTheme: AppBarTheme(
-      backgroundColor: Colors.transparent,
+      backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
       iconTheme: iconTheme,
       elevation: UIConstants.noElevation,
