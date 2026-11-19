@@ -1,23 +1,24 @@
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../model/party/user_profile.dart';
+import '../../../model/post/post.dart';
 import '../../../model/post/post_media.dart';
 import '../../../route/routes.dart';
 import '../../../util/const/app/app_strings.dart';
 import '../../../util/const/ui/ui_constants.dart';
+import 'post_engagement_bar.dart';
+import 'post_media_information.dart';
 
 class PostMediaGallery extends StatelessWidget {
-  const PostMediaGallery({
-    required this.postId,
-    required this.media,
-    super.key,
-  });
+  const PostMediaGallery({required this.post, required this.author, super.key});
 
-  final String postId;
-  final List<PostMedia> media;
+  final Post post;
+  final UserProfile? author;
 
   @override
   Widget build(BuildContext context) {
+    final media = post.media;
     final children = <Widget>[];
     var index = 0;
     var imageOffset = 0;
@@ -36,7 +37,8 @@ class PostMediaGallery extends StatelessWidget {
       }
       children.add(
         _PhotoCollection(
-          postId: postId,
+          post: post,
+          author: author,
           media: photos,
           collectionOffset: imageOffset,
         ),
@@ -58,12 +60,14 @@ class PostMediaGallery extends StatelessWidget {
 
 class _PhotoCollection extends StatelessWidget {
   const _PhotoCollection({
-    required this.postId,
+    required this.post,
+    required this.author,
     required this.media,
     required this.collectionOffset,
   });
 
-  final String postId;
+  final Post post;
+  final UserProfile? author;
   final List<PostMedia> media;
   final int collectionOffset;
 
@@ -142,7 +146,7 @@ class _PhotoCollection extends StatelessWidget {
             '{index}',
             '${collectionOffset + index + 1}',
           );
-    final heroTag = '$postId-${photo.id}';
+    final heroTag = '${post.id}-${photo.id}';
 
     return Tooltip(
       message: label,
@@ -189,7 +193,8 @@ class _PhotoCollection extends StatelessWidget {
         transitionDuration: UIConstants.imageViewerTransitionDuration,
         pageBuilder: (context, animation, secondaryAnimation) =>
             _FullscreenPhotoViewer(
-              postId: postId,
+              post: post,
+              author: author,
               media: media,
               initialIndex: index,
             ),
@@ -202,12 +207,14 @@ class _PhotoCollection extends StatelessWidget {
 
 class _FullscreenPhotoViewer extends StatefulWidget {
   const _FullscreenPhotoViewer({
-    required this.postId,
+    required this.post,
+    required this.author,
     required this.media,
     required this.initialIndex,
   });
 
-  final String postId;
+  final Post post;
+  final UserProfile? author;
   final List<PostMedia> media;
   final int initialIndex;
 
@@ -251,7 +258,7 @@ class _FullscreenPhotoViewerState extends State<_FullscreenPhotoViewer> {
               final photo = widget.media[index];
               return Center(
                 child: Hero(
-                  tag: '${widget.postId}-${photo.id}',
+                  tag: '${widget.post.id}-${photo.id}',
                   child: _NetworkPhoto(
                     media: photo,
                     fit: BoxFit.contain,
@@ -299,6 +306,50 @@ class _FullscreenPhotoViewerState extends State<_FullscreenPhotoViewer> {
                       ),
                     ),
                   ],
+                ),
+              ),
+            ),
+          ),
+          IgnorePointer(
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: DecoratedBox(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, Colors.black87],
+                  ),
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.all(
+                      UIConstants.videoOverlayPadding,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: PostMediaInformation(
+                            post: widget.post,
+                            author: widget.author,
+                          ),
+                        ),
+                        const SizedBox(
+                          width: UIConstants.fullscreenOverlayContentSpacing,
+                        ),
+                        SizedBox(
+                          width: UIConstants.fullscreenEngagementRailWidth,
+                          child: PostEngagementBar(
+                            post: widget.post,
+                            layout: PostEngagementLayout.vertical,
+                            onMedia: true,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),

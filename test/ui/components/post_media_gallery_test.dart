@@ -1,5 +1,9 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:indigo/model/party/user_profile.dart';
+import 'package:indigo/model/post/post.dart';
+import 'package:indigo/model/post/post_content.dart';
+import 'package:indigo/model/post/post_engagement_summary.dart';
 import 'package:indigo/model/post/post_media.dart';
 import 'package:indigo/ui/components/post/post_media_gallery.dart';
 
@@ -14,6 +18,13 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('2 / 3'), findsOneWidget);
+      expect(find.text('Ana Costa'), findsOneWidget);
+      expect(find.text('@ana.costa'), findsOneWidget);
+      expect(find.text('Gallery'), findsOneWidget);
+      expect(find.byIcon(Icons.mode_comment_outlined), findsOneWidget);
+      expect(find.byIcon(Icons.favorite_border), findsOneWidget);
+      expect(find.byIcon(Icons.repeat), findsOneWidget);
+      expect(find.byIcon(Icons.bookmark_border), findsOneWidget);
 
       await tester.drag(find.byType(PageView), const Offset(-700, 0));
       await tester.pumpAndSettle();
@@ -41,7 +52,28 @@ Widget _galleryApp(List<PostMedia> media) => MaterialApp(
     body: Center(
       child: SizedBox(
         width: 320,
-        child: PostMediaGallery(postId: 'post-gallery', media: media),
+        child: PostMediaGallery(
+          post: Post(
+            id: 'post-gallery',
+            authorPartyRoleId: 'role-ana-user',
+            content: PostContent(segments: [PostTextSegment(text: 'Gallery')]),
+            createdAt: DateTime.utc(2026),
+            engagement: const PostEngagementSummary(
+              commentCount: 8,
+              reactionCount: 74,
+              shareCount: 12,
+              saveCount: 4,
+            ),
+            media: media,
+          ),
+          author: UserProfile(
+            partyId: 'party-ana',
+            platformUserRoleId: 'role-ana-user',
+            username: 'ana.costa',
+            displayName: 'Ana Costa',
+            createdAt: DateTime.utc(2024),
+          ),
+        ),
       ),
     ),
   ),

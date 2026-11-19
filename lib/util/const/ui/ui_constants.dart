@@ -44,6 +44,20 @@ class UIConstants {
   static const double postHeaderTextSpacing = 2;
   static const double postEngagementIconSize = 20;
   static const double postEngagementItemSpacing = 6;
+  static const double fullscreenEngagementIconSize = 28;
+  static const double fullscreenEngagementSpacing = 24;
+  static const double fullscreenEngagementRailWidth = 56;
+  static const double fullscreenOverlayContentSpacing = 16;
+  static const double postMediaBorderWidth = 2;
+  static const List<Shadow> postMediaTextShadows = [
+    Shadow(color: Colors.black, blurRadius: 8),
+  ];
+  static const double fullscreenVideoBottomInset =
+      bottomNavigationHeight +
+      bottomNavigationOuterPadding +
+      bottomNavigationBottomPadding;
+  static const int postMediaCaptionMaxLines = 4;
+  static const Color fullscreenLikedColor = Color(0xFFFF5A6A);
   static const double postPhotoPairAspectRatio = 1.45;
   static const double postPhotoGridAspectRatio = 1;
   static const double postPhotoGridSpacing = 4;
