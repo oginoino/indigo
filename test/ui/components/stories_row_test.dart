@@ -86,6 +86,93 @@ void main() {
 
     expect(find.byType(StoryViewer), findsOneWidget);
   });
+
+  testWidgets('groups multiple stories from the same profile into one entry', (
+    tester,
+  ) async {
+    final author = _profile('role-lucas-user', 'Lucas Mendes');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StoriesRow(
+            stories: [
+              _story('story-1', 'role-lucas-user'),
+              _story('story-2', 'role-lucas-user'),
+            ],
+            authorFor: (_) => author,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Lucas Mendes'), findsOneWidget);
+    expect(find.byType(Avatar), findsOneWidget);
+  });
+
+  testWidgets('skips the current user profile from the friend entries', (
+    tester,
+  ) async {
+    final me = _profile('role-me', 'Ana Costa');
+    final friend = _profile('role-lucas-user', 'Lucas Mendes');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StoriesRow(
+            stories: [
+              _story('mine', 'role-me'),
+              _story('friend', 'role-lucas-user'),
+            ],
+            authorFor: (post) =>
+                post.authorPartyRoleId == 'role-me' ? me : friend,
+            currentUser: me,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text(AppStrings.yourStory), findsOneWidget);
+    expect(find.text('Ana Costa'), findsNothing);
+    expect(find.text('Lucas Mendes'), findsOneWidget);
+    expect(find.byType(Avatar), findsNWidgets(2));
+  });
+
+  testWidgets('opens the viewer at the first story of the tapped profile', (
+    tester,
+  ) async {
+    final lucas = _profile('role-lucas-user', 'Lucas Mendes');
+    final maya = _profile('role-maya-user', 'Maya Ribeiro');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StoriesRow(
+            stories: [
+              _story('lucas-1', 'role-lucas-user'),
+              _story('lucas-2', 'role-lucas-user'),
+              _story('maya-1', 'role-maya-user'),
+            ],
+            authorFor: (post) =>
+                post.authorPartyRoleId == 'role-lucas-user' ? lucas : maya,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Maya Ribeiro'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.byType(StoryViewer), findsOneWidget);
+    final controller = tester
+        .widget<PageView>(find.byType(PageView))
+        .controller!;
+    expect(controller.page, 2);
+  });
 }
 
 Post _story(String id, String authorRoleId) => Post(

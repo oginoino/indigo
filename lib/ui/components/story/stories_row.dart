@@ -21,22 +21,36 @@ class StoriesRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = <Widget>[
-      if (currentUser case final user?)
+    final ownRoleId = currentUser?.platformUserRoleId;
+    final groups = _groupsByAuthor()
+        .where((group) => group.authorRoleId != ownRoleId)
+        .toList(growable: false);
+    final orderedStories = <Post>[
+      for (final group in groups) ...group.stories,
+    ];
+
+    final items = <Widget>[];
+    if (currentUser case final user?) {
+      items.add(
         _StoryItem(
           label: AppStrings.yourStory,
           imageProvider: _avatarProvider(user),
           isOwn: true,
         ),
-      for (var index = 0; index < stories.length; index++)
+      );
+    }
+    var startIndex = 0;
+    for (final group in groups) {
+      final firstIndex = startIndex;
+      startIndex += group.stories.length;
+      items.add(
         _StoryItem(
-          label:
-              authorFor(stories[index])?.displayName ??
-              AppStrings.unknownPostAuthor,
-          imageProvider: _avatarProvider(authorFor(stories[index])),
-          onTap: () => _openStory(context, index),
+          label: group.author?.displayName ?? AppStrings.unknownPostAuthor,
+          imageProvider: _avatarProvider(group.author),
+          onTap: () => _openStory(context, orderedStories, firstIndex),
         ),
-    ];
+      );
+    }
 
     if (items.isEmpty) return const SizedBox.shrink();
 
@@ -56,13 +70,36 @@ class StoriesRow extends StatelessWidget {
     );
   }
 
-  void _openStory(BuildContext context, int index) {
+  List<_StoryGroup> _groupsByAuthor() {
+    final order = <String>[];
+    final storiesByAuthor = <String, List<Post>>{};
+    for (final story in stories) {
+      final roleId = story.authorPartyRoleId;
+      storiesByAuthor
+          .putIfAbsent(roleId, () {
+            order.add(roleId);
+            return <Post>[];
+          })
+          .add(story);
+    }
+
+    return [
+      for (final roleId in order)
+        _StoryGroup(
+          authorRoleId: roleId,
+          author: authorFor(storiesByAuthor[roleId]!.first),
+          stories: List.unmodifiable(storiesByAuthor[roleId]!),
+        ),
+    ];
+  }
+
+  void _openStory(BuildContext context, List<Post> orderedStories, int index) {
     Navigator.of(context).push<void>(
       PageRouteBuilder<void>(
         opaque: true,
         transitionDuration: UIConstants.storyViewerTransitionDuration,
         pageBuilder: (context, animation, secondaryAnimation) => StoryViewer(
-          stories: stories,
+          stories: orderedStories,
           authorFor: authorFor,
           initialIndex: index,
         ),
@@ -77,6 +114,18 @@ class StoriesRow extends StatelessWidget {
     if (avatarUrl == null || avatarUrl.isEmpty) return null;
     return NetworkImage(avatarUrl);
   }
+}
+
+class _StoryGroup {
+  const _StoryGroup({
+    required this.authorRoleId,
+    required this.author,
+    required this.stories,
+  });
+
+  final String authorRoleId;
+  final UserProfile? author;
+  final List<Post> stories;
 }
 
 class _StoryItem extends StatelessWidget {
