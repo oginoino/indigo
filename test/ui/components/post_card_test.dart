@@ -5,6 +5,7 @@ import 'package:indigo/model/post/post_content.dart';
 import 'package:indigo/model/post/post_engagement_summary.dart';
 import 'package:indigo/model/post/post_interaction.dart';
 import 'package:indigo/ui/components/post/post_card.dart';
+import 'package:indigo/ui/theme/app_theme.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
@@ -59,5 +60,33 @@ void main() {
     expect(find.bySemanticsLabel('Republicações: 12'), findsOneWidget);
     expect(find.bySemanticsLabel('Salvamentos: 4'), findsOneWidget);
     semantics.dispose();
+  });
+
+  testWidgets('uses the screen surface with no border in both themes', (
+    tester,
+  ) async {
+    final post = Post(
+      id: 'post-surface',
+      authorPartyRoleId: 'role-ana-user',
+      content: PostContent(segments: [PostTextSegment(text: 'Hello feed')]),
+      createdAt: DateTime.utc(2026),
+    );
+
+    for (final theme in [lightTheme, darkTheme]) {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Scaffold(body: PostCard(post: post, author: null)),
+        ),
+      );
+
+      final cardTheme = theme.cardTheme;
+      final shape = cardTheme.shape! as RoundedRectangleBorder;
+
+      expect(cardTheme.color, theme.scaffoldBackgroundColor);
+      expect(cardTheme.elevation, 0);
+      expect(shape.side, BorderSide.none);
+      expect(find.byType(Divider), findsNothing);
+    }
   });
 }

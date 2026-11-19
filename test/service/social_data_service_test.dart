@@ -15,6 +15,18 @@ void main() {
       expect(data.profileForParty(data.currentUserPartyId), isNotNull);
       expect(data.postById('post-river-walk'), isNotNull);
       expect(data.commentsForPost('post-river-walk'), hasLength(2));
+      final longPost = data.postById('post-morning-walk-notes')!;
+      final longPostContent = longPost['content'] as JsonObject;
+      final longPostText = (longPostContent['segments'] as List)
+          .map((segment) => (segment as JsonObject)['text'] as String)
+          .join();
+      expect(longPostText.length, greaterThan(500));
+      expect(data.commentsForPost('post-morning-walk-notes'), hasLength(2));
+      expect(
+        (data.postById('post-city-details')!['media'] as List),
+        hasLength(4),
+      );
+      expect(data.postById('post-pan-cheese'), isNotNull);
       expect(
         data.messagesForConversation('conversation-ana-lucas'),
         hasLength(3),

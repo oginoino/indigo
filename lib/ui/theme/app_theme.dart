@@ -38,7 +38,7 @@ ThemeData _buildTheme({
     ),
     iconTheme: iconTheme,
     cardTheme: CardThemeData(
-      color: colorScheme.surface,
+      color: backgroundColor,
       surfaceTintColor: Colors.transparent,
       shadowColor: Colors.transparent,
       elevation: UIConstants.noElevation,
@@ -46,17 +46,12 @@ ThemeData _buildTheme({
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(UIConstants.postCardRadius),
-        side: BorderSide(
-          color: colorScheme.outlineVariant.withValues(
-            alpha: isDark ? 0.28 : 0.38,
-          ),
-        ),
       ),
     ),
     dividerTheme: DividerThemeData(
-      color: colorScheme.outlineVariant.withValues(alpha: isDark ? 0.45 : 0.6),
+      color: colorScheme.outlineVariant.withValues(alpha: isDark ? 0.3 : 0.34),
       space: UIConstants.spaceSm,
-      thickness: 1,
+      thickness: UIConstants.postFeedDividerThickness,
     ),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: backgroundColor.withValues(

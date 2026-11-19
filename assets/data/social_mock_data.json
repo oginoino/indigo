@@ -735,6 +735,238 @@
             "status": "published",
             "created_at": "2026-11-18T18:30:00Z",
             "expires_at": "2026-11-19T18:30:00Z"
+        },
+        {
+            "id": "post-morning-walk-notes",
+            "author_party_role_id": "role-maya-user",
+            "title": "O que aprendi caminhando sem pressa",
+            "content": {
+                "segments": [
+                    {
+                        "text": "Durante muito tempo eu tratei a caminhada como um intervalo entre dois compromissos. Saía de casa olhando o relógio e voltava com a sensação de que precisava ter feito mais. No último mês, comecei a mudar o ritmo: deixei o celular no bolso e escolhi uma rua diferente a cada manhã.\n\n",
+                        "styles": []
+                    },
+                    {
+                        "text": "O caminho não precisa render uma história extraordinária para valer a pena. ",
+                        "styles": [
+                            "bold"
+                        ]
+                    },
+                    {
+                        "text": "Às vezes basta perceber a luz mudando nas fachadas, ouvir o barulho das folhas depois da chuva e cumprimentar quem abre a padaria antes do sol nascer.\n\nNo sábado encontrei uma pequena trilha perto da cidade. Caminhei devagar, parei para beber água e fiquei alguns minutos observando o movimento das nuvens. Não tirei muitas fotos; preferi guardar alguns detalhes na memória.\n\nVoltei para casa com menos pressa e com uma ideia simples para a semana: reservar um pedaço do dia para fazer uma coisa de cada vez. Se você também anda precisando desacelerar, talvez uma volta curta já seja um bom começo. ",
+                        "styles": [],
+                        "entity": {
+                            "type": "hashtag",
+                            "value": "caminharcomcalma",
+                            "id": "tag-caminhar-com-calma"
+                        }
+                    }
+                ]
+            },
+            "theme_id": "theme-paper",
+            "location": {
+                "place_id": "place-parque-da-cidade",
+                "name": "Parque da Cidade",
+                "locality": "Niterói",
+                "region": "RJ",
+                "country_code": "BR",
+                "precision": "city",
+                "coordinates": {
+                    "latitude": -22.9624,
+                    "longitude": -43.0206
+                }
+            },
+            "media": [],
+            "tags": [
+                {
+                    "id": "tag-caminhar-com-calma",
+                    "label": "caminharcomcalma",
+                    "type": "hashtag"
+                },
+                {
+                    "id": "tag-natureza",
+                    "label": "natureza",
+                    "type": "topic"
+                }
+            ],
+            "stickers": [],
+            "engagement": {
+                "reaction_count": 86,
+                "comment_count": 2,
+                "save_count": 25,
+                "share_count": 9,
+                "view_count": 1290,
+                "viewer": {
+                    "reaction": "support",
+                    "is_saved": true,
+                    "is_shared": false
+                }
+            },
+            "visibility": "public",
+            "status": "published",
+            "created_at": "2026-11-18T19:40:00Z",
+            "updated_at": "2026-11-18T19:55:00Z"
+        },
+        {
+            "id": "post-city-details",
+            "author_party_role_id": "role-lucas-user",
+            "title": "Uma manhã, quatro detalhes",
+            "content": {
+                "segments": [
+                    {
+                        "text": "Saí sem roteiro e voltei com pequenas cenas que quase passariam despercebidas.",
+                        "styles": []
+                    }
+                ]
+            },
+            "theme_id": "theme-sunset",
+            "location": {
+                "place_id": "place-liberdade",
+                "name": "Liberdade",
+                "locality": "São Paulo",
+                "region": "SP",
+                "country_code": "BR",
+                "precision": "neighborhood",
+                "coordinates": {
+                    "latitude": -23.5586,
+                    "longitude": -46.6356
+                }
+            },
+            "media": [
+                {
+                    "id": "media-city-1",
+                    "type": "image",
+                    "source_url": "https://picsum.photos/id/1020/1200/900",
+                    "thumbnail_url": "https://picsum.photos/id/1020/480/360",
+                    "alt_text": "Fachada antiga iluminada pelo sol da manhã",
+                    "mime_type": "image/jpeg",
+                    "width": 1200,
+                    "height": 900
+                },
+                {
+                    "id": "media-city-2",
+                    "type": "image",
+                    "source_url": "https://picsum.photos/id/1021/1200/900",
+                    "thumbnail_url": "https://picsum.photos/id/1021/480/360",
+                    "alt_text": "Detalhe de uma janela com plantas",
+                    "mime_type": "image/jpeg",
+                    "width": 1200,
+                    "height": 900
+                },
+                {
+                    "id": "media-city-3",
+                    "type": "image",
+                    "source_url": "https://picsum.photos/id/1022/1200/900",
+                    "thumbnail_url": "https://picsum.photos/id/1022/480/360",
+                    "alt_text": "Bicicleta encostada em uma parede colorida",
+                    "mime_type": "image/jpeg",
+                    "width": 1200,
+                    "height": 900
+                },
+                {
+                    "id": "media-city-4",
+                    "type": "image",
+                    "source_url": "https://picsum.photos/id/1023/1200/900",
+                    "thumbnail_url": "https://picsum.photos/id/1023/480/360",
+                    "alt_text": "Banca de flores aberta no início do dia",
+                    "mime_type": "image/jpeg",
+                    "width": 1200,
+                    "height": 900
+                }
+            ],
+            "tags": [
+                {
+                    "id": "tag-fotografia",
+                    "label": "fotografia",
+                    "type": "topic"
+                },
+                {
+                    "id": "tag-cidade",
+                    "label": "cidade",
+                    "type": "hashtag"
+                }
+            ],
+            "stickers": [],
+            "engagement": {
+                "reaction_count": 234,
+                "comment_count": 1,
+                "save_count": 38,
+                "share_count": 21,
+                "view_count": 3670,
+                "viewer": {
+                    "reaction": "love",
+                    "is_saved": false,
+                    "is_shared": false
+                }
+            },
+            "visibility": "public",
+            "status": "published",
+            "created_at": "2026-11-18T19:20:00Z",
+            "updated_at": "2026-11-18T19:35:00Z"
+        },
+        {
+            "id": "post-pan-cheese",
+            "author_party_role_id": "role-rafa-user",
+            "title": "Pão de queijo de frigideira",
+            "content": {
+                "segments": [
+                    {
+                        "text": "Quando a vontade aparece no meio da tarde, faço uma versão rápida com ",
+                        "styles": []
+                    },
+                    {
+                        "text": "queijo meia cura",
+                        "styles": [
+                            "bold"
+                        ]
+                    },
+                    {
+                        "text": " e poucos ingredientes. Fica pronto em dez minutos e combina com café passado na hora. ☕",
+                        "styles": []
+                    }
+                ]
+            },
+            "theme_id": "theme-sunset",
+            "media": [
+                {
+                    "id": "media-pan-cheese",
+                    "type": "image",
+                    "source_url": "https://picsum.photos/id/1080/1200/900",
+                    "thumbnail_url": "https://picsum.photos/id/1080/480/360",
+                    "alt_text": "Pão de queijo dourado servido em um prato",
+                    "mime_type": "image/jpeg",
+                    "width": 1200,
+                    "height": 900
+                }
+            ],
+            "tags": [
+                {
+                    "id": "tag-receita",
+                    "label": "receita",
+                    "type": "topic"
+                },
+                {
+                    "id": "tag-cozinha-afetiva",
+                    "label": "cozinhaafetiva",
+                    "type": "hashtag"
+                }
+            ],
+            "stickers": [],
+            "engagement": {
+                "reaction_count": 57,
+                "comment_count": 1,
+                "save_count": 19,
+                "share_count": 6,
+                "view_count": 940,
+                "viewer": {
+                    "reaction": null,
+                    "is_saved": true,
+                    "is_shared": false
+                }
+            },
+            "visibility": "public",
+            "status": "published",
+            "created_at": "2026-11-18T18:55:00Z"
         }
     ],
     "comments": [
@@ -798,6 +1030,87 @@
                 "viewer_reaction": null
             },
             "created_at": "2026-11-18T17:05:00Z"
+        },
+        {
+            "id": "comment-walk-notes-1",
+            "post_id": "post-morning-walk-notes",
+            "author_party_role_id": "role-lucas-user",
+            "content": {
+                "segments": [
+                    {
+                        "text": "Precisava ler isso hoje. Vou tentar sair sem fone amanhã.",
+                        "styles": []
+                    }
+                ]
+            },
+            "media": [],
+            "engagement": {
+                "reaction_count": 5,
+                "reply_count": 1,
+                "viewer_reaction": "like"
+            },
+            "created_at": "2026-11-18T19:50:00Z"
+        },
+        {
+            "id": "comment-walk-notes-2",
+            "post_id": "post-morning-walk-notes",
+            "parent_comment_id": "comment-walk-notes-1",
+            "author_party_role_id": "role-maya-user",
+            "content": {
+                "segments": [
+                    {
+                        "text": "Depois me conta como foi. Uma volta curta já muda o dia.",
+                        "styles": []
+                    }
+                ]
+            },
+            "media": [],
+            "engagement": {
+                "reaction_count": 1,
+                "reply_count": 0,
+                "viewer_reaction": null
+            },
+            "created_at": "2026-11-18T19:56:00Z"
+        },
+        {
+            "id": "comment-city-details-1",
+            "post_id": "post-city-details",
+            "author_party_role_id": "role-ana-user",
+            "content": {
+                "segments": [
+                    {
+                        "text": "A foto da janela com plantas tem uma luz linda.",
+                        "styles": []
+                    }
+                ]
+            },
+            "media": [],
+            "engagement": {
+                "reaction_count": 3,
+                "reply_count": 0,
+                "viewer_reaction": "love"
+            },
+            "created_at": "2026-11-18T19:42:00Z"
+        },
+        {
+            "id": "comment-pan-cheese-1",
+            "post_id": "post-pan-cheese",
+            "author_party_role_id": "role-maya-user",
+            "content": {
+                "segments": [
+                    {
+                        "text": "Qual queijo você costuma usar para a receita?",
+                        "styles": []
+                    }
+                ]
+            },
+            "media": [],
+            "engagement": {
+                "reaction_count": 2,
+                "reply_count": 0,
+                "viewer_reaction": null
+            },
+            "created_at": "2026-11-18T19:05:00Z"
         }
     ],
     "post_reactions": [
@@ -821,6 +1134,34 @@
             "actor_party_role_id": "role-rafa-user",
             "type": "wow",
             "created_at": "2026-11-18T17:04:00Z"
+        },
+        {
+            "id": "reaction-ana-walk-notes",
+            "post_id": "post-morning-walk-notes",
+            "actor_party_role_id": "role-ana-user",
+            "type": "support",
+            "created_at": "2026-11-18T19:45:00Z"
+        },
+        {
+            "id": "reaction-lucas-walk-notes",
+            "post_id": "post-morning-walk-notes",
+            "actor_party_role_id": "role-lucas-user",
+            "type": "love",
+            "created_at": "2026-11-18T19:52:00Z"
+        },
+        {
+            "id": "reaction-ana-city-details",
+            "post_id": "post-city-details",
+            "actor_party_role_id": "role-ana-user",
+            "type": "love",
+            "created_at": "2026-11-18T19:21:00Z"
+        },
+        {
+            "id": "reaction-rafa-pan-cheese",
+            "post_id": "post-pan-cheese",
+            "actor_party_role_id": "role-rafa-user",
+            "type": "like",
+            "created_at": "2026-11-18T19:02:00Z"
         }
     ],
     "comment_reactions": [
@@ -830,6 +1171,13 @@
             "actor_party_role_id": "role-ana-user",
             "type": "like",
             "created_at": "2026-11-18T15:40:00Z"
+        },
+        {
+            "id": "comment-reaction-walk-notes",
+            "comment_id": "comment-walk-notes-1",
+            "actor_party_role_id": "role-ana-user",
+            "type": "like",
+            "created_at": "2026-11-18T19:53:00Z"
         }
     ],
     "post_saves": [
@@ -838,6 +1186,18 @@
             "post_id": "post-long-video",
             "actor_party_role_id": "role-ana-user",
             "created_at": "2026-11-18T18:00:00Z"
+        },
+        {
+            "id": "save-ana-walk-notes",
+            "post_id": "post-morning-walk-notes",
+            "actor_party_role_id": "role-ana-user",
+            "created_at": "2026-11-18T19:48:00Z"
+        },
+        {
+            "id": "save-ana-pan-cheese",
+            "post_id": "post-pan-cheese",
+            "actor_party_role_id": "role-ana-user",
+            "created_at": "2026-11-18T19:08:00Z"
         }
     ],
     "post_shares": [
@@ -857,6 +1217,14 @@
             "conversation_id": "conversation-ana-lucas",
             "response_message_id": "message-ana-lucas-2",
             "created_at": "2026-11-17T19:12:00Z"
+        },
+        {
+            "id": "share-lucas-pan-cheese",
+            "post_id": "post-pan-cheese",
+            "actor_party_role_id": "role-lucas-user",
+            "destination": "conversation",
+            "conversation_id": "conversation-ana-lucas",
+            "created_at": "2026-11-18T19:10:00Z"
         }
     ],
     "live_sessions": [
