@@ -41,6 +41,7 @@ class PostArticlePage extends StatelessWidget {
                     PostAuthorHeader(
                       author: author,
                       publishedAt: post.createdAt,
+                      location: post.location,
                     ),
                     if (title != null && title.isNotEmpty) ...[
                       const SizedBox(

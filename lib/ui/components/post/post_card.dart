@@ -31,7 +31,11 @@ class PostCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              PostAuthorHeader(author: author, publishedAt: post.createdAt),
+              PostAuthorHeader(
+                author: author,
+                publishedAt: post.createdAt,
+                location: post.location,
+              ),
               const SizedBox(height: UIConstants.postCardSpacing),
               if (title != null && title.isNotEmpty) ...[
                 Text(title, style: theme.textTheme.titleMedium),
