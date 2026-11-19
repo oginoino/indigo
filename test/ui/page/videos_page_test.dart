@@ -99,6 +99,49 @@ void main() {
     },
   );
 
+  testWidgets('opens the video identified by its post and media IDs', (
+    tester,
+  ) async {
+    final provider = PostsProvider(
+      repository: _FakePostRepository([
+        for (var index = 0; index < 3; index++) _videoPost(index),
+      ]),
+      socialDataService: socialDataService,
+      clock: () => DateTime.utc(2026, 2),
+    );
+    await provider.load();
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider.value(value: provider),
+          ChangeNotifierProvider(
+            create: (_) => BottomNavigationProvider(const []),
+          ),
+        ],
+        child: const MaterialApp(
+          home: VideosPage(initialPostId: 'post-1', initialMediaId: 'video-1'),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final pageController = tester
+        .widget<PageView>(find.byType(PageView))
+        .controller!;
+    expect(pageController.page, 1);
+    expect(fakePlatform.createdSources, [
+      'https://example.test/video-0.mp4',
+      'https://example.test/video-1.mp4',
+      'https://example.test/video-2.mp4',
+    ]);
+
+    fakePlatform.initializeAll();
+    await tester.pump();
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
   testWidgets('shows an end message after the final video', (tester) async {
     final provider = PostsProvider(
       repository: _FakePostRepository([_videoPost(0)]),

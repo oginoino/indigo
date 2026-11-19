@@ -1,10 +1,12 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:indigo/model/party/user_profile.dart';
 import 'package:indigo/model/post/post.dart';
 import 'package:indigo/model/post/post_content.dart';
 import 'package:indigo/model/post/post_engagement_summary.dart';
 import 'package:indigo/model/post/post_media.dart';
+import 'package:indigo/route/routes.dart';
 import 'package:indigo/ui/components/post/post_engagement_bar.dart';
 import 'package:indigo/ui/components/post/post_media_gallery.dart';
 import 'package:indigo/util/const/app/app_strings.dart';
@@ -92,6 +94,57 @@ void main() {
       await tester.pumpWidget(_galleryApp(_photos(5)));
 
       expect(find.text('+1'), findsOneWidget);
+    });
+
+    testWidgets('opens the selected post video in the video feed', (
+      tester,
+    ) async {
+      final router = GoRouter(
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (context, state) => Scaffold(
+              body: Center(
+                child: SizedBox(
+                  width: 320,
+                  child: PostMediaGallery(
+                    post: Post(
+                      id: 'post-video',
+                      authorPartyRoleId: 'role-ana-user',
+                      content: PostContent(
+                        segments: [PostTextSegment(text: 'Video preview')],
+                      ),
+                      createdAt: DateTime.utc(2026),
+                      media: [
+                        PostMedia(
+                          id: 'media-video',
+                          type: PostMediaType.video,
+                          sourceUrl: 'https://example.test/video.mp4',
+                        ),
+                      ],
+                    ),
+                    author: null,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          GoRoute(
+            path: Routes.videos,
+            builder: (context, state) => Text(
+              '${state.uri.queryParameters[Routes.videoPostIdQueryParameter]}:'
+              '${state.uri.queryParameters[Routes.videoMediaIdQueryParameter]}',
+            ),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.tap(find.byTooltip(AppStrings.playVideo));
+      await tester.pumpAndSettle();
+
+      expect(find.text('post-video:media-video'), findsOneWidget);
     });
 
     testWidgets('offers a retry when a media image fails to load', (

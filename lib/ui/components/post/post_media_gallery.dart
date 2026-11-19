@@ -30,7 +30,7 @@ class PostMediaGallery extends StatelessWidget {
 
     while (index < media.length) {
       if (media[index].isVideo) {
-        children.add(_VideoPreview(media: media[index]));
+        children.add(_VideoPreview(postId: post.id, media: media[index]));
         index++;
         continue;
       }
@@ -400,8 +400,9 @@ class _FullscreenPhotoViewerState extends State<_FullscreenPhotoViewer> {
 }
 
 class _VideoPreview extends StatelessWidget {
-  const _VideoPreview({required this.media});
+  const _VideoPreview({required this.postId, required this.media});
 
+  final String postId;
   final PostMedia media;
 
   @override
@@ -417,7 +418,15 @@ class _VideoPreview extends StatelessWidget {
           child: Material(
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             child: InkWell(
-              onTap: () => context.go(Routes.videos),
+              onTap: () => context.go(
+                Uri(
+                  path: Routes.videos,
+                  queryParameters: {
+                    Routes.videoPostIdQueryParameter: postId,
+                    Routes.videoMediaIdQueryParameter: media.id,
+                  },
+                ).toString(),
+              ),
               child: Stack(
                 alignment: Alignment.center,
                 children: [
