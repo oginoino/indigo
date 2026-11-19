@@ -59,8 +59,6 @@ class UIConstants {
   static const double postCardRadius = radiusLg;
   static const double postFeedDividerHeight = spaceLg;
   static const double postFeedDividerThickness = 0.5;
-  static const double postFeedLoadMoreExtent = 600;
-  static const int postPreviewMaxLines = 5;
   static const double postArticleMaxWidth = 720;
   static const double postArticleHorizontalPadding = spaceLg;
   static const double postArticleBodyLineHeight = 1.75;
@@ -71,7 +69,8 @@ class UIConstants {
   static const double postHeaderAvatarSize = 40;
   static const double postHeaderSpacing = spaceSm;
   static const double postHeaderTextSpacing = space2xs;
-  static const double postEngagementButtonSize = 48;
+  static const double minimumInteractiveTargetSize = 48;
+  static const double postEngagementButtonSize = minimumInteractiveTargetSize;
   static const double postEngagementIconSize = 20;
   static const double postEngagementItemSpacing = spaceXs;
   static const double fullscreenEngagementIconSize = 28;
@@ -82,12 +81,11 @@ class UIConstants {
   static const double fullscreenLandscapeActionRailWidthFactor = 0.42;
   static const double fullscreenLandscapeActionRailMaxWidth = 320;
   static const double postMediaBorderWidth = 2;
+  static const double postMediaErrorCompactBreakpoint = 180;
   static const List<Shadow> postMediaTextShadows = [
     Shadow(color: Color(0xB3000000), blurRadius: 3, offset: Offset(0, 1)),
   ];
   static const double fullscreenVideoBottomGap = spaceMd;
-  static const int postMediaCaptionMaxLines = 4;
-  static const Color fullscreenLikedColor = Color(0xFFFF5A6A);
   static const double postPhotoPairAspectRatio = 1.45;
   static const double postPhotoGridAspectRatio = 1;
   static const double postPhotoGridSpacing = spaceXs;
@@ -96,6 +94,7 @@ class UIConstants {
       postPhotoGridColumns * postPhotoGridColumns;
   static const double videoActionIconSize = 32;
   static const double videoOverlayPadding = spaceLg;
+  static const double videoOverlayGradientMiddleStop = 0.4;
   static const Duration imageViewerTransitionDuration = Duration(
     milliseconds: 220,
   );

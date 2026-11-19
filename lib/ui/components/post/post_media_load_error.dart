@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../util/const/app/app_strings.dart';
 import '../../../util/const/ui/ui_constants.dart';
+import '../../theme/media_overlay_theme.dart';
 
 class PostMediaLoadError extends StatelessWidget {
   const PostMediaLoadError({
@@ -20,17 +21,20 @@ class PostMediaLoadError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final mediaTheme = MediaOverlayTheme.of(context);
     final foregroundColor = onDarkBackground
-        ? Colors.white
+        ? mediaTheme.foregroundColor
         : theme.colorScheme.onSurface;
     final secondaryColor = onDarkBackground
-        ? Colors.white70
+        ? mediaTheme.secondaryForegroundColor
         : theme.colorScheme.onSurfaceVariant;
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final compact =
-            constraints.maxHeight < 180 || constraints.maxWidth < 180;
+            constraints.maxHeight <
+                UIConstants.postMediaErrorCompactBreakpoint ||
+            constraints.maxWidth < UIConstants.postMediaErrorCompactBreakpoint;
         return Semantics(
           liveRegion: true,
           label: message,
@@ -63,10 +67,9 @@ class PostMediaLoadError extends StatelessWidget {
                     tooltip: AppStrings.retry,
                     onPressed: onRetry,
                     color: foregroundColor,
-                    visualDensity: VisualDensity.compact,
                     constraints: const BoxConstraints(
-                      minWidth: 40,
-                      minHeight: 40,
+                      minWidth: UIConstants.minimumInteractiveTargetSize,
+                      minHeight: UIConstants.minimumInteractiveTargetSize,
                     ),
                     icon: const Icon(Icons.refresh),
                   ),

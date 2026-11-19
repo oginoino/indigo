@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
@@ -11,32 +10,41 @@ import '../../provider/post/posts_provider.dart';
 import '../../util/const/app/app_strings.dart';
 import '../../util/const/ui/ui_constants.dart';
 import '../components/app_bottom_navigation_bar.dart';
+import '../components/post/fullscreen_post_layout.dart';
 import '../components/post/post_engagement_bar.dart';
 import '../components/post/post_media_load_error.dart';
 import '../components/post/post_media_information.dart';
+import '../theme/media_overlay_theme.dart';
 
 class VideosPage extends StatelessWidget {
   const VideosPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final mediaTheme = MediaOverlayTheme.of(context);
+
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: mediaTheme.backgroundColor,
       extendBody: true,
       body: Consumer<PostsProvider>(
         builder: (context, provider, _) {
           if (provider.status == PostsLoadStatus.loading ||
               provider.status == PostsLoadStatus.initial) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(
+              child: CircularProgressIndicator(
+                color: mediaTheme.foregroundColor,
+              ),
+            );
           }
           if (provider.status == PostsLoadStatus.error) {
             return Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
+                  Text(
                     AppStrings.postsLoadFailed,
-                    style: TextStyle(color: Colors.white),
+                    style: Theme.of(context).textTheme.bodyMedium
+                        ?.copyWith(color: mediaTheme.foregroundColor),
                   ),
                   TextButton(
                     onPressed: provider.load,
@@ -49,10 +57,11 @@ class VideosPage extends StatelessWidget {
 
           final videos = provider.videoFeedItems;
           if (videos.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
                 AppStrings.noVideosAvailable,
-                style: TextStyle(color: Colors.white),
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(color: mediaTheme.foregroundColor),
               ),
             );
           }
@@ -176,22 +185,22 @@ class _FullscreenVideoItemState extends State<_FullscreenVideoItem> {
     if (mounted) setState(() {});
   }
 
-  Widget _buildPlaybackButton() => IconButton(
+  Widget _buildPlaybackButton(Color foregroundColor) => IconButton(
     tooltip: _controller.value.isPlaying
         ? AppStrings.pauseVideo
         : AppStrings.playVideo,
     onPressed: _togglePlayback,
-    color: Colors.white,
+    color: foregroundColor,
     icon: Icon(
       _controller.value.isPlaying ? Icons.pause_circle : Icons.play_circle,
       size: UIConstants.videoActionIconSize,
     ),
   );
 
-  Widget _buildMuteButton() => IconButton(
+  Widget _buildMuteButton(Color foregroundColor) => IconButton(
     tooltip: _isMuted ? AppStrings.unmuteVideo : AppStrings.muteVideo,
     onPressed: _toggleMute,
-    color: Colors.white,
+    color: foregroundColor,
     icon: Icon(_isMuted ? Icons.volume_off : Icons.volume_up),
   );
 
@@ -203,6 +212,8 @@ class _FullscreenVideoItemState extends State<_FullscreenVideoItem> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaTheme = MediaOverlayTheme.of(context);
+
     return FutureBuilder<void>(
       future: _initialization,
       builder: (context, snapshot) {
@@ -215,8 +226,8 @@ class _FullscreenVideoItemState extends State<_FullscreenVideoItem> {
           );
         }
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(
-            child: CircularProgressIndicator(color: Colors.white),
+          return Center(
+            child: CircularProgressIndicator(color: mediaTheme.foregroundColor),
           );
         }
 
@@ -234,17 +245,17 @@ class _FullscreenVideoItemState extends State<_FullscreenVideoItem> {
                   child: VideoPlayer(_controller),
                 ),
               ),
-              const Positioned.fill(
+              Positioned.fill(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      stops: [0, 0.4, 1],
+                      stops: [0, UIConstants.videoOverlayGradientMiddleStop, 1],
                       colors: [
-                        Colors.black38,
+                        mediaTheme.gradientTopColor,
                         Colors.transparent,
-                        Colors.black87,
+                        mediaTheme.gradientBottomColor,
                       ],
                     ),
                   ),
@@ -253,16 +264,11 @@ class _FullscreenVideoItemState extends State<_FullscreenVideoItem> {
               SafeArea(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    final isLandscape =
-                        constraints.maxWidth > constraints.maxHeight;
-                    final actionRailWidth = isLandscape
-                        ? math.min(
-                            constraints.maxWidth *
-                                UIConstants
-                                    .fullscreenLandscapeActionRailWidthFactor,
-                            UIConstants.fullscreenLandscapeActionRailMaxWidth,
-                          )
-                        : UIConstants.fullscreenEngagementRailWidth;
+                    final isLandscape = FullscreenPostLayout.isLandscape(
+                      constraints,
+                    );
+                    final actionRailWidth =
+                        FullscreenPostLayout.actionRailWidth(constraints);
 
                     return Padding(
                       padding: const EdgeInsets.fromLTRB(
@@ -308,13 +314,21 @@ class _FullscreenVideoItemState extends State<_FullscreenVideoItem> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        _buildPlaybackButton(),
-                                        _buildMuteButton(),
+                                        _buildPlaybackButton(
+                                          mediaTheme.foregroundColor,
+                                        ),
+                                        _buildMuteButton(
+                                          mediaTheme.foregroundColor,
+                                        ),
                                       ],
                                     )
                                   else ...[
-                                    _buildPlaybackButton(),
-                                    _buildMuteButton(),
+                                    _buildPlaybackButton(
+                                      mediaTheme.foregroundColor,
+                                    ),
+                                    _buildMuteButton(
+                                      mediaTheme.foregroundColor,
+                                    ),
                                   ],
                                 ],
                               ),

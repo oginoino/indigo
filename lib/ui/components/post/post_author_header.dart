@@ -4,6 +4,7 @@ import '../../../model/party/user_profile.dart';
 import '../../../util/const/app/app_strings.dart';
 import '../../../util/const/ui/ui_constants.dart';
 import '../../../util/formatter/post_time_formatter.dart';
+import '../../theme/media_overlay_theme.dart';
 import '../avatar.dart';
 
 class PostAuthorHeader extends StatelessWidget {
@@ -21,9 +22,10 @@ class PostAuthorHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final mediaTheme = MediaOverlayTheme.of(context);
     final absoluteTime = PostTimeFormatter.formatAbsolute(publishedAt);
-    final titleColor = onMedia ? Colors.white : null;
-    final detailColor = onMedia ? Colors.white70 : null;
+    final titleColor = onMedia ? mediaTheme.foregroundColor : null;
+    final detailColor = onMedia ? mediaTheme.secondaryForegroundColor : null;
     final semanticLabel = AppStrings.postPublishedOn.replaceAll(
       '{date}',
       absoluteTime,
@@ -42,7 +44,7 @@ class PostAuthorHeader extends StatelessWidget {
               ? BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: Colors.white,
+                    color: mediaTheme.foregroundColor,
                     width: UIConstants.postMediaBorderWidth,
                   ),
                 )
@@ -80,11 +82,19 @@ class PostAuthorHeader extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
                       horizontal: UIConstants.postHeaderTextSpacing,
                     ),
-                    child: Text(AppStrings.postEngagementSeparator),
+                    child: Text(
+                      AppStrings.postEngagementSeparator,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: detailColor,
+                        shadows: onMedia
+                            ? UIConstants.postMediaTextShadows
+                            : null,
+                      ),
+                    ),
                   ),
                   Semantics(
                     label: semanticLabel,
