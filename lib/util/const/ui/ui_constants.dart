@@ -72,7 +72,7 @@ class UIConstants {
   static const double postEngagementIconSize = 20;
   static const double postEngagementItemSpacing = spaceXs;
   static const double fullscreenEngagementIconSize = 28;
-  static const double fullscreenEngagementSpacing = spaceXl;
+  static const double fullscreenEngagementSpacing = spaceSm;
   static const double fullscreenEngagementRailWidth = 56;
   static const double fullscreenOverlayContentSpacing = spaceLg;
   static const double postMediaBorderWidth = 2;
