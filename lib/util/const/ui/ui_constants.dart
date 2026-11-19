@@ -37,7 +37,9 @@ class UIConstants {
   static const double noElevation = 0;
 
   static const double bottomNavigationHeight = 60;
+  static const double bottomNavigationCompactHeight = 48;
   static const double bottomNavigationRadius = radiusPill;
+  static const double bottomNavigationCompactIconSize = 24;
   static const int bottomNavigationMaxVisibleItems = 5;
   static const double bottomNavigationItemWidth = 64;
   static const double bottomNavigationOuterPadding = spaceSm;

@@ -39,5 +39,26 @@ void main() {
       expect(notifications, 1);
       provider.dispose();
     });
+
+    test(
+      'compacts while scrolling and expands when a destination is selected',
+      () {
+        final provider = BottomNavigationProvider(items);
+        var notifications = 0;
+        provider.addListener(() => notifications++);
+
+        provider.setCompact(true);
+        provider.setCompact(true);
+
+        expect(provider.isCompact, isTrue);
+        expect(notifications, 1);
+
+        provider.selectItem(items.first);
+
+        expect(provider.isCompact, isFalse);
+        expect(notifications, 2);
+        provider.dispose();
+      },
+    );
   });
 }

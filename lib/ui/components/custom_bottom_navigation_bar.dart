@@ -11,12 +11,14 @@ class CustomBottomNavigationBar extends StatelessWidget {
     required this.currentIndex,
     required this.onTap,
     required this.items,
+    this.compact = false,
     super.key,
   });
 
   final int currentIndex;
   final ValueChanged<int> onTap;
   final List<BottomNavigationBarItem> items;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +59,9 @@ class CustomBottomNavigationBar extends StatelessWidget {
 
       final iconTheme = (configuredIconTheme ?? theme.iconTheme).copyWith(
         color: selected ? selectedColor : unselectedColor,
+        size: compact
+            ? UIConstants.bottomNavigationCompactIconSize
+            : UIConstants.navigationIconSize,
       );
 
       final button = Semantics(
@@ -115,8 +120,12 @@ class CustomBottomNavigationBar extends StatelessWidget {
             sigmaX: UIConstants.bottomNavigationBlurSigma,
             sigmaY: UIConstants.bottomNavigationBlurSigma,
           ),
-          child: Container(
-            height: UIConstants.bottomNavigationHeight,
+          child: AnimatedContainer(
+            duration: UIConstants.bottomNavigationAnimationDuration,
+            curve: Curves.easeOutCubic,
+            height: compact
+                ? UIConstants.bottomNavigationCompactHeight
+                : UIConstants.bottomNavigationHeight,
             padding: const EdgeInsets.all(
               UIConstants.bottomNavigationContentPadding,
             ),

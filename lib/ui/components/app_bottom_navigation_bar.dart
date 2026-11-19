@@ -20,6 +20,7 @@ class AppBottomNavigationBar extends StatelessWidget {
         final selectedIndex = items.indexWhere((item) => item.id == selectedId);
 
         return CustomBottomNavigationBar(
+          compact: provider.isCompact,
           items: items
               .map(
                 (item) => BottomNavigationBarItem(
