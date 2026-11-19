@@ -406,11 +406,11 @@ class _WaveformProgressState extends State<_WaveformProgress> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    Theme.of(context);
     final progress = (_previewProgress ?? widget.progress)
         .clamp(0.0, 1.0)
         .toDouble();
-    final playedBars = (progress * widget.waveform.length).round().clamp(
+    (progress * widget.waveform.length).round().clamp(
       0,
       widget.waveform.length,
     );
