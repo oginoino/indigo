@@ -1,4 +1,5 @@
 import '../util/const/app/app_data_constants.dart';
+import 'hashtag.dart';
 
 class FeedItem {
   const FeedItem({
@@ -7,6 +8,7 @@ class FeedItem {
     required this.icon,
     required this.route,
     this.appBar,
+    this.hashtag,
   });
 
   final int id;
@@ -14,6 +16,7 @@ class FeedItem {
   final String icon;
   final String route;
   final String? appBar;
+  final Hashtag? hashtag;
 
   factory FeedItem.fromJson(Map<String, dynamic> json) {
     return FeedItem(

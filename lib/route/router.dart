@@ -4,6 +4,7 @@ import '../di/di.dart';
 import '../ui/components/app_bar/app_bar.dart';
 import '../ui/components/app_bar/feed_app_bar_resolver.dart';
 import '../ui/page/home_page.dart';
+import '../ui/page/hashtag_feed_page.dart';
 import '../ui/page/placeholder_page.dart';
 import '../ui/page/videos_page.dart';
 import '../util/const/app/app_strings.dart';
@@ -45,6 +46,11 @@ List<GoRoute> _buildRoutes() {
   return [
     AppRoute(Routes.home, (context, state) => const HomePage()),
     AppRoute(Routes.videos, (context, state) => const VideosPage()),
+    AppRoute(
+      Routes.hashtags,
+      (context, state) =>
+          HashtagFeedPage(hashtagId: state.pathParameters['hashtagId']!),
+    ),
     AppRoute(
       Routes.create,
       (context, state) => const PlaceholderPage(

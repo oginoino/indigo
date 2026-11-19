@@ -7,6 +7,7 @@ import '../../util/const/ui/ui_constants.dart';
 import '../components/post/post_author_header.dart';
 import '../components/post/post_engagement_bar.dart';
 import '../components/post/post_media_gallery.dart';
+import '../components/post/post_content_text.dart';
 
 class PostArticlePage extends StatelessWidget {
   const PostArticlePage({required this.post, required this.author, super.key});
@@ -18,7 +19,6 @@ class PostArticlePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final title = post.title?.trim();
-    final content = post.content.plainText.trim();
 
     return Scaffold(
       appBar: AppBar(title: const Text(AppStrings.postArticleTitle)),
@@ -49,12 +49,14 @@ class PostArticlePage extends StatelessWidget {
                       Text(title, style: theme.textTheme.headlineSmall),
                     ],
                     const SizedBox(height: UIConstants.spaceLg),
-                    SelectableText(
-                      content,
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        height: UIConstants.postArticleBodyLineHeight,
+                    if (post.content.plainText.trim().isNotEmpty)
+                      PostContentText(
+                        content: post.content,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          height: UIConstants.postArticleBodyLineHeight,
+                        ),
+                        selectable: true,
                       ),
-                    ),
                     if (post.media.isNotEmpty) ...[
                       const SizedBox(
                         height: UIConstants.postArticleSectionSpacing,

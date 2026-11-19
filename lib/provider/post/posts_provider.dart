@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../model/post/post.dart';
+import '../../model/post/post_content.dart';
 import '../../model/post/post_media.dart';
 import '../../model/party/user_profile.dart';
 import '../../service/mapper/user_profile_json_mapper.dart';
@@ -64,6 +65,22 @@ class PostsProvider extends ChangeNotifier {
 
   List<Post> get feedPosts =>
       List.unmodifiable(_posts.where((post) => post.isPublishedAt(_clock())));
+
+  List<Post> postsForHashtag(String hashtagId) {
+    final label = _socialDataService.data.hashtagById(hashtagId)?['label'];
+    return List.unmodifiable(
+      feedPosts.where(
+        (post) =>
+            post.tags.any((tag) => tag.id == hashtagId) ||
+            post.content.segments.any((segment) {
+              final entity = segment.entity;
+              return entity?.type == PostTextEntityType.hashtag &&
+                  (entity?.id == hashtagId ||
+                      (entity?.id == null && entity?.value == label));
+            }),
+      ),
+    );
+  }
 
   List<VideoFeedItem> get videoFeedItems => List.unmodifiable([
     for (final post in feedPosts)

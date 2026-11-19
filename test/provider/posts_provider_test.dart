@@ -4,6 +4,7 @@ import 'package:indigo/model/post/post_content.dart';
 import 'package:indigo/model/post/post_media.dart';
 import 'package:indigo/provider/post/posts_provider.dart';
 import 'package:indigo/service/post_repository.dart';
+import 'package:indigo/service/mapper/post_json_mapper.dart';
 import 'package:indigo/service/social_data_service.dart';
 
 void main() {
@@ -96,18 +97,64 @@ void main() {
         expect(provider.hasMore, isTrue);
       },
     );
+
+    test('filters posts by hashtag tag and text entity ids', () async {
+      final socialDataService = AssetSocialDataService();
+      await socialDataService.load();
+      final taggedPost = PostJsonMapper.fromJson(
+        socialDataService.data.postById('post-river-walk')!,
+      );
+      final valueOnlyPost = _post(
+        id: 'value-only-tag',
+        content: PostContent(
+          segments: [
+            PostTextSegment(
+              text: '#diasleves',
+              entity: const PostTextEntity(
+                type: PostTextEntityType.hashtag,
+                value: 'diasleves',
+              ),
+            ),
+          ],
+        ),
+      );
+      final provider = PostsProvider(
+        repository: _FakePostRepository([
+          taggedPost,
+          valueOnlyPost,
+          _post(id: 'unrelated'),
+        ]),
+        socialDataService: socialDataService,
+      );
+
+      await provider.load();
+
+      expect(
+        provider.postsForHashtag('tag-fotografia').map((post) => post.id),
+        ['post-river-walk'],
+      );
+      expect(
+        provider.postsForHashtag('tag-design-movimento').map((post) => post.id),
+        ['post-river-walk'],
+      );
+      expect(
+        provider.postsForHashtag('tag-dias-leves').map((post) => post.id),
+        ['post-river-walk', 'value-only-tag'],
+      );
+    });
   });
 }
 
 Post _post({
   required String id,
+  PostContent? content,
   List<PostMedia> media = const [],
   PostStatus status = PostStatus.published,
   DateTime? expiresAt,
 }) => Post(
   id: id,
   authorPartyRoleId: 'role-ana-user',
-  content: PostContent(segments: [PostTextSegment(text: id)]),
+  content: content ?? PostContent(segments: [PostTextSegment(text: id)]),
   media: media,
   status: status,
   createdAt: DateTime.utc(2026),
