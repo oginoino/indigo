@@ -193,6 +193,36 @@ void main() {
     expect(seen.map((post) => post.id), ['story-1']);
   });
 
+  testWidgets('shows one progress step per story of the current profile', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StoryViewer(
+          stories: [
+            _story('lucas-1', 'role-lucas-user', 'Um'),
+            _story('lucas-2', 'role-lucas-user', 'Dois'),
+            _story('lucas-3', 'role-lucas-user', 'Três'),
+            _story('maya-1', 'role-maya-user', 'Ouvindo um disco'),
+          ],
+          authorFor: authorFor,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(LinearProgressIndicator), findsNWidgets(3));
+
+    final controller = tester
+        .widget<PageView>(find.byType(PageView))
+        .controller!;
+    controller.jumpToPage(3);
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+  });
+
   testWidgets('closes the viewer with the close button', (tester) async {
     await tester.pumpWidget(
       MaterialApp(

@@ -3,6 +3,7 @@ import 'package:indigo/model/feed_item.dart';
 import 'package:indigo/provider/social/friends_provider.dart';
 import 'package:indigo/service/social_data_service.dart';
 import 'package:indigo/ui/components/app_bar/friends_nav_item.dart';
+import 'package:indigo/ui/components/avatar.dart';
 import 'package:indigo/ui/components/avatar_group.dart';
 import 'package:indigo/util/const/app/app_strings.dart';
 import 'package:indigo/util/const/app/social_data_constants.dart';
@@ -50,6 +51,50 @@ void main() {
     expect(find.byType(AvatarGroup), findsOneWidget);
     expect(find.text('Amigos'), findsOneWidget);
     expect(find.text(AppStrings.addFriends), findsNothing);
+    provider.dispose();
+  });
+
+  testWidgets('shows up to three friend avatars and an overflow counter', (
+    tester,
+  ) async {
+    final provider = FriendsProvider(
+      socialDataService: _FakeSocialDataService(
+        _socialData(
+          profiles: [
+            _profile('party-lucas', 'Lucas Mendes'),
+            _profile('party-maya', 'Maya Ribeiro'),
+            _profile('party-rafa', 'Rafa Nunes'),
+            _profile('party-bia', 'Bia Lima'),
+          ],
+          friendships: [
+            for (final recipient in const [
+              'party-lucas',
+              'party-maya',
+              'party-rafa',
+              'party-bia',
+            ])
+              _friendship(
+                requester: 'party-ana',
+                recipient: recipient,
+                status: 'accepted',
+              ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider.value(
+        value: provider,
+        child: const MaterialApp(
+          home: Scaffold(body: FriendsNavItem(feedItem: friendsFeed)),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Avatar), findsNWidgets(3));
+    expect(find.text('+1'), findsOneWidget);
     provider.dispose();
   });
 

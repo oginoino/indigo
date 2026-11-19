@@ -16,11 +16,13 @@ void main() {
       expect(provider.friends.map((friend) => friend.partyId), [
         'party-lucas',
         'party-maya',
+        'party-rafa',
       ]);
-      expect(
-        provider.friends.map((friend) => friend.displayName),
-        ['Lucas Mendes', 'Maya Ribeiro'],
-      );
+      expect(provider.friends.map((friend) => friend.displayName), [
+        'Lucas Mendes',
+        'Maya Ribeiro',
+        'Rafa Santos',
+      ]);
       provider.dispose();
     });
   });

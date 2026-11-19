@@ -121,6 +121,24 @@ class _StoryViewerState extends State<StoryViewer>
     return -1;
   }
 
+  /// Faixa contígua de stories do mesmo perfil que contém [index]. Como os
+  /// stories são agrupados por perfil, o indicador de progresso reflete apenas
+  /// os stories do perfil atual (um step por story, como no Instagram).
+  ({int start, int count}) _profileRange(int index) {
+    final authorRoleId = widget.stories[index].authorPartyRoleId;
+    var start = index;
+    while (start > 0 &&
+        widget.stories[start - 1].authorPartyRoleId == authorRoleId) {
+      start--;
+    }
+    var end = index;
+    while (end + 1 < widget.stories.length &&
+        widget.stories[end + 1].authorPartyRoleId == authorRoleId) {
+      end++;
+    }
+    return (start: start, count: end - start + 1);
+  }
+
   void _handlePageChanged(int index) {
     setState(() => _currentIndex = index);
     _progressController.forward(from: 0);
@@ -163,6 +181,7 @@ class _StoryViewerState extends State<StoryViewer>
     final mediaTheme = MediaOverlayTheme.of(context);
     final currentStory = widget.stories[_currentIndex];
     final author = widget.authorFor(currentStory);
+    final profileRange = _profileRange(_currentIndex);
 
     return Scaffold(
       backgroundColor: mediaTheme.backgroundColor,
@@ -198,8 +217,8 @@ class _StoryViewerState extends State<StoryViewer>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     _StoryProgressBars(
-                      count: widget.stories.length,
-                      currentIndex: _currentIndex,
+                      count: profileRange.count,
+                      currentIndex: _currentIndex - profileRange.start,
                       progress: _progressController,
                     ),
                     const SizedBox(

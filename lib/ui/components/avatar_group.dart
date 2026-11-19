@@ -31,7 +31,7 @@ class AvatarGroup extends StatelessWidget {
 
     final hasOverflow = members.length > maxVisible;
     final visibleMembers = hasOverflow
-        ? members.take(maxVisible - 1).toList(growable: false)
+        ? members.take(maxVisible).toList(growable: false)
         : members;
     final overflowCount = members.length - visibleMembers.length;
 

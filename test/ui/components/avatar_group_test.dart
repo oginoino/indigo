@@ -48,8 +48,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byType(Avatar), findsNWidgets(2));
-    expect(find.text('+3'), findsOneWidget);
+    expect(find.byType(Avatar), findsNWidgets(3));
+    expect(find.text('+2'), findsOneWidget);
   });
 
   testWidgets('renders the provided empty state when there are no members', (

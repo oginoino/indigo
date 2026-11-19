@@ -214,8 +214,9 @@
             "id": "friendship-rafa-ana",
             "requester_party_id": "party-rafa",
             "recipient_party_id": "party-ana",
-            "status": "pending",
-            "requested_at": "2026-11-18T16:30:00Z"
+            "status": "accepted",
+            "requested_at": "2026-11-18T16:30:00Z",
+            "responded_at": "2026-11-18T17:00:00Z"
         }
     ],
     "communities": [
