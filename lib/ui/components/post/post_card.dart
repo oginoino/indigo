@@ -18,32 +18,31 @@ class PostCard extends StatelessWidget {
     final theme = Theme.of(context);
     final content = post.content.plainText;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(
+    return Padding(
+      padding: const EdgeInsets.symmetric(
         horizontal: UIConstants.defaultPadding,
-        vertical: UIConstants.postCardSpacing / 2,
+        vertical: UIConstants.postCardOuterSpacing,
       ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(UIConstants.postCardRadius),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(UIConstants.defaultPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            PostAuthorHeader(author: author, publishedAt: post.createdAt),
-            const SizedBox(height: UIConstants.postCardSpacing),
-            if (post.title case final title?) ...[
-              Text(title, style: theme.textTheme.titleMedium),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(UIConstants.defaultPadding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              PostAuthorHeader(author: author, publishedAt: post.createdAt),
               const SizedBox(height: UIConstants.postCardSpacing),
+              if (post.title case final title?) ...[
+                Text(title, style: theme.textTheme.titleMedium),
+                const SizedBox(height: UIConstants.postCardSpacing),
+              ],
+              if (content.isNotEmpty)
+                Text(content, style: theme.textTheme.bodyLarge),
+              PostMediaGallery(post: post, author: author),
+              const SizedBox(height: UIConstants.postCardSpacing),
+              const Divider(),
+              PostEngagementBar(post: post),
             ],
-            if (content.isNotEmpty)
-              Text(content, style: theme.textTheme.bodyLarge),
-            PostMediaGallery(post: post, author: author),
-            const SizedBox(height: UIConstants.postCardSpacing),
-            Divider(color: theme.colorScheme.outlineVariant),
-            PostEngagementBar(post: post),
-          ],
+          ),
         ),
       ),
     );

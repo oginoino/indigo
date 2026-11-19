@@ -22,18 +22,42 @@ ThemeData _buildTheme({
 
   return ThemeData(
     brightness: brightness,
+    useMaterial3: true,
+    visualDensity: VisualDensity.standard,
+    materialTapTargetSize: MaterialTapTargetSize.padded,
     colorScheme: colorScheme,
     scaffoldBackgroundColor: backgroundColor,
-    textTheme: const TextTheme().apply(
-      bodyColor: foregroundColor,
-      displayColor: foregroundColor,
-    ),
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.transparent,
       foregroundColor: foregroundColor,
       iconTheme: iconTheme,
+      elevation: UIConstants.noElevation,
+      scrolledUnderElevation: UIConstants.noElevation,
+      surfaceTintColor: Colors.transparent,
+      toolbarHeight: UIConstants.appBarToolbarHeight,
     ),
     iconTheme: iconTheme,
+    cardTheme: CardThemeData(
+      color: colorScheme.surfaceContainerLow,
+      surfaceTintColor: Colors.transparent,
+      shadowColor: Colors.transparent,
+      elevation: UIConstants.noElevation,
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(UIConstants.postCardRadius),
+        side: BorderSide(
+          color: colorScheme.outlineVariant.withValues(
+            alpha: isDark ? 0.35 : 0.65,
+          ),
+        ),
+      ),
+    ),
+    dividerTheme: DividerThemeData(
+      color: colorScheme.outlineVariant.withValues(alpha: isDark ? 0.45 : 0.6),
+      space: UIConstants.spaceSm,
+      thickness: 1,
+    ),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: backgroundColor.withValues(
         alpha: isDark
