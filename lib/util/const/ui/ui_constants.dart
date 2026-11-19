@@ -26,7 +26,7 @@ class UIConstants {
   static const double appBarLeadingWidth = 56;
   static const double appBarToolbarHeight = 56;
 
-  static const double navBarHeight = 40;
+  static const double navBarHeight = 48;
   static const double navBarItemSpacing = spaceSm;
   static const double navBarHorizontalPadding = spaceSm;
   static const double navBarItemBorderRadius = radiusLg;

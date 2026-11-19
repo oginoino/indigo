@@ -26,30 +26,33 @@ class NavItem extends StatelessWidget {
         context.read<FeedsListProvider>().selectFeed(feedItem.id);
         context.go(feedItem.route);
       },
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: UIConstants.navBarHorizontalPadding,
-              vertical: UIConstants.navBarItemSpacing,
-            ),
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: indicatorColor,
-                  width: UIConstants.navBarSelectedIndicatorThickness,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: UIConstants.navBarHeight),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: UIConstants.navBarHorizontalPadding,
+                vertical: UIConstants.navBarItemSpacing,
+              ),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: indicatorColor,
+                    width: UIConstants.navBarSelectedIndicatorThickness,
+                  ),
                 ),
               ),
+              child: Text(feedItem.name, textAlign: TextAlign.left),
             ),
-            child: Text(feedItem.name, textAlign: TextAlign.left),
-          ),
-          if (isSelected)
-            const Icon(Icons.keyboard_arrow_down)
-          else
-            const SizedBox.shrink(),
-        ],
+            if (isSelected)
+              const Icon(Icons.keyboard_arrow_down)
+            else
+              const SizedBox.shrink(),
+          ],
+        ),
       ),
     );
   }
