@@ -6,6 +6,7 @@ import '../../../util/const/ui/ui_constants.dart';
 import 'post_author_header.dart';
 import 'post_engagement_bar.dart';
 import 'post_media_gallery.dart';
+import 'post_long_text_preview.dart';
 
 class PostCard extends StatelessWidget {
   const PostCard({required this.post, required this.author, super.key});
@@ -37,7 +38,7 @@ class PostCard extends StatelessWidget {
                 const SizedBox(height: UIConstants.postCardSpacing),
               ],
               if (content.isNotEmpty)
-                Text(content, style: theme.textTheme.bodyLarge),
+                PostLongTextPreview(post: post, author: author, text: content),
               if (post.media.isNotEmpty)
                 PostMediaGallery(post: post, author: author),
               const SizedBox(height: UIConstants.postCardSpacing),

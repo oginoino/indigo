@@ -11,6 +11,7 @@ import '../../util/const/app/app_strings.dart';
 import '../../util/const/ui/ui_constants.dart';
 import '../components/app_bottom_navigation_bar.dart';
 import '../components/post/post_engagement_bar.dart';
+import '../components/post/post_media_load_error.dart';
 import '../components/post/post_media_information.dart';
 
 class VideosPage extends StatelessWidget {
@@ -107,13 +108,17 @@ class _FullscreenVideoItem extends StatefulWidget {
 }
 
 class _FullscreenVideoItemState extends State<_FullscreenVideoItem> {
-  late final VideoPlayerController _controller;
-  late final Future<void> _initialization;
+  late VideoPlayerController _controller;
+  late Future<void> _initialization;
   bool _isMuted = false;
 
   @override
   void initState() {
     super.initState();
+    _createController();
+  }
+
+  void _createController() {
     _controller = VideoPlayerController.networkUrl(
       Uri.parse(widget.item.media.sourceUrl),
     );
@@ -129,17 +134,30 @@ class _FullscreenVideoItemState extends State<_FullscreenVideoItem> {
   @override
   void didUpdateWidget(covariant _FullscreenVideoItem oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.isActive == widget.isActive &&
-        oldWidget.item.media.sourceUrl == widget.item.media.sourceUrl) {
+    if (oldWidget.item.media.sourceUrl != widget.item.media.sourceUrl) {
+      final previousController = _controller;
+      _isMuted = false;
+      _createController();
+      unawaited(previousController.dispose());
       return;
     }
 
+    if (oldWidget.isActive == widget.isActive) return;
     if (!_controller.value.isInitialized) return;
     if (widget.isActive) {
       unawaited(_controller.play());
     } else {
       unawaited(_controller.pause());
     }
+  }
+
+  void _retryInitialization() {
+    final previousController = _controller;
+    setState(() {
+      _isMuted = false;
+      _createController();
+    });
+    unawaited(previousController.dispose());
   }
 
   @override
@@ -169,15 +187,17 @@ class _FullscreenVideoItemState extends State<_FullscreenVideoItem> {
       future: _initialization,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return const Center(
-            child: Text(
-              AppStrings.videoPlaybackFailed,
-              style: TextStyle(color: Colors.white),
-            ),
+          return PostMediaLoadError(
+            message: AppStrings.videoPlaybackFailed,
+            icon: Icons.video_file_outlined,
+            onDarkBackground: true,
+            onRetry: _retryInitialization,
           );
         }
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(
+            child: CircularProgressIndicator(color: Colors.white),
+          );
         }
 
         final size = _controller.value.size;

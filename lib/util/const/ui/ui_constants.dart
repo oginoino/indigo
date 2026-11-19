@@ -54,6 +54,12 @@ class UIConstants {
   static const double postCardHorizontalInset = spaceSm;
   static const double postCardOuterSpacing = spaceXs;
   static const double postCardRadius = radiusLg;
+  static const int postPreviewMaxLines = 5;
+  static const double postArticleMaxWidth = 720;
+  static const double postArticleHorizontalPadding = spaceLg;
+  static const double postArticleBodyLineHeight = 1.75;
+  static const double postArticleSectionSpacing = spaceXl;
+  static const double postMediaErrorIconSize = 36;
   static const double postMediaAspectRatio = 1.2;
   static const double postMediaRadius = radiusMd;
   static const double postHeaderAvatarSize = 40;
