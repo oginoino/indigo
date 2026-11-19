@@ -4,6 +4,7 @@ import '../../../model/post/post.dart';
 import '../../../util/const/app/app_strings.dart';
 import '../../../util/const/ui/ui_constants.dart';
 import '../../theme/media_overlay_theme.dart';
+import 'animated_engagement_icon.dart';
 
 enum PostEngagementLayout { horizontal, vertical }
 
@@ -54,6 +55,8 @@ class PostEngagementBar extends StatelessWidget {
         count: post.engagement.commentCount,
         color: inactiveColor,
         onPressed: onComment,
+        effect: EngagementEffect.wiggle,
+        playOnTap: true,
       ),
       _EngagementMetric(
         layout: layout,
@@ -65,6 +68,9 @@ class PostEngagementBar extends StatelessWidget {
         count: post.engagement.reactionCount,
         color: likeColor,
         onPressed: onLike,
+        effect: EngagementEffect.pop,
+        isActive: post.engagement.viewer.isReacted,
+        playOnTap: true,
       ),
       _EngagementMetric(
         layout: layout,
@@ -74,6 +80,8 @@ class PostEngagementBar extends StatelessWidget {
         count: post.engagement.shareCount,
         color: inactiveColor,
         onPressed: onRepost,
+        effect: EngagementEffect.spin,
+        playOnTap: true,
       ),
       _EngagementMetric(
         layout: layout,
@@ -85,6 +93,8 @@ class PostEngagementBar extends StatelessWidget {
         count: post.engagement.saveCount,
         color: saveColor,
         onPressed: onSave,
+        effect: EngagementEffect.bounce,
+        isActive: post.engagement.viewer.isSaved,
       ),
     ];
 
@@ -116,6 +126,9 @@ class _EngagementMetric extends StatelessWidget {
     required this.count,
     required this.color,
     required this.onPressed,
+    required this.effect,
+    this.isActive = false,
+    this.playOnTap = false,
   });
 
   final PostEngagementLayout layout;
@@ -124,6 +137,9 @@ class _EngagementMetric extends StatelessWidget {
   final String label;
   final int count;
   final Color color;
+  final EngagementEffect effect;
+  final bool isActive;
+  final bool playOnTap;
   final VoidCallback? onPressed;
 
   @override
@@ -152,7 +168,24 @@ class _EngagementMetric extends StatelessWidget {
               children: [
                 _buildButton(accessibleLabel, iconSize),
                 const SizedBox(height: UIConstants.postEngagementItemSpacing),
-                Text('$count', style: countStyle),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  transitionBuilder: (child, anim) => FadeTransition(
+                    opacity: anim,
+                    child: SlideTransition(
+                      position: Tween(
+                        begin: const Offset(0, 0.6),
+                        end: Offset.zero,
+                      ).animate(anim),
+                      child: child,
+                    ),
+                  ),
+                  child: Text(
+                    '$count',
+                    key: ValueKey(count),
+                    style: countStyle,
+                  ),
+                ),
               ],
             )
           : Row(
@@ -172,16 +205,16 @@ class _EngagementMetric extends StatelessWidget {
     );
   }
 
-  Widget _buildButton(String accessibleLabel, double iconSize) => IconButton(
-    tooltip: accessibleLabel,
-    onPressed: onPressed,
-    color: color,
-    disabledColor: color,
-    padding: EdgeInsets.zero,
-    constraints: BoxConstraints.tightFor(
-      width: UIConstants.postEngagementButtonSize,
-      height: UIConstants.postEngagementButtonSize,
-    ),
-    icon: Icon(icon, size: iconSize),
-  );
+  Widget _buildButton(String accessibleLabel, double iconSize) =>
+      AnimatedEngagementIcon(
+        icon: icon,
+        color: color,
+        iconSize: iconSize,
+        buttonSize: UIConstants.postEngagementButtonSize,
+        tooltip: accessibleLabel,
+        effect: effect,
+        isActive: isActive,
+        playOnTap: playOnTap,
+        onPressed: onPressed,
+      );
 }
