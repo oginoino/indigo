@@ -65,6 +65,8 @@ class AppStrings {
   static const noHashtagPosts = 'Ainda não há publicações com esta hashtag.';
   static const addFriends = 'Adicionar amigos';
   static const avatarGroupOverflow = '+{count}';
+  static const yourStory = 'Seu story';
+  static const addStory = 'Adicionar story';
 
   static const invalidAppData = 'App data must be a JSON object.';
   static const missingAppDataSection = 'App data is missing {section}.';

@@ -106,6 +106,18 @@ class UIConstants {
     milliseconds: 220,
   );
 
+  static const double storyAvatarSize = 64;
+  static const double storyRingWidth = 3;
+  static const double storyRingGap = 2;
+  static const double storyItemWidth = 76;
+  static const double storyItemSpacing = spaceMd;
+  static const double storyLabelSpacing = spaceXs;
+  static const double storyRowVerticalPadding = spaceMd;
+  static const double storyRowHeight = 108;
+  static const double storyAddBadgeSize = 20;
+  static const double storyAddIconSize = 14;
+  static const int storyLabelMaxLines = 1;
+
   static const double lightBottomNavigationBackgroundOpacity = 0.66;
   static const double darkBottomNavigationBackgroundOpacity = 0.72;
   static const double lightBottomNavigationSelectionOpacity = 0.1;

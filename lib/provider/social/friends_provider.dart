@@ -8,12 +8,21 @@ import '../../service/social_data_service.dart';
 
 class FriendsProvider extends ChangeNotifier {
   FriendsProvider({required SocialDataService socialDataService})
-    : _friends = _resolveFriends(socialDataService);
+    : _currentUser = _resolveCurrentUser(socialDataService),
+      _friends = _resolveFriends(socialDataService);
 
+  final UserProfile? _currentUser;
   final List<UserProfile> _friends;
 
+  UserProfile? get currentUser => _currentUser;
   List<UserProfile> get friends => _friends;
   bool get hasFriends => _friends.isNotEmpty;
+
+  static UserProfile? _resolveCurrentUser(SocialDataService socialDataService) {
+    final data = socialDataService.data;
+    final profileJson = data.profileForParty(data.currentUserPartyId);
+    return profileJson == null ? null : UserProfileJsonMapper.fromJson(profileJson);
+  }
 
   static List<UserProfile> _resolveFriends(
     SocialDataService socialDataService,

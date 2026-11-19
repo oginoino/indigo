@@ -61,8 +61,17 @@ class PostsProvider extends ChangeNotifier {
     return profile;
   }
 
-  List<Post> get feedPosts =>
-      List.unmodifiable(_posts.where((post) => post.isPublishedAt(_clock())));
+  List<Post> get feedPosts => List.unmodifiable(
+    _posts.where((post) => !post.isEphemeral && post.isPublishedAt(_clock())),
+  );
+
+  List<Post> get stories => List.unmodifiable(
+    _posts.where((post) => post.isEphemeral && post.isPublishedAt(_clock())),
+  );
+
+  List<Post> postsForFeed(String feedRoute) => List.unmodifiable(
+    feedPosts.where((post) => post.feeds.contains(feedRoute)),
+  );
 
   List<Post> postsForHashtag(String hashtagId) {
     final label = _socialDataService.data.hashtagById(hashtagId)?['label'];
