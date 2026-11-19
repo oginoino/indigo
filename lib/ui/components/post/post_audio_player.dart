@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show FontFeature;
 
 import 'package:material_ui/material_ui.dart';
 import 'package:video_player/video_player.dart';
@@ -13,6 +14,7 @@ class _AudioPlaybackHub {
   static void claim(_PostAudioPlayerState player) {
     final previous = _active;
     _active = player;
+
     if (previous != null && !identical(previous, player)) {
       previous.pauseFromCoordinator();
     }
@@ -24,7 +26,10 @@ class _AudioPlaybackHub {
 }
 
 class PostAudioPlayer extends StatefulWidget {
-  const PostAudioPlayer({required this.media, super.key});
+  const PostAudioPlayer({
+    required this.media,
+    super.key,
+  });
 
   static const waveformKey = Key('postAudioWaveform');
 
@@ -37,16 +42,18 @@ class PostAudioPlayer extends StatefulWidget {
 class _PostAudioPlayerState extends State<PostAudioPlayer> {
   late VideoPlayerController _controller;
   late Future<void> _initialization;
+
   int _generation = 0;
   bool _isPlaying = false;
   bool _hasError = false;
+  bool _isPlaybackActionInProgress = false;
   Duration _position = Duration.zero;
   Duration _duration = Duration.zero;
 
   static const List<double> _fallbackWaveform = [
-    0.2, 0.4, 0.6, 0.35, 0.7, 0.5, 0.8, 0.45, 0.6, 0.3, 0.55, 0.75, 0.4, 0.65,
-    0.5, 0.85, 0.35, 0.6, 0.45, 0.7, 0.55, 0.3, 0.5, 0.65, 0.4, 0.75, 0.6,
-    0.35, 0.55, 0.8,
+    0.2, 0.4, 0.6, 0.35, 0.7, 0.5, 0.8, 0.45, 0.6, 0.3,
+    0.55, 0.75, 0.4, 0.65, 0.5, 0.85, 0.35, 0.6, 0.45, 0.7,
+    0.55, 0.3, 0.5, 0.65, 0.4, 0.75, 0.6, 0.35, 0.55, 0.8,
   ];
 
   @override
@@ -57,15 +64,18 @@ class _PostAudioPlayerState extends State<PostAudioPlayer> {
   }
 
   @override
-  void didUpdateWidget(PostAudioPlayer oldWidget) {
+  void didUpdateWidget(covariant PostAudioPlayer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.media.sourceUrl != widget.media.sourceUrl) {
       _replaceController();
     }
   }
 
-  VideoPlayerController _createController() =>
-      VideoPlayerController.networkUrl(Uri.parse(widget.media.sourceUrl));
+  VideoPlayerController _createController() {
+    return VideoPlayerController.networkUrl(
+      Uri.parse(widget.media.sourceUrl),
+    );
+  }
 
   Future<void> _initialize(
     VideoPlayerController controller,
@@ -74,31 +84,39 @@ class _PostAudioPlayerState extends State<PostAudioPlayer> {
     try {
       await controller.initialize();
       if (!mounted || generation != _generation) return;
+
       controller.addListener(_onControllerUpdate);
       setState(() {
         _duration = controller.value.duration;
+        _position = controller.value.position;
+        _isPlaying = controller.value.isPlaying;
         _hasError = controller.value.hasError;
       });
-    } catch (_) {
+    } catch (error, stackTrace) {
+      debugPrint('[PostAudioPlayer] Initialization failed: $error');
+      debugPrintStack(stackTrace: stackTrace);
       if (!mounted || generation != _generation) return;
       setState(() => _hasError = true);
     }
   }
 
   void _replaceController() {
-    final previous = _controller;
-    previous.removeListener(_onControllerUpdate);
+    final previous = _controller..removeListener(_onControllerUpdate);
     final generation = ++_generation;
     final controller = _createController();
+
     _controller = controller;
     _AudioPlaybackHub.release(this);
+
     setState(() {
       _hasError = false;
       _isPlaying = false;
+      _isPlaybackActionInProgress = false;
       _position = Duration.zero;
       _duration = Duration.zero;
       _initialization = _initialize(controller, generation);
     });
+
     unawaited(_disposeController(previous));
   }
 
@@ -106,34 +124,42 @@ class _PostAudioPlayerState extends State<PostAudioPlayer> {
     controller.removeListener(_onControllerUpdate);
     try {
       await controller.dispose();
-    } catch (_) {}
+    } catch (error) {
+      debugPrint('[PostAudioPlayer] Controller disposal failed: $error');
+    }
   }
 
   void _onControllerUpdate() {
     if (!mounted) return;
+
     final value = _controller.value;
-    final hasError = _hasError || value.hasError;
     if (value.position == _position &&
         value.isPlaying == _isPlaying &&
         value.duration == _duration &&
-        hasError == _hasError) {
+        value.hasError == _hasError) {
       return;
     }
+
     setState(() {
       _position = value.position;
       _isPlaying = value.isPlaying;
       _duration = value.duration;
-      _hasError = hasError;
+      _hasError = value.hasError;
     });
+
+    if (value.hasError ||
+        (!value.isPlaying &&
+            value.duration > Duration.zero &&
+            value.position >= value.duration)) {
+      _AudioPlaybackHub.release(this);
+    }
   }
 
   @override
   void dispose() {
     _generation++;
     _AudioPlaybackHub.release(this);
-    _controller
-      ..removeListener(_onControllerUpdate)
-      ..dispose();
+    unawaited(_disposeController(_controller));
     super.dispose();
   }
 
@@ -145,69 +171,75 @@ class _PostAudioPlayerState extends State<PostAudioPlayer> {
   }
 
   Future<void> _togglePlayback() async {
+    if (_isPlaybackActionInProgress) return;
+
     if (_hasError) {
       _replaceController();
       return;
     }
-    await _initialization;
-    if (!mounted || _hasError || !_controller.value.isInitialized) return;
-    if (_controller.value.isPlaying) {
-      await _controller.pause();
-      return;
-    }
-    _AudioPlaybackHub.claim(this);
-    final duration = _controller.value.duration;
-    if (duration > Duration.zero && _controller.value.position >= duration) {
-      await _controller.seekTo(Duration.zero);
-    }
-    await _controller.play();
-  }
 
-  Future<void> _seekBy(Duration offset) async {
-    await _initialization;
-    if (!mounted || _hasError || !_controller.value.isInitialized) return;
-    final duration = _controller.value.duration;
-    if (duration <= Duration.zero) return;
-    var target = _controller.value.position + offset;
-    if (target < Duration.zero) target = Duration.zero;
-    if (target > duration) target = duration;
-    await _controller.seekTo(target);
+    _isPlaybackActionInProgress = true;
+    try {
+      await _initialization;
+      if (!mounted || _hasError || !_controller.value.isInitialized) return;
+
+      if (_controller.value.isPlaying) {
+        await _controller.pause();
+        return;
+      }
+
+      _AudioPlaybackHub.claim(this);
+      final value = _controller.value;
+
+      if (value.duration > Duration.zero && value.position >= value.duration) {
+        await _controller.seekTo(Duration.zero);
+      }
+
+      await _controller.play();
+    } catch (error, stackTrace) {
+      debugPrint('[PostAudioPlayer] Playback failed: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      if (mounted) setState(() => _hasError = true);
+    } finally {
+      _isPlaybackActionInProgress = false;
+    }
   }
 
   Future<void> _seekToFraction(double fraction) async {
-    await _initialization;
-    if (!mounted || _hasError || !_controller.value.isInitialized) return;
-    final duration = _controller.value.duration;
-    if (duration <= Duration.zero) return;
-    final clamped = fraction.clamp(0.0, 1.0);
-    await _controller.seekTo(duration * clamped);
+    try {
+      await _initialization;
+      if (!mounted || _hasError || !_controller.value.isInitialized) return;
+
+      final duration = _controller.value.duration;
+      if (duration <= Duration.zero) return;
+
+      final normalized = fraction.clamp(0.0, 1.0);
+      await _controller.seekTo(duration * normalized);
+    } catch (error) {
+      debugPrint('[PostAudioPlayer] Seeking failed: $error');
+    }
   }
 
   String _formatDuration(Duration duration) {
-    final totalSeconds = duration.inSeconds;
-    final minutes = totalSeconds ~/ 60;
-    final seconds = totalSeconds % 60;
+    final seconds = duration.inSeconds;
     return AppStrings.audioDurationFormat
-        .replaceAll('{minutes}', '$minutes')
-        .replaceAll('{seconds}', seconds.toString().padLeft(2, '0'));
+        .replaceAll('{minutes}', '${seconds ~/ 60}')
+        .replaceAll('{seconds}', (seconds % 60).toString().padLeft(2, '0'));
   }
 
   double get _progress {
     final durationMs = _duration.inMilliseconds;
-    if (durationMs == 0) return 0;
-    final positionMs = _position.inMilliseconds.clamp(0, durationMs);
-    return positionMs / durationMs;
+    if (durationMs <= 0) return 0;
+    return _position.inMilliseconds.clamp(0, durationMs) / durationMs;
   }
 
-  Duration get _displayedDuration {
-    if (_position > Duration.zero || _isPlaying) return _position;
-    if (_duration > Duration.zero) return _duration;
-    return widget.media.duration ?? Duration.zero;
-  }
+  Duration get _totalDuration =>
+      _duration > Duration.zero ? _duration : widget.media.duration ?? Duration.zero;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     final waveform = widget.media.waveform.isNotEmpty
         ? widget.media.waveform
         : _fallbackWaveform;
@@ -223,8 +255,12 @@ class _PostAudioPlayerState extends State<PostAudioPlayer> {
           container: true,
           label: widget.media.altText,
           child: Material(
-            color: theme.colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(UIConstants.postMediaRadius),
+            color: theme.cardTheme.color ?? colors.surface,
+            shape: theme.cardTheme.shape ??
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(UIConstants.postMediaRadius),
+                ),
+            clipBehavior: Clip.antiAlias,
             child: SizedBox(
               height: UIConstants.audioPlayerHeight,
               child: Padding(
@@ -239,57 +275,36 @@ class _PostAudioPlayerState extends State<PostAudioPlayer> {
                       hasError: _hasError,
                       onPressed: isLoading ? null : _togglePlayback,
                     ),
-                    if (_hasError) ...[
-                      const SizedBox(width: UIConstants.audioPlayerSpacing),
-                      Expanded(
-                        child: Text(
-                          AppStrings.audioPlaybackFailed,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
+                    SizedBox(width: UIConstants.audioPlayerSpacing),
+                    Expanded(
+                      child: _hasError
+                          ? Text(
+                              AppStrings.audioPlaybackFailed,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colors.onSurfaceVariant,
+                              ),
+                            )
+                          : _WaveformProgress(
+                              key: PostAudioPlayer.waveformKey,
+                              waveform: waveform,
+                              progress: _progress,
+                              color: colors.primary,
+                              trackColor: colors.outlineVariant,
+                              onSeek: canSeek ? _seekToFraction : null,
+                            ),
+                    ),
+                    SizedBox(width: UIConstants.audioPlayerSpacing),
+                    Text(
+                      _formatDuration(_position > Duration.zero || _isPlaying
+                          ? _position
+                          : _totalDuration),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colors.onSurfaceVariant,
+                        fontFeatures: const [FontFeature.tabularFigures()],
                       ),
-                    ] else ...[
-                      const SizedBox(width: UIConstants.audioPlayerSpacing),
-                      _SeekButton(
-                        tooltip: AppStrings.rewindAudio,
-                        icon: Icons.replay_5,
-                        onPressed: canSeek
-                            ? () => _seekBy(-UIConstants.audioPlayerSeekStep)
-                            : null,
-                      ),
-                      const SizedBox(width: UIConstants.audioPlayerSpacing),
-                      Expanded(
-                        child: _WaveformProgress(
-                          key: PostAudioPlayer.waveformKey,
-                          waveform: waveform,
-                          progress: _progress,
-                          color: theme.colorScheme.primary,
-                          trackColor: theme.colorScheme.outlineVariant,
-                          onSeek: canSeek ? _seekToFraction : null,
-                        ),
-                      ),
-                      const SizedBox(width: UIConstants.audioPlayerSpacing),
-                      _SeekButton(
-                        tooltip: AppStrings.forwardAudio,
-                        icon: Icons.forward_5,
-                        onPressed: canSeek
-                            ? () => _seekBy(UIConstants.audioPlayerSeekStep)
-                            : null,
-                      ),
-                      const SizedBox(width: UIConstants.audioPlayerSpacing),
-                      Text(
-                        _formatDuration(_displayedDuration),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          fontFeatures: const [
-                            FontFeature.tabularFigures(),
-                          ],
-                        ),
-                      ),
-                    ],
+                    ),
                   ],
                 ),
               ),
@@ -317,79 +332,43 @@ class _PlayButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = theme.colorScheme.primary;
-    return SizedBox(
-      width: UIConstants.audioPlayerButtonSize,
-      height: UIConstants.audioPlayerButtonSize,
+    final size = UIConstants.audioPlayerButtonSize;
+
+    return SizedBox.square(
+      dimension: size,
       child: isLoading
           ? Center(
-              child: SizedBox(
-                width: UIConstants.audioPlayerIconSize,
-                height: UIConstants.audioPlayerIconSize,
-                child: CircularProgressIndicator(strokeWidth: 2, color: color),
+              child: SizedBox.square(
+                dimension: UIConstants.audioPlayerIconSize,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: theme.colorScheme.primary,
+                ),
               ),
             )
           : IconButton(
               tooltip: hasError
                   ? AppStrings.retry
-                  : (isPlaying ? AppStrings.pauseAudio : AppStrings.playAudio),
+                  : isPlaying
+                      ? AppStrings.pauseAudio
+                      : AppStrings.playAudio,
               onPressed: onPressed,
+              constraints: BoxConstraints.tightFor(width: size, height: size),
               padding: EdgeInsets.zero,
-              style: IconButton.styleFrom(
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                minimumSize: const Size(
-                  UIConstants.audioPlayerButtonSize,
-                  UIConstants.audioPlayerButtonSize,
-                ),
-                padding: EdgeInsets.zero,
-              ),
               icon: Icon(
                 hasError
                     ? Icons.refresh
-                    : (isPlaying ? Icons.pause : Icons.play_arrow),
+                    : isPlaying
+                        ? Icons.pause
+                        : Icons.play_arrow,
                 size: UIConstants.audioPlayerIconSize,
-                color: color,
               ),
             ),
     );
   }
 }
 
-class _SeekButton extends StatelessWidget {
-  const _SeekButton({
-    required this.tooltip,
-    required this.icon,
-    required this.onPressed,
-  });
-
-  final String tooltip;
-  final IconData icon;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      tooltip: tooltip,
-      onPressed: onPressed,
-      padding: EdgeInsets.zero,
-      style: IconButton.styleFrom(
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        minimumSize: const Size(
-          UIConstants.audioPlayerButtonSize,
-          UIConstants.audioPlayerButtonSize,
-        ),
-        padding: EdgeInsets.zero,
-      ),
-      icon: Icon(
-        icon,
-        size: UIConstants.audioPlayerIconSize,
-        color: Theme.of(context).colorScheme.primary,
-      ),
-    );
-  }
-}
-
-class _WaveformProgress extends StatelessWidget {
+class _WaveformProgress extends StatefulWidget {
   const _WaveformProgress({
     required this.waveform,
     required this.progress,
@@ -406,57 +385,108 @@ class _WaveformProgress extends StatelessWidget {
   final ValueChanged<double>? onSeek;
 
   @override
-  Widget build(BuildContext context) {
-    final barCount = waveform.length;
-    final playedBars = (progress * barCount).round().clamp(0, barCount);
+  State<_WaveformProgress> createState() => _WaveformProgressState();
+}
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: onSeek == null
-          ? null
-          : (details) => onSeek!(_fraction(context, details.localPosition.dx)),
-      onHorizontalDragUpdate: onSeek == null
-          ? null
-          : (details) => onSeek!(_fraction(context, details.localPosition.dx)),
-      child: SizedBox(
-        height: UIConstants.audioPlayerButtonSize,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            for (var i = 0; i < barCount; i++)
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    right: i == barCount - 1
-                        ? 0
-                        : UIConstants.audioPlayerWaveformBarSpacing,
-                  ),
-                  child: Align(
-                    child: Container(
-                      width: double.infinity,
-                      height:
-                          UIConstants.audioPlayerWaveformHeight *
-                          waveform[i].clamp(0.15, 1.0),
-                      decoration: BoxDecoration(
-                        color: i < playedBars ? color : trackColor,
-                        borderRadius: BorderRadius.circular(
-                          UIConstants.audioPlayerWaveformBarWidth / 2,
+class _WaveformProgressState extends State<_WaveformProgress> {
+  double? _previewProgress;
+
+  double _fraction(double dx, double width) =>
+      width <= 0 ? 0 : (dx / width).clamp(0.0, 1.0);
+
+  void _updatePreview(double value) {
+    setState(() => _previewProgress = value);
+  }
+
+  void _commitSeek() {
+    final value = _previewProgress;
+    setState(() => _previewProgress = null);
+    if (value != null) widget.onSeek?.call(value);
+  }
+
+  void _cancelPreview() {
+    if (_previewProgress != null) {
+      setState(() => _previewProgress = null);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final progress = (_previewProgress ?? widget.progress).clamp(0.0, 1.0);
+    final playedBars =
+        (progress * widget.waveform.length).round().clamp(0, widget.waveform.length);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+
+        return Semantics(
+          label: 'Audio progress',
+          value: '${(progress * 100).round()}%',
+          slider: true,
+          onIncrease: widget.onSeek == null
+              ? null
+              : () => widget.onSeek!((progress + 0.05).clamp(0.0, 1.0)),
+          onDecrease: widget.onSeek == null
+              ? null
+              : () => widget.onSeek!((progress - 0.05).clamp(0.0, 1.0)),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTapUp: widget.onSeek == null
+                ? null
+                : (details) => widget.onSeek!(
+                      _fraction(details.localPosition.dx, width),
+                    ),
+            onHorizontalDragStart: widget.onSeek == null
+                ? null
+                : (details) => _updatePreview(
+                      _fraction(details.localPosition.dx, width),
+                    ),
+            onHorizontalDragUpdate: widget.onSeek == null
+                ? null
+                : (details) => _updatePreview(
+                      _fraction(details.localPosition.dx, width),
+                    ),
+            onHorizontalDragEnd: widget.onSeek == null ? null : (_) => _commitSeek(),
+            onHorizontalDragCancel: _cancelPreview,
+            child: SizedBox(
+              height: UIConstants.audioPlayerButtonSize,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  for (var i = 0; i < widget.waveform.length; i++)
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          right: i == widget.waveform.length - 1
+                              ? 0
+                              : UIConstants.audioPlayerWaveformBarSpacing,
+                        ),
+                        child: Align(
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 90),
+                            width: double.infinity,
+                            height: UIConstants.audioPlayerWaveformHeight *
+                                widget.waveform[i].clamp(0.15, 1.0),
+                            decoration: BoxDecoration(
+                              color: i < playedBars
+                                  ? widget.color
+                                  : widget.trackColor,
+                              borderRadius: BorderRadius.circular(
+                                UIConstants.audioPlayerWaveformBarWidth / 2,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
+                ],
               ),
-          ],
-        ),
-      ),
+            ),
+          ),
+        );
+      },
     );
-  }
-
-  double _fraction(BuildContext context, double dx) {
-    final box = context.findRenderObject() as RenderBox?;
-    final width = box?.size.width ?? 0;
-    if (width <= 0) return 0;
-    return (dx / width).clamp(0.0, 1.0);
   }
 }
