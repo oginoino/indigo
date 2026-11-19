@@ -40,6 +40,8 @@ class AppStrings {
   static const postSaves = 'Salvamentos';
   static const invalidSocialUserProfileField =
       'Invalid {field} in social user profile data.';
+  static const invalidSocialFriendshipField =
+      'Invalid {field} in social friendship data.';
   static const viewPostImage = 'Visualizar imagem {index}';
   static const closeImageViewer = 'Fechar visualização';
   static const imageViewerCounter = '{current} / {total}';
@@ -61,6 +63,8 @@ class AppStrings {
   static const navFeedOrderSaveFailed =
       'Não foi possível salvar a ordem da navegação.';
   static const noHashtagPosts = 'Ainda não há publicações com esta hashtag.';
+  static const addFriends = 'Adicionar amigos';
+  static const avatarGroupOverflow = '+{count}';
 
   static const invalidAppData = 'App data must be a JSON object.';
   static const missingAppDataSection = 'App data is missing {section}.';

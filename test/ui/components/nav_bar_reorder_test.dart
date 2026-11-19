@@ -1,9 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:indigo/model/feed_item.dart';
 import 'package:indigo/provider/feed/feeds_list_provider.dart';
+import 'package:indigo/provider/social/friends_provider.dart';
 import 'package:indigo/provider/theme/theme_provider.dart';
 import 'package:indigo/service/persistence/persistence_service.dart';
+import 'package:indigo/service/social_data_service.dart';
 import 'package:indigo/ui/components/app_bar/nav_bar.dart';
+import 'package:indigo/util/const/app/social_data_constants.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -28,12 +31,16 @@ void main() {
       const FeedItem(id: 4, name: 'Notícias', icon: '', route: '/news'),
     ]);
     final theme = ThemeProvider(PersistenceService(preferences));
+    final friends = FriendsProvider(
+      socialDataService: _EmptySocialDataService(),
+    );
 
     await tester.pumpWidget(
       MultiProvider(
         providers: [
           ChangeNotifierProvider.value(value: feeds),
           ChangeNotifierProvider.value(value: theme),
+          ChangeNotifierProvider.value(value: friends),
         ],
         child: const MaterialApp(
           home: Scaffold(
@@ -78,5 +85,24 @@ void main() {
 
     feeds.dispose();
     theme.dispose();
+    friends.dispose();
   });
+}
+
+class _EmptySocialDataService implements SocialDataService {
+  _EmptySocialDataService()
+    : _data = SocialMockData.fromJson({
+        SocialDataConstants.schemaVersionKey: 3,
+        SocialDataConstants.currentUserPartyIdKey: 'party-ana',
+        for (final section in SocialDataConstants.sections)
+          section: <dynamic>[],
+      });
+
+  final SocialMockData _data;
+
+  @override
+  Future<void> load() async {}
+
+  @override
+  SocialMockData get data => _data;
 }

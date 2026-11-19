@@ -15,6 +15,11 @@ class SocialDataConstants {
   static const postIdKey = 'post_id';
   static const conversationIdKey = 'conversation_id';
   static const liveSessionIdKey = 'live_session_id';
+  static const requesterPartyIdKey = 'requester_party_id';
+  static const recipientPartyIdKey = 'recipient_party_id';
+  static const statusKey = 'status';
+  static const requestedAtKey = 'requested_at';
+  static const respondedAtKey = 'responded_at';
 
   static const partiesKey = 'parties';
   static const userProfilesKey = 'user_profiles';

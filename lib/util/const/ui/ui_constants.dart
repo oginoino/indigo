@@ -22,6 +22,10 @@ class UIConstants {
   static const double avatarMediumSize = 48;
   static const double avatarLargeSize = 72;
   static const double avatarPlaceholderIconScale = 0.6;
+  static const int avatarGroupMaxVisible = 3;
+  static const double avatarGroupOverlapRatio = 0.3;
+  static const double avatarGroupRingWidth = 2;
+  static const double friendsNavCtaIconSize = 20;
   static const double navigationIconSize = 28;
   static const double appBarLeadingWidth = 56;
   static const double appBarToolbarHeight = 56;
