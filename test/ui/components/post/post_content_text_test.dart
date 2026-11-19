@@ -5,6 +5,7 @@ import 'package:indigo/model/hashtag.dart';
 import 'package:indigo/model/post/post_content.dart';
 import 'package:indigo/provider/feed/feeds_list_provider.dart';
 import 'package:indigo/ui/components/post/post_content_text.dart';
+import 'package:indigo/util/const/ui/ui_constants.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
@@ -68,6 +69,18 @@ void main() {
       ),
     );
     await tester.pump();
+
+    final text = tester.widget<Text>(
+      find.descendant(
+        of: find.byType(PostContentText),
+        matching: find.byType(Text),
+      ),
+    );
+    final link = (text.textSpan! as TextSpan).children!.single as TextSpan;
+    expect(link.text, '🌿\u00A0#diasleves');
+    expect(link.style?.fontWeight, FontWeight.bold);
+    expect(link.style?.color, UIConstants.lightHashtagLinkColor);
+    expect(link.style?.decoration, TextDecoration.none);
 
     await tester.tap(find.byType(RichText));
     await tester.pump();
