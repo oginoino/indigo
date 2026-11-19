@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../provider/bottom_navigation_bar/bottom_navigation_provider.dart';
 import '../../provider/post/posts_provider.dart';
 import '../../util/const/app/app_strings.dart';
+import '../../util/const/app/feed_constants.dart';
 import '../../util/const/ui/ui_constants.dart';
 import '../components/app_bar/app_bar.dart';
 import '../components/post/post_card.dart';
@@ -42,7 +43,7 @@ class HomePage extends StatelessWidget {
             };
             if (metrics != null &&
                 metrics.axis == Axis.vertical &&
-                metrics.extentAfter < UIConstants.postFeedLoadMoreExtent) {
+                metrics.extentAfter < FeedConstants.loadMoreExtent) {
               unawaited(provider.loadMore());
             }
             return false;

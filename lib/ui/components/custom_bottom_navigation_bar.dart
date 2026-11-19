@@ -136,25 +136,43 @@ class CustomBottomNavigationBar extends StatelessWidget {
               height: compact
                   ? UIConstants.bottomNavigationCompactHeight
                   : UIConstants.bottomNavigationHeight,
-              padding: const EdgeInsets.all(
-                UIConstants.bottomNavigationContentPadding,
-              ),
-              decoration: BoxDecoration(
-                color: backgroundColor,
-                borderRadius: BorderRadius.circular(
-                  UIConstants.bottomNavigationRadius,
-                ),
-                border: Border.all(color: borderColor),
-              ),
-              child: isScrollable
-                  ? SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: children,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  AnimatedContainer(
+                    duration: UIConstants.bottomNavigationAnimationDuration,
+                    curve: Curves.easeOutCubic,
+                    decoration: BoxDecoration(
+                      color: backgroundColor,
+                      borderRadius: BorderRadius.circular(
+                        UIConstants.bottomNavigationRadius,
                       ),
-                    )
-                  : Row(children: children),
+                      border: Border.all(color: borderColor),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: UIConstants.bottomNavigationContentPadding,
+                      vertical: compact
+                          ? UIConstants.spaceNone
+                          : UIConstants.bottomNavigationContentPadding,
+                    ),
+                    child: isScrollable
+                        ? SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: children,
+                            ),
+                          )
+                        : Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: children,
+                          ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

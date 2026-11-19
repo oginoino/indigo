@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -9,8 +7,10 @@ import '../../../model/post/post_media.dart';
 import '../../../route/routes.dart';
 import '../../../util/const/app/app_strings.dart';
 import '../../../util/const/ui/ui_constants.dart';
-import 'post_media_load_error.dart';
+import '../../theme/media_overlay_theme.dart';
+import 'fullscreen_post_layout.dart';
 import 'post_engagement_bar.dart';
+import 'post_media_load_error.dart';
 import 'post_media_information.dart';
 
 class PostMediaGallery extends StatelessWidget {
@@ -153,6 +153,7 @@ class _PhotoCollection extends StatelessWidget {
             '${collectionOffset + index + 1}',
           );
     final heroTag = '${post.id}-${photo.id}';
+    final mediaTheme = MediaOverlayTheme.of(context);
 
     return Tooltip(
       message: label,
@@ -179,12 +180,12 @@ class _PhotoCollection extends StatelessWidget {
                 ),
                 if (remainingCount > 0)
                   ColoredBox(
-                    color: Colors.black54,
+                    color: mediaTheme.controlBackgroundColor,
                     child: Center(
                       child: Text(
                         '+$remainingCount',
                         style: Theme.of(context).textTheme.headlineMedium
-                            ?.copyWith(color: Colors.white),
+                            ?.copyWith(color: mediaTheme.foregroundColor),
                       ),
                     ),
                   ),
@@ -251,12 +252,13 @@ class _FullscreenPhotoViewerState extends State<_FullscreenPhotoViewer> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaTheme = MediaOverlayTheme.of(context);
     final counter = AppStrings.imageViewerCounter
         .replaceAll('{current}', '${_currentIndex + 1}')
         .replaceAll('{total}', '${widget.media.length}');
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: mediaTheme.backgroundColor,
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -273,7 +275,8 @@ class _FullscreenPhotoViewerState extends State<_FullscreenPhotoViewer> {
                     media: photo,
                     fit: BoxFit.contain,
                     semanticLabel: photo.altText,
-                    loadingColor: Colors.white,
+                    loadingColor: mediaTheme.foregroundColor,
+                    onDarkBackground: true,
                   ),
                 ),
               );
@@ -290,15 +293,15 @@ class _FullscreenPhotoViewerState extends State<_FullscreenPhotoViewer> {
                       tooltip: AppStrings.closeImageViewer,
                       onPressed: () => Navigator.of(context).pop(),
                       style: IconButton.styleFrom(
-                        backgroundColor: Colors.black54,
-                        foregroundColor: Colors.white,
+                        backgroundColor: mediaTheme.controlBackgroundColor,
+                        foregroundColor: mediaTheme.foregroundColor,
                       ),
                       icon: const Icon(Icons.close),
                     ),
                     const Spacer(),
                     DecoratedBox(
                       decoration: BoxDecoration(
-                        color: Colors.black54,
+                        color: mediaTheme.controlBackgroundColor,
                         borderRadius: BorderRadius.circular(
                           UIConstants.postMediaRadius,
                         ),
@@ -311,7 +314,7 @@ class _FullscreenPhotoViewerState extends State<_FullscreenPhotoViewer> {
                         child: Text(
                           counter,
                           style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(color: Colors.white),
+                              ?.copyWith(color: mediaTheme.foregroundColor),
                         ),
                       ),
                     ),
@@ -326,16 +329,12 @@ class _FullscreenPhotoViewerState extends State<_FullscreenPhotoViewer> {
               top: false,
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final isLandscape =
-                      constraints.maxWidth > constraints.maxHeight;
-                  final actionRailWidth = isLandscape
-                      ? math.min(
-                          constraints.maxWidth *
-                              UIConstants
-                                  .fullscreenLandscapeActionRailWidthFactor,
-                          UIConstants.fullscreenLandscapeActionRailMaxWidth,
-                        )
-                      : UIConstants.fullscreenEngagementRailWidth;
+                  final isLandscape = FullscreenPostLayout.isLandscape(
+                    constraints,
+                  );
+                  final actionRailWidth = FullscreenPostLayout.actionRailWidth(
+                    constraints,
+                  );
 
                   return Padding(
                     padding: const EdgeInsets.fromLTRB(
@@ -349,11 +348,14 @@ class _FullscreenPhotoViewerState extends State<_FullscreenPhotoViewer> {
                         Positioned.fill(
                           child: IgnorePointer(
                             child: DecoratedBox(
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
-                                  colors: [Colors.transparent, Colors.black87],
+                                  colors: [
+                                    Colors.transparent,
+                                    mediaTheme.gradientBottomColor,
+                                  ],
                                 ),
                               ),
                             ),
@@ -404,6 +406,8 @@ class _VideoPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mediaTheme = MediaOverlayTheme.of(context);
+
     return Tooltip(
       message: AppStrings.playVideo,
       child: AspectRatio(
@@ -426,9 +430,9 @@ class _VideoPreview extends StatelessWidget {
                         semanticLabel: media.altText,
                       ),
                     ),
-                  const Icon(
+                  Icon(
                     Icons.play_circle_fill,
-                    color: Colors.white,
+                    color: mediaTheme.foregroundColor,
                     size: UIConstants.videoActionIconSize * 2,
                   ),
                 ],
@@ -449,6 +453,7 @@ class _NetworkPhoto extends StatefulWidget {
     this.fallbackSourceUrl,
     this.semanticLabel,
     this.loadingColor,
+    this.onDarkBackground = false,
   });
 
   final PostMedia media;
@@ -457,6 +462,7 @@ class _NetworkPhoto extends StatefulWidget {
   final String? fallbackSourceUrl;
   final String? semanticLabel;
   final Color? loadingColor;
+  final bool onDarkBackground;
 
   @override
   State<_NetworkPhoto> createState() => _NetworkPhotoState();
@@ -507,6 +513,7 @@ class _NetworkPhotoState extends State<_NetworkPhoto> {
       message: AppStrings.imageLoadFailed,
       icon: Icons.broken_image_outlined,
       onRetry: _retryImage,
+      onDarkBackground: widget.onDarkBackground,
     ),
   );
 }

@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../../model/post/post.dart';
 import '../../../util/const/app/app_strings.dart';
 import '../../../util/const/ui/ui_constants.dart';
+import '../../theme/media_overlay_theme.dart';
 
 enum PostEngagementLayout { horizontal, vertical }
 
@@ -29,17 +30,18 @@ class PostEngagementBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final mediaTheme = MediaOverlayTheme.of(context);
     final inactiveColor = onMedia
-        ? Colors.white
+        ? mediaTheme.foregroundColor
         : theme.colorScheme.onSurfaceVariant;
     final likeColor = post.engagement.viewer.isReacted
         ? onMedia
-              ? UIConstants.fullscreenLikedColor
+              ? mediaTheme.likedColor
               : theme.colorScheme.primary
         : inactiveColor;
     final saveColor = post.engagement.viewer.isSaved
         ? onMedia
-              ? Colors.white
+              ? mediaTheme.foregroundColor
               : theme.colorScheme.primary
         : inactiveColor;
 
@@ -126,12 +128,13 @@ class _EngagementMetric extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mediaTheme = MediaOverlayTheme.of(context);
     final accessibleLabel = '$label: $count';
     final iconSize = layout == PostEngagementLayout.vertical
         ? UIConstants.fullscreenEngagementIconSize
         : UIConstants.postEngagementIconSize;
     final countStyle = Theme.of(context).textTheme.labelMedium?.copyWith(
-      color: onMedia ? Colors.white : color,
+      color: onMedia ? mediaTheme.foregroundColor : color,
       fontWeight: FontWeight.w600,
       shadows: onMedia ? UIConstants.postMediaTextShadows : null,
     );

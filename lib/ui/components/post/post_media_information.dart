@@ -2,7 +2,9 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../model/party/user_profile.dart';
 import '../../../model/post/post.dart';
+import '../../../util/const/app/post_constants.dart';
 import '../../../util/const/ui/ui_constants.dart';
+import '../../theme/media_overlay_theme.dart';
 import 'post_author_header.dart';
 
 class PostMediaInformation extends StatelessWidget {
@@ -18,12 +20,13 @@ class PostMediaInformation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final mediaTheme = MediaOverlayTheme.of(context);
     final titleStyle = textTheme.titleMedium?.copyWith(
-      color: Colors.white,
+      color: mediaTheme.foregroundColor,
       shadows: UIConstants.postMediaTextShadows,
     );
     final contentStyle = textTheme.bodyMedium?.copyWith(
-      color: Colors.white,
+      color: mediaTheme.foregroundColor,
       shadows: UIConstants.postMediaTextShadows,
     );
     final content = post.content.plainText;
@@ -50,7 +53,7 @@ class PostMediaInformation extends StatelessWidget {
           const SizedBox(height: UIConstants.postHeaderTextSpacing),
           Text(
             content,
-            maxLines: UIConstants.postMediaCaptionMaxLines,
+            maxLines: PostConstants.fullscreenCaptionMaxLines,
             overflow: TextOverflow.ellipsis,
             style: contentStyle,
           ),

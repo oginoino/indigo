@@ -3,7 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../../model/party/user_profile.dart';
 import '../../../model/post/post.dart';
 import '../../../util/const/app/app_strings.dart';
-import '../../../util/const/ui/ui_constants.dart';
+import '../../../util/const/app/post_constants.dart';
 import '../../page/post_article_page.dart';
 
 class PostLongTextPreview extends StatelessWidget {
@@ -30,7 +30,7 @@ class PostLongTextPreview extends StatelessWidget {
 
         final textPainter = TextPainter(
           text: TextSpan(text: text, style: theme.textTheme.bodyLarge),
-          maxLines: UIConstants.postPreviewMaxLines,
+          maxLines: PostConstants.previewMaxLines,
           textDirection: Directionality.of(context),
           textScaler: MediaQuery.textScalerOf(context),
         )..layout(maxWidth: constraints.maxWidth);
@@ -42,7 +42,7 @@ class PostLongTextPreview extends StatelessWidget {
           children: [
             Text(
               text,
-              maxLines: hasMore ? UIConstants.postPreviewMaxLines : null,
+              maxLines: hasMore ? PostConstants.previewMaxLines : null,
               overflow: hasMore ? TextOverflow.ellipsis : TextOverflow.clip,
               style: theme.textTheme.bodyLarge,
             ),

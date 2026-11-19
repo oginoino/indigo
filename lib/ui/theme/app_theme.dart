@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../util/const/ui/ui_constants.dart';
 import 'app_component_theme.dart';
+import 'media_overlay_theme.dart';
 
 ThemeData _buildTheme({
   required Brightness brightness,
@@ -76,6 +77,7 @@ ThemeData _buildTheme({
           alpha: UIConstants.bottomNavigationBorderOpacity,
         ),
       ),
+      MediaOverlayTheme.standard,
     ],
   );
 }

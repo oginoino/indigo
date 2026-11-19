@@ -51,6 +51,14 @@ void main() {
               as BoxDecoration;
 
       expect(background.color!.a, lessThan(1));
+      final expandedTapTarget = find.descendant(
+        of: find.byTooltip('Início'),
+        matching: find.byType(InkWell),
+      );
+      expect(
+        tester.getSize(expandedTapTarget).height,
+        greaterThanOrEqualTo(48),
+      );
       await tester.tap(find.byTooltip('Perfil'));
       await tester.pumpAndSettle();
       expect(selectedIndex, 1);
@@ -78,6 +86,11 @@ void main() {
             2 * UIConstants.bottomNavigationCompactHorizontalInset,
       );
 
+      final compactTapTarget = find.descendant(
+        of: find.byTooltip('Início'),
+        matching: find.byType(InkWell),
+      );
+      expect(tester.getSize(compactTapTarget).height, greaterThanOrEqualTo(48));
       await tester.tap(find.byTooltip('Início'));
       await tester.pumpAndSettle();
       expect(selectedIndex, 0);
