@@ -40,16 +40,17 @@ class UIConstants {
   static const double bottomNavigationRadius = radiusPill;
   static const int bottomNavigationMaxVisibleItems = 5;
   static const double bottomNavigationItemWidth = 64;
-  static const double bottomNavigationOuterPadding = defaultPadding;
+  static const double bottomNavigationOuterPadding = spaceSm;
   static const double bottomNavigationBottomPadding = spaceMd;
   static const double bottomNavigationContentPadding = spaceXs;
-  static const double bottomNavigationBlurSigma = 18;
+  static const double bottomNavigationBlurSigma = 22;
   static const Duration bottomNavigationAnimationDuration = Duration(
     milliseconds: 220,
   );
   static const double bottomNavigationBorderOpacity = 0.55;
 
   static const double postCardSpacing = spaceMd;
+  static const double postCardHorizontalInset = spaceSm;
   static const double postCardOuterSpacing = spaceXs;
   static const double postCardRadius = radiusLg;
   static const double postMediaAspectRatio = 1.2;
@@ -85,10 +86,10 @@ class UIConstants {
     milliseconds: 220,
   );
 
-  static const double lightBottomNavigationBackgroundOpacity = 0.92;
-  static const double darkBottomNavigationBackgroundOpacity = 0.88;
-  static const double lightBottomNavigationSelectionOpacity = 0.07;
-  static const double darkBottomNavigationSelectionOpacity = 0.16;
+  static const double lightBottomNavigationBackgroundOpacity = 0.66;
+  static const double darkBottomNavigationBackgroundOpacity = 0.72;
+  static const double lightBottomNavigationSelectionOpacity = 0.1;
+  static const double darkBottomNavigationSelectionOpacity = 0.2;
 
   static const Color lightPrimaryColor = Color(0xFF121212);
   static const Color darkPrimaryColor = Color(0xFFF8F8F8);
