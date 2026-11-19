@@ -26,6 +26,8 @@ class Routes {
   static const String messages = '/messages';
   static const String profile = '/profile';
   static const String hashtags = '/hashtags/:hashtagId';
+  static const String videoPostIdQueryParameter = 'postId';
+  static const String videoMediaIdQueryParameter = 'mediaId';
 
   static const List<RouteInfo> routes = [
     RouteInfo(name: RouteNames.home, path: home),

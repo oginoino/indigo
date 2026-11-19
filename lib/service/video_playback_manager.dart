@@ -43,7 +43,8 @@ class VideoPlaybackEntry {
 }
 
 class VideoPlaybackManager {
-  VideoPlaybackManager({required this.onError});
+  VideoPlaybackManager({required this.onError, int initialIndex = 0})
+    : _currentIndex = initialIndex;
 
   final VideoPlaybackErrorHandler onError;
   final Map<String, VideoPlaybackEntry> _entries = {};

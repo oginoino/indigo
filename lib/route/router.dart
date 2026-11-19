@@ -45,7 +45,15 @@ List<GoRoute> _buildRoutes() {
 
   return [
     AppRoute(Routes.home, (context, state) => const HomePage()),
-    AppRoute(Routes.videos, (context, state) => const VideosPage()),
+    AppRoute(
+      Routes.videos,
+      (context, state) => VideosPage(
+        initialPostId:
+            state.uri.queryParameters[Routes.videoPostIdQueryParameter],
+        initialMediaId:
+            state.uri.queryParameters[Routes.videoMediaIdQueryParameter],
+      ),
+    ),
     AppRoute(
       Routes.hashtags,
       (context, state) =>

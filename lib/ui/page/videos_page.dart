@@ -17,7 +17,10 @@ import '../components/post/post_media_information.dart';
 import '../theme/media_overlay_theme.dart';
 
 class VideosPage extends StatelessWidget {
-  const VideosPage({super.key});
+  const VideosPage({this.initialPostId, this.initialMediaId, super.key});
+
+  final String? initialPostId;
+  final String? initialMediaId;
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +69,12 @@ class VideosPage extends StatelessWidget {
             );
           }
 
-          return _VideoCarousel(items: videos, authorFor: provider.authorFor);
+          return _VideoCarousel(
+            items: videos,
+            authorFor: provider.authorFor,
+            initialPostId: initialPostId,
+            initialMediaId: initialMediaId,
+          );
         },
       ),
       bottomNavigationBar: const AppBottomNavigationBar(),
@@ -75,10 +83,17 @@ class VideosPage extends StatelessWidget {
 }
 
 class _VideoCarousel extends StatefulWidget {
-  const _VideoCarousel({required this.items, required this.authorFor});
+  const _VideoCarousel({
+    required this.items,
+    required this.authorFor,
+    this.initialPostId,
+    this.initialMediaId,
+  });
 
   final List<VideoFeedItem> items;
   final UserProfile? Function(Post post) authorFor;
+  final String? initialPostId;
+  final String? initialMediaId;
 
   @override
   State<_VideoCarousel> createState() => _VideoCarouselState();
@@ -86,11 +101,26 @@ class _VideoCarousel extends StatefulWidget {
 
 class _VideoCarouselState extends State<_VideoCarousel> {
   late final VideoPlaybackManager _playbackManager;
+  late final PageController _pageController;
+
+  int _initialVideoIndex() {
+    final postId = widget.initialPostId;
+    final mediaId = widget.initialMediaId;
+    if (postId == null || mediaId == null) return 0;
+
+    final index = widget.items.indexWhere(
+      (item) => item.post.id == postId && item.media.id == mediaId,
+    );
+    return index < 0 ? 0 : index;
+  }
 
   @override
   void initState() {
     super.initState();
+    final initialIndex = _initialVideoIndex();
+    _pageController = PageController(initialPage: initialIndex);
     _playbackManager = VideoPlaybackManager(
+      initialIndex: initialIndex,
       onError: (error, stackTrace) => ErrorHandler.report(
         error,
         stackTrace,
@@ -124,12 +154,14 @@ class _VideoCarouselState extends State<_VideoCarousel> {
   @override
   void dispose() {
     _playbackManager.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return PageView.builder(
+      controller: _pageController,
       scrollDirection: Axis.vertical,
       itemCount: widget.items.length + 1,
       onPageChanged: _handlePageChanged,
