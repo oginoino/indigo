@@ -236,7 +236,7 @@ class _FullscreenVideoItemState extends State<_FullscreenVideoItem> {
                     UIConstants.videoOverlayPadding,
                     UIConstants.videoOverlayPadding,
                     UIConstants.videoOverlayPadding,
-                    UIConstants.fullscreenVideoBottomInset,
+                    UIConstants.fullscreenVideoBottomGap,
                   ),
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
