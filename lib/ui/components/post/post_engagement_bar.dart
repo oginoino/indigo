@@ -11,12 +11,20 @@ class PostEngagementBar extends StatelessWidget {
     required this.post,
     this.layout = PostEngagementLayout.horizontal,
     this.onMedia = false,
+    this.onComment,
+    this.onLike,
+    this.onRepost,
+    this.onSave,
     super.key,
   });
 
   final Post post;
   final PostEngagementLayout layout;
   final bool onMedia;
+  final VoidCallback? onComment;
+  final VoidCallback? onLike;
+  final VoidCallback? onRepost;
+  final VoidCallback? onSave;
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +51,7 @@ class PostEngagementBar extends StatelessWidget {
         label: AppStrings.postComments,
         count: post.engagement.commentCount,
         color: inactiveColor,
+        onPressed: onComment,
       ),
       _EngagementMetric(
         layout: layout,
@@ -53,6 +62,7 @@ class PostEngagementBar extends StatelessWidget {
         label: AppStrings.postLikes,
         count: post.engagement.reactionCount,
         color: likeColor,
+        onPressed: onLike,
       ),
       _EngagementMetric(
         layout: layout,
@@ -61,6 +71,7 @@ class PostEngagementBar extends StatelessWidget {
         label: AppStrings.postReposts,
         count: post.engagement.shareCount,
         color: inactiveColor,
+        onPressed: onRepost,
       ),
       _EngagementMetric(
         layout: layout,
@@ -71,6 +82,7 @@ class PostEngagementBar extends StatelessWidget {
         label: AppStrings.postSaves,
         count: post.engagement.saveCount,
         color: saveColor,
+        onPressed: onSave,
       ),
     ];
 
@@ -101,6 +113,7 @@ class _EngagementMetric extends StatelessWidget {
     required this.label,
     required this.count,
     required this.color,
+    required this.onPressed,
   });
 
   final PostEngagementLayout layout;
@@ -109,6 +122,7 @@ class _EngagementMetric extends StatelessWidget {
   final String label;
   final int count;
   final Color color;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -125,34 +139,46 @@ class _EngagementMetric extends StatelessWidget {
     return Semantics(
       label: accessibleLabel,
       container: true,
+      button: true,
+      enabled: onPressed != null,
+      onTap: onPressed,
       excludeSemantics: true,
-      child: Tooltip(
-        message: accessibleLabel,
-        excludeFromSemantics: true,
-        child: layout == PostEngagementLayout.vertical
-            ? Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(icon, size: iconSize, color: color),
-                  const SizedBox(height: UIConstants.postEngagementItemSpacing),
-                  Text('$count', style: countStyle),
-                ],
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(icon, size: iconSize, color: color),
-                  const SizedBox(width: UIConstants.postEngagementItemSpacing),
-                  Flexible(
-                    child: Text(
-                      '$count',
-                      overflow: TextOverflow.ellipsis,
-                      style: countStyle,
-                    ),
+      child: layout == PostEngagementLayout.vertical
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildButton(accessibleLabel, iconSize),
+                const SizedBox(height: UIConstants.postEngagementItemSpacing),
+                Text('$count', style: countStyle),
+              ],
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildButton(accessibleLabel, iconSize),
+                const SizedBox(width: UIConstants.postEngagementItemSpacing),
+                Flexible(
+                  child: Text(
+                    '$count',
+                    overflow: TextOverflow.ellipsis,
+                    style: countStyle,
                   ),
-                ],
-              ),
-      ),
+                ),
+              ],
+            ),
     );
   }
+
+  Widget _buildButton(String accessibleLabel, double iconSize) => IconButton(
+    tooltip: accessibleLabel,
+    onPressed: onPressed,
+    color: color,
+    disabledColor: color,
+    padding: EdgeInsets.zero,
+    constraints: BoxConstraints.tightFor(
+      width: UIConstants.postEngagementButtonSize,
+      height: UIConstants.postEngagementButtonSize,
+    ),
+    icon: Icon(icon, size: iconSize),
+  );
 }
