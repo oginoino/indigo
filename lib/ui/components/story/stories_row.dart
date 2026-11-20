@@ -26,9 +26,15 @@ class StoriesRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ownRoleId = currentUser?.platformUserRoleId;
-    final groups = _groupsByAuthor()
+    final otherGroups = _groupsByAuthor()
         .where((group) => group.authorRoleId != ownRoleId)
         .toList(growable: false);
+    // Perfis com stories não vistos primeiro; totalmente vistos no final.
+    // A ordem original é preservada dentro de cada grupo.
+    final groups = <_StoryGroup>[
+      ...otherGroups.where((group) => !_isAllSeen(group)),
+      ...otherGroups.where(_isAllSeen),
+    ];
     final orderedStories = <Post>[for (final group in groups) ...group.stories];
 
     final items = <Widget>[];
@@ -79,6 +85,9 @@ class StoriesRow extends StatelessWidget {
       ),
     );
   }
+
+  bool _isAllSeen(_StoryGroup group) =>
+      group.stories.every((story) => seenStoryIds.contains(story.id));
 
   List<_StoryGroup> _groupsByAuthor() {
     final order = <String>[];
