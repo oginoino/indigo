@@ -383,6 +383,8 @@ class _WaveformProgress extends StatefulWidget {
 }
 
 class _WaveformProgressState extends State<_WaveformProgress> {
+  static const double _height = 28;
+
   double? _previewProgress;
 
   double _fraction(double dx, double width) =>
@@ -406,14 +408,11 @@ class _WaveformProgressState extends State<_WaveformProgress> {
 
   @override
   Widget build(BuildContext context) {
-    Theme.of(context);
+    final isDragging = _previewProgress != null;
     final progress = (_previewProgress ?? widget.progress)
         .clamp(0.0, 1.0)
         .toDouble();
-    (progress * widget.waveform.length).round().clamp(
-      0,
-      widget.waveform.length,
-    );
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -438,16 +437,192 @@ class _WaveformProgressState extends State<_WaveformProgress> {
               : (_) => _commitSeek(),
           onHorizontalDragCancel: _cancelPreview,
           child: SizedBox(
-            height: UIConstants.audioPlayerButtonSize,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Preserve aqui a construção atual das barras da waveform.
-              ],
+            width: width,
+            height: _height,
+            // Entrada: as barras crescem em cascata da esquerda para a direita.
+            child: TweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: reduceMotion ? 1 : 0, end: 1),
+              duration: reduceMotion
+                  ? Duration.zero
+                  : const Duration(milliseconds: 700),
+              builder: (context, intro, _) => TweenAnimationBuilder<double>(
+                // Suaviza o avanço; durante o arraste acompanha o dedo.
+                tween: Tween<double>(end: progress),
+                duration: isDragging || reduceMotion
+                    ? Duration.zero
+                    : const Duration(milliseconds: 250),
+                curve: Curves.linear,
+                builder: (context, animatedProgress, _) =>
+                    TweenAnimationBuilder<double>(
+                      tween: Tween<double>(end: isDragging ? 1 : 0),
+                      duration: const Duration(milliseconds: 160),
+                      builder: (context, playhead, _) => CustomPaint(
+                        painter: _WaveformPainter(
+                          waveform: widget.waveform,
+                          progress: animatedProgress,
+                          intro: intro,
+                          playhead: playhead,
+                          color: widget.color,
+                          trackColor: widget.trackColor,
+                        ),
+                      ),
+                    ),
+              ),
             ),
           ),
         );
       },
     );
   }
+}
+
+class _WaveformPainter extends CustomPainter {
+  _WaveformPainter({
+    required this.waveform,
+    required this.progress,
+    required this.intro,
+    required this.playhead,
+    required this.color,
+    required this.trackColor,
+  });
+
+  final List<double> waveform;
+  final double progress;
+
+  /// 0..1 — animação de entrada das barras.
+  final double intro;
+
+  /// 0..1 — opacidade do marcador (visível apenas durante o arraste).
+  final double playhead;
+  final Color color;
+  final Color trackColor;
+
+  static const double _barWidth = 2.5;
+  static const double _barGap = 1.8;
+  static const double _minBarHeight = 3;
+  static const double _verticalInset = 4;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.width <= 0 || size.height <= 0) return;
+
+    if (waveform.isEmpty) {
+      _paintLinear(canvas, size);
+    } else {
+      _paintBars(canvas, size);
+    }
+
+    if (playhead > 0) _paintPlayhead(canvas, size);
+  }
+
+  void _paintBars(Canvas canvas, Size size) {
+    final barCount = ((size.width + _barGap) / (_barWidth + _barGap))
+        .floor()
+        .clamp(1, 1000)
+        .toInt();
+    final peak = waveform.reduce((a, b) => a > b ? a : b).abs();
+    final normalizer = peak <= 0 ? 1.0 : peak;
+
+    final restPaint = Paint()..color = color.withValues(alpha: 0.28);
+    final playedPaint = Paint()..color = color;
+    final centerY = size.height / 2;
+    final step = size.width / barCount;
+    final maxBarHeight = size.height - _verticalInset;
+
+    for (var i = 0; i < barCount; i++) {
+      // Reamostra as amostras reais para a quantidade de barras que cabe.
+      final start = (i * waveform.length / barCount).floor();
+      final end = ((i + 1) * waveform.length / barCount)
+          .ceil()
+          .clamp(start + 1, waveform.length)
+          .toInt();
+
+      var sum = 0.0;
+      for (var j = start; j < end; j++) {
+        sum += waveform[j].abs();
+      }
+      final amplitude = (sum / (end - start) / normalizer).clamp(0.0, 1.0);
+
+      // Entrada em cascata.
+      final reveal = Curves.easeOutCubic.transform(
+        (intro * 1.6 - (i / barCount) * 0.6).clamp(0.0, 1.0),
+      );
+
+      var barHeight =
+          (_minBarHeight + (maxBarHeight - _minBarHeight) * amplitude) *
+          reveal;
+
+      // Leve "respiro" nas barras próximas ao marcador durante o arraste.
+      if (playhead > 0) {
+        final distance = ((i + 0.5) / barCount - progress).abs();
+        final lift = (1 - (distance * 8).clamp(0.0, 1.0)) * 0.18 * playhead;
+        barHeight *= 1 + lift;
+      }
+      barHeight = barHeight.clamp(0.0, size.height).toDouble();
+      if (barHeight < 0.5) continue;
+
+      final x = i * step + (step - _barWidth) / 2;
+      final rrect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(x, centerY - barHeight / 2, _barWidth, barHeight),
+        const Radius.circular(_barWidth / 2),
+      );
+
+      // Preenchimento fracionado: a barra sob o marcador é preenchida
+      // parcialmente, o que deixa o avanço contínuo em vez de "em degraus".
+      final fill = (progress * barCount - i).clamp(0.0, 1.0).toDouble();
+      if (fill >= 1) {
+        canvas.drawRRect(rrect, playedPaint);
+      } else {
+        canvas.drawRRect(rrect, restPaint);
+        if (fill > 0) {
+          canvas
+            ..save()
+            ..clipRect(Rect.fromLTWH(x, 0, _barWidth * fill, size.height))
+            ..drawRRect(rrect, playedPaint)
+            ..restore();
+        }
+      }
+    }
+  }
+
+  void _paintLinear(Canvas canvas, Size size) {
+    final centerY = size.height / 2;
+    final stroke = Paint()
+      ..strokeWidth = 3
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawLine(
+      Offset(0, centerY),
+      Offset(size.width, centerY),
+      stroke..color = trackColor,
+    );
+    if (progress > 0) {
+      canvas.drawLine(
+        Offset(0, centerY),
+        Offset(size.width * progress, centerY),
+        stroke..color = color,
+      );
+    }
+  }
+
+  void _paintPlayhead(Canvas canvas, Size size) {
+    final x = (size.width * progress).clamp(1.0, size.width - 1);
+    canvas.drawLine(
+      Offset(x, 1),
+      Offset(x, size.height - 1),
+      Paint()
+        ..color = color.withValues(alpha: playhead)
+        ..strokeWidth = 2
+        ..strokeCap = StrokeCap.round,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_WaveformPainter old) =>
+      old.progress != progress ||
+      old.intro != intro ||
+      old.playhead != playhead ||
+      old.color != color ||
+      old.trackColor != trackColor ||
+      !identical(old.waveform, waveform);
 }
