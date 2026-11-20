@@ -147,7 +147,6 @@ void main() {
                         _story('story-3', 'role-maya-user', 'Ouvindo um disco'),
                       ],
                       authorFor: authorFor,
-                      seenStoryIds: const {'story-2'},
                     ),
                   ),
                 ),
@@ -183,7 +182,6 @@ void main() {
         home: StoryViewer(
           stories: [_story('story-1', 'role-lucas-user', 'Primeira luz')],
           authorFor: authorFor,
-          onStorySeen: seen.add,
         ),
       ),
     );

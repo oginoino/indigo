@@ -1,7 +1,9 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:provider/provider.dart';
 
 import '../../../model/party/user_profile.dart';
 import '../../../model/post/post.dart';
+import '../../../provider/story/story_seen_provider.dart';
 import '../../../util/const/app/app_strings.dart';
 import '../../../util/const/ui/ui_constants.dart';
 import '../avatar.dart';
@@ -12,19 +14,16 @@ class StoriesRow extends StatelessWidget {
     required this.stories,
     required this.authorFor,
     this.currentUser,
-    this.seenStoryIds = const <String>{},
-    this.onStorySeen,
     super.key,
   });
 
   final List<Post> stories;
   final UserProfile? Function(Post post) authorFor;
   final UserProfile? currentUser;
-  final Set<String> seenStoryIds;
-  final ValueChanged<Post>? onStorySeen;
 
   @override
   Widget build(BuildContext context) {
+    final seen = context.watch<StorySeenProvider>();
     final ownRoleId = currentUser?.platformUserRoleId;
     final otherGroups = _groupsByAuthor()
         .where((group) => group.authorRoleId != ownRoleId)
@@ -32,8 +31,8 @@ class StoriesRow extends StatelessWidget {
     // Perfis com stories não vistos primeiro; totalmente vistos no final.
     // A ordem original é preservada dentro de cada grupo.
     final groups = <_StoryGroup>[
-      ...otherGroups.where((group) => !_isAllSeen(group)),
-      ...otherGroups.where(_isAllSeen),
+      ...otherGroups.where((group) => !seen.hasSeenAll(group.stories)),
+      ...otherGroups.where((group) => seen.hasSeenAll(group.stories)),
     ];
     final orderedStories = <Post>[for (final group in groups) ...group.stories];
 
@@ -51,13 +50,9 @@ class StoriesRow extends StatelessWidget {
     for (final group in groups) {
       final firstIndex = startIndex;
       startIndex += group.stories.length;
-      final unseenOffset = group.stories.indexWhere(
-        (story) => !seenStoryIds.contains(story.id),
-      );
-      final openIndex = unseenOffset == -1
-          ? firstIndex
-          : firstIndex + unseenOffset;
+      final unseenOffset = seen.firstUnseenIndex(group.stories);
       final allSeen = unseenOffset == -1;
+      final openIndex = allSeen ? firstIndex : firstIndex + unseenOffset;
       items.add(
         _StoryItem(
           label: group.author?.displayName ?? AppStrings.unknownPostAuthor,
@@ -85,9 +80,6 @@ class StoriesRow extends StatelessWidget {
       ),
     );
   }
-
-  bool _isAllSeen(_StoryGroup group) =>
-      group.stories.every((story) => seenStoryIds.contains(story.id));
 
   List<_StoryGroup> _groupsByAuthor() {
     final order = <String>[];
@@ -121,8 +113,6 @@ class StoriesRow extends StatelessWidget {
           stories: orderedStories,
           authorFor: authorFor,
           initialIndex: index,
-          seenStoryIds: seenStoryIds,
-          onStorySeen: onStorySeen,
         ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) =>
             FadeTransition(opacity: animation, child: child),

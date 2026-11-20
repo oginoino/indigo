@@ -188,7 +188,6 @@ void main() {
             ],
             authorFor: (post) =>
                 post.authorPartyRoleId == 'role-lucas-user' ? lucas : maya,
-            seenStoryIds: const {'lucas-1'},
           ),
         ),
       ),
@@ -214,7 +213,6 @@ void main() {
               _story('lucas-3', 'role-lucas-user'),
             ],
             authorFor: (_) => lucas,
-            seenStoryIds: const {'lucas-1'},
           ),
         ),
       ),

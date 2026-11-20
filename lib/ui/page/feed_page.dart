@@ -143,7 +143,7 @@ class _FeedStories extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<PostsProvider>();
     final currentUser = context.watch<FriendsProvider>().currentUser;
-    final storySeen = context.watch<StorySeenProvider>();
+    context.watch<StorySeenProvider>();
     final stories = provider.stories
         .where((story) => story.feeds.contains(feedRoute))
         .toList(growable: false);
@@ -156,8 +156,6 @@ class _FeedStories extends StatelessWidget {
       stories: stories,
       authorFor: provider.authorFor,
       currentUser: currentUser,
-      seenStoryIds: storySeen.seenStoryIds,
-      onStorySeen: (story) => storySeen.markSeen(story.id),
     );
   }
 }

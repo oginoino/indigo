@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:material_ui/material_ui.dart';
+import 'package:provider/provider.dart';
 
 import '../../../model/party/user_profile.dart';
 import '../../../model/post/post.dart';
 import '../../../model/post/post_media.dart';
+import '../../../provider/story/story_seen_provider.dart';
 import '../../../util/const/app/app_strings.dart';
 import '../../../util/const/ui/ui_constants.dart';
 import '../../../util/formatter/post_time_formatter.dart';
@@ -17,16 +19,12 @@ class StoryViewer extends StatefulWidget {
     required this.stories,
     required this.authorFor,
     this.initialIndex = 0,
-    this.seenStoryIds = const <String>{},
-    this.onStorySeen,
     super.key,
   });
 
   final List<Post> stories;
   final UserProfile? Function(Post post) authorFor;
   final int initialIndex;
-  final Set<String> seenStoryIds;
-  final ValueChanged<Post>? onStorySeen;
 
   @override
   State<StoryViewer> createState() => _StoryViewerState();
@@ -36,7 +34,6 @@ class _StoryViewerState extends State<StoryViewer>
     with SingleTickerProviderStateMixin {
   late final PageController _pageController;
   late final AnimationController _progressController;
-  late final Set<String> _seenStoryIds;
   late int _currentIndex;
 
   @override
@@ -44,7 +41,6 @@ class _StoryViewerState extends State<StoryViewer>
     super.initState();
     final lastIndex = widget.stories.length - 1;
     _currentIndex = lastIndex < 0 ? 0 : widget.initialIndex.clamp(0, lastIndex);
-    _seenStoryIds = {...widget.seenStoryIds};
     _pageController = PageController(initialPage: _currentIndex);
     _progressController = AnimationController(
       vsync: this,
@@ -115,8 +111,9 @@ class _StoryViewerState extends State<StoryViewer>
   }
 
   int _nextUnseenIndex(int start) {
+    final seen = context.read<StorySeenProvider>();
     for (var index = start; index < widget.stories.length; index++) {
-      if (!_seenStoryIds.contains(widget.stories[index].id)) return index;
+      if (!seen.isSeen(widget.stories[index].id)) return index;
     }
     return -1;
   }
@@ -147,9 +144,9 @@ class _StoryViewerState extends State<StoryViewer>
   }
 
   void _markSeen(int index) {
-    if (index < 0 || index >= widget.stories.length) return;
-    final story = widget.stories[index];
-    if (_seenStoryIds.add(story.id)) widget.onStorySeen?.call(story);
+    if (!mounted || index < 0 || index >= widget.stories.length) return;
+    // O provider notifica a StoriesRow: anel muda e a fila é reordenada.
+    context.read<StorySeenProvider>().markSeen(widget.stories[index].id);
   }
 
   void _precacheStoryAt(int index) {
