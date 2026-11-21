@@ -1,4 +1,6 @@
-import 'package:camera/camera.dart';
+import 'dart:io';
+
+import 'package:image_picker/image_picker.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
@@ -7,7 +9,7 @@ import '../../../service/media_picker_service.dart';
 import '../../../util/const/app/app_strings.dart';
 import '../../../util/const/ui/ui_constants.dart';
 
-/// Chama o sheet de mídia em modal bottom.
+/// Chama o sheet de mídia (galeria pura) em modal bottom.
 /// Retorna quando o usuário fecha (seleciona ou cancela).
 Future<void> showMediaPickerSheet(
   BuildContext context, {
@@ -34,82 +36,8 @@ class _MediaPickerSheet extends StatefulWidget {
   State<_MediaPickerSheet> createState() => _MediaPickerSheetState();
 }
 
-class _MediaPickerSheetState extends State<_MediaPickerSheet>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tab = TabController(length: 2, vsync: this);
+class _MediaPickerSheetState extends State<_MediaPickerSheet> {
   final _pickerService = MediaPickerService();
-
-  // Camera state
-  List<CameraDescription> _cameras = [];
-  CameraController? _cameraController;
-  bool _cameraReady = false;
-  final bool _isRecording = false;
-  int _cameraIndex = 0;
-  FlashMode _flashMode = FlashMode.auto;
-
-  @override
-  void initState() {
-    super.initState();
-    _initCamera();
-  }
-
-  Future<void> _initCamera() async {
-    try {
-      _cameras = await availableCameras();
-      if (_cameras.isEmpty) return;
-      await _startCamera(_cameras[_cameraIndex]);
-    } catch (_) {
-      // Câmera indisponível (simulador ou permissão negada)
-    }
-  }
-
-  Future<void> _startCamera(CameraDescription camera) async {
-    final controller = CameraController(
-      camera,
-      ResolutionPreset.high,
-      enableAudio: true,
-    );
-    try {
-      await controller.initialize();
-      await controller.setFlashMode(_flashMode);
-      if (!mounted) return;
-      await _cameraController?.dispose();
-      setState(() {
-        _cameraController = controller;
-        _cameraReady = true;
-      });
-    } catch (_) {
-      await controller.dispose();
-    }
-  }
-
-  Future<void> _flipCamera() async {
-    if (_cameras.length < 2) return;
-    _cameraIndex = (_cameraIndex + 1) % _cameras.length;
-    setState(() => _cameraReady = false);
-    await _startCamera(_cameras[_cameraIndex]);
-  }
-
-  Future<void> _cycleFlash() async {
-    final next = switch (_flashMode) {
-      FlashMode.off => FlashMode.auto,
-      FlashMode.auto => FlashMode.always,
-      _ => FlashMode.off,
-    };
-    _flashMode = next;
-    await _cameraController?.setFlashMode(next);
-    setState(() {});
-  }
-
-  Future<void> _capturePhoto() async {
-    if (!_cameraReady || _cameraController == null) return;
-    try {
-      final file = await _cameraController!.takePicture();
-      if (!mounted) return;
-      context.read<CreatePostProvider>().addMediaItems([file]);
-      Navigator.of(context).pop();
-    } catch (_) {}
-  }
 
   Future<void> _pickFromGallery() async {
     final provider = context.read<CreatePostProvider>();
@@ -140,13 +68,6 @@ class _MediaPickerSheetState extends State<_MediaPickerSheet>
         behavior: SnackBarBehavior.floating,
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _tab.dispose();
-    _cameraController?.dispose();
-    super.dispose();
   }
 
   @override
@@ -191,32 +112,34 @@ class _MediaPickerSheetState extends State<_MediaPickerSheet>
                 ),
               ),
 
-              // ── Tab bar ──
-              TabBar(
-                controller: _tab,
-                tabs: const [
-                  Tab(text: AppStrings.mediaPickerCamera),
-                  Tab(text: AppStrings.mediaPickerGallery),
-                ],
+              // ── AppBar leve ──
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: UIConstants.spaceMd,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        AppStrings.mediaPickerGallery,
+                        style: theme.textTheme.titleMedium,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded),
+                      tooltip: AppStrings.mediaPickerCancel,
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
               ),
 
-              // ── Tab views ──
+              // ── Conteúdo ──
               Expanded(
-                child: TabBarView(
-                  controller: _tab,
-                  children: [
-                    _CameraTab(
-                      cameraController: _cameraController,
-                      cameraReady: _cameraReady,
-                      isRecording: _isRecording,
-                      flashMode: _flashMode,
-                      hasMultipleCameras: _cameras.length > 1,
-                      onCapture: _capturePhoto,
-                      onFlip: _flipCamera,
-                      onFlash: _cycleFlash,
-                    ),
-                    _GalleryTab(onPick: _pickFromGallery),
-                  ],
+                child: _GalleryBody(
+                  scrollController: scrollController,
+                  maxItems: widget.maxItems,
+                  onPick: _pickFromGallery,
                 ),
               ),
             ],
@@ -228,119 +151,93 @@ class _MediaPickerSheetState extends State<_MediaPickerSheet>
 }
 
 // ---------------------------------------------------------------------------
-// Aba Câmera
+// Corpo de galeria
 // ---------------------------------------------------------------------------
 
-class _CameraTab extends StatelessWidget {
-  const _CameraTab({
-    required this.cameraController,
-    required this.cameraReady,
-    required this.isRecording,
-    required this.flashMode,
-    required this.hasMultipleCameras,
-    required this.onCapture,
-    required this.onFlip,
-    required this.onFlash,
+class _GalleryBody extends StatelessWidget {
+  const _GalleryBody({
+    required this.scrollController,
+    required this.maxItems,
+    required this.onPick,
   });
 
-  final CameraController? cameraController;
-  final bool cameraReady;
-  final bool isRecording;
-  final FlashMode flashMode;
-  final bool hasMultipleCameras;
-  final VoidCallback onCapture;
-  final VoidCallback onFlip;
-  final VoidCallback onFlash;
-
-  IconData get _flashIcon => switch (flashMode) {
-    FlashMode.always => Icons.flash_on_rounded,
-    FlashMode.off => Icons.flash_off_rounded,
-    _ => Icons.flash_auto_rounded,
-  };
-
-  String get _flashTooltip => switch (flashMode) {
-    FlashMode.always => AppStrings.mediaPickerFlashOn,
-    FlashMode.off => AppStrings.mediaPickerFlashOff,
-    _ => AppStrings.mediaPickerFlashAuto,
-  };
+  final ScrollController scrollController;
+  final int maxItems;
+  final VoidCallback onPick;
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    final provider = context.watch<CreatePostProvider>();
+    final items = provider.mediaItems;
 
-    return Column(
-      children: [
-        // Preview
-        Expanded(
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              if (cameraReady && cameraController != null)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(UIConstants.radiusMd),
-                  child: CameraPreview(cameraController!),
-                )
-              else
-                ColoredBox(
-                  color: Colors.black,
-                  child: Center(
-                    child: Text(
-                      AppStrings.mediaPickerCameraError,
-                      style: TextStyle(color: colors.onInverseSurface),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-              // Flash + flip buttons
-              Positioned(
-                top: UIConstants.spaceSm,
-                right: UIConstants.spaceSm,
-                child: Column(
-                  children: [
-                    _OverlayIconButton(
-                      icon: _flashIcon,
-                      tooltip: _flashTooltip,
-                      onTap: onFlash,
-                    ),
-                    if (hasMultipleCameras) ...[
-                      const SizedBox(height: UIConstants.spaceSm),
-                      _OverlayIconButton(
-                        icon: Icons.flip_camera_ios_rounded,
-                        tooltip: AppStrings.mediaPickerFlipCamera,
-                        onTap: onFlip,
-                      ),
-                    ],
-                  ],
-                ),
+    return CustomScrollView(
+      controller: scrollController,
+      slivers: [
+        if (items.isNotEmpty)
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: UIConstants.spaceMd,
+              vertical: UIConstants.spaceSm,
+            ),
+            sliver: SliverGrid.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: UIConstants.mediaPickerGridColumns.toInt(),
+                crossAxisSpacing: UIConstants.mediaPickerGridSpacing,
+                mainAxisSpacing: UIConstants.mediaPickerGridSpacing,
               ),
-            ],
+              itemCount: items.length,
+              itemBuilder: (context, i) => _GridThumb(
+                file: items[i],
+                index: i,
+                onRemove: () => provider.removeMediaAt(i),
+              ),
+            ),
           ),
-        ),
-        // Shutter
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: UIConstants.spaceLg),
-          child: GestureDetector(
-            onTap: onCapture,
-            child: Container(
-              width: UIConstants.mediaPickerCameraButtonSize,
-              height: UIConstants.mediaPickerCameraButtonSize,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: colors.onSurface,
-                  width: UIConstants.mediaPickerSelectionBorderWidth,
-                ),
-              ),
-              child: Center(
-                child: Container(
-                  width: UIConstants.mediaPickerCameraButtonInner,
-                  height: UIConstants.mediaPickerCameraButtonInner,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
+
+        // ── Botão de abertura do picker nativo ──
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: UIConstants.spaceLg,
+              vertical: UIConstants.spaceLg,
+            ),
+            child: Column(
+              mainAxisAlignment: items.isEmpty
+                  ? MainAxisAlignment.center
+                  : MainAxisAlignment.end,
+              children: [
+                if (items.isEmpty) ...[
+                  Icon(
+                    Icons.photo_library_outlined,
+                    size: UIConstants.createTypeIconSize * 2,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(height: UIConstants.spaceMd),
+                  Text(
+                    AppStrings.mediaPickerGallery,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: UIConstants.spaceXs),
+                  Text(
+                    AppStrings.mediaPickerGalleryHint,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color:
+                          Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: UIConstants.spaceLg),
+                ],
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: onPick,
+                    icon: const Icon(Icons.photo_library_rounded),
+                    label: const Text(AppStrings.mediaPickerDone),
                   ),
                 ),
-              ),
+              ],
             ),
           ),
         ),
@@ -350,85 +247,84 @@ class _CameraTab extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Aba Galeria
+// Thumbnail do grid (maior que o strip — usa largura automática do grid)
 // ---------------------------------------------------------------------------
 
-class _GalleryTab extends StatelessWidget {
-  const _GalleryTab({required this.onPick});
+class _GridThumb extends StatelessWidget {
+  const _GridThumb({
+    required this.file,
+    required this.index,
+    required this.onRemove,
+  });
 
-  final VoidCallback onPick;
+  final XFile file;
+  final int index;
+  final VoidCallback onRemove;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Stack(
+      fit: StackFit.expand,
       children: [
-        Icon(
-          Icons.photo_library_outlined,
-          size: 64,
-          color: colors.onSurfaceVariant,
-        ),
-        const SizedBox(height: UIConstants.spaceMd),
-        Text(
-          AppStrings.mediaPickerGallery,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: UIConstants.spaceXs),
-        Text(
-          AppStrings.mediaPickerGalleryHint,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: colors.onSurfaceVariant,
+        ClipRRect(
+          borderRadius:
+              BorderRadius.circular(UIConstants.mediaPickerThumbRadius),
+          child: Image.file(
+            File(file.path),
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, _) => ColoredBox(
+              color: colors.surfaceContainerHighest,
+              child: Icon(
+                Icons.broken_image_outlined,
+                color: colors.onSurfaceVariant,
+              ),
+            ),
           ),
-          textAlign: TextAlign.center,
         ),
-        const SizedBox(height: UIConstants.spaceLg),
-        FilledButton.icon(
-          onPressed: onPick,
-          icon: const Icon(Icons.photo_library_rounded),
-          label: const Text(AppStrings.mediaPickerDone),
+        // Botão remover
+        Positioned(
+          top: UIConstants.mediaThumbBadgeOffset,
+          right: UIConstants.mediaThumbBadgeOffset,
+          child: GestureDetector(
+            onTap: onRemove,
+            child: Container(
+              width: UIConstants.mediaPickerSelectionBadgeSize,
+              height: UIConstants.mediaPickerSelectionBadgeSize,
+              decoration: BoxDecoration(
+                color: colors.error,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.close, size: 12, color: colors.onError),
+            ),
+          ),
+        ),
+        // Número de ordem
+        Positioned(
+          bottom: UIConstants.mediaThumbBadgeOffset,
+          left: UIConstants.mediaThumbBadgeOffset,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: UIConstants.space2xs,
+              vertical: 1,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.6),
+              borderRadius:
+                  BorderRadius.circular(UIConstants.space2xs),
+            ),
+            child: Text(
+              '${index + 1}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
         ),
       ],
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Botão overlay para controles da câmera
-// ---------------------------------------------------------------------------
-
-class _OverlayIconButton extends StatelessWidget {
-  const _OverlayIconButton({
-    required this.icon,
-    required this.tooltip,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: UIConstants.minimumInteractiveTargetSize,
-          height: UIConstants.minimumInteractiveTargetSize,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.black.withValues(alpha: 0.5),
-          ),
-          child: Icon(
-            icon,
-            color: Colors.white,
-            size: UIConstants.composerAttachIconSize,
-          ),
-        ),
-      ),
     );
   }
 }

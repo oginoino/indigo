@@ -82,7 +82,7 @@ class _AuthorRow extends StatelessWidget {
         const Avatar(size: AvatarSize.small),
         const SizedBox(width: UIConstants.createEditorAvatarSpacing),
         Text(
-          AppStrings.yourStory,
+          AppStrings.createEditorAuthorYou,
           style: Theme.of(context).textTheme.titleSmall,
         ),
       ],
@@ -150,6 +150,7 @@ class _BodyField extends StatelessWidget {
       decoration: InputDecoration(hintText: _hint, border: InputBorder.none),
       style: Theme.of(context).textTheme.bodyLarge,
       textCapitalization: TextCapitalization.sentences,
+      autofocus: true,
       maxLines: _maxLines ?? 999,
       minLines: 3,
       onChanged: provider.setBody,
@@ -299,11 +300,30 @@ class _PollOptionField extends StatelessWidget {
 // Campos de evento
 // ---------------------------------------------------------------------------
 
-class _EventFieldsPanel extends StatelessWidget {
+class _EventFieldsPanel extends StatefulWidget {
   const _EventFieldsPanel({required this.provider, required this.draft});
 
   final CreatePostProvider provider;
   final PostDraft draft;
+
+  @override
+  State<_EventFieldsPanel> createState() => _EventFieldsPanelState();
+}
+
+class _EventFieldsPanelState extends State<_EventFieldsPanel> {
+  late final TextEditingController _dateController;
+
+  @override
+  void initState() {
+    super.initState();
+    _dateController = TextEditingController(text: widget.draft.eventDate);
+  }
+
+  @override
+  void dispose() {
+    _dateController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -338,14 +358,14 @@ class _EventFieldsPanel extends StatelessWidget {
               lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
             );
             if (picked != null) {
-              provider.setEventDate(
+              widget.provider.setEventDate(
                 '${picked.day.toString().padLeft(2, '0')}/'
                 '${picked.month.toString().padLeft(2, '0')}/'
                 '${picked.year}',
               );
             }
           },
-          controller: TextEditingController(text: draft.eventDate),
+          controller: _dateController,
         ),
         const SizedBox(height: UIConstants.createEditorSectionSpacing),
         TextField(
@@ -353,7 +373,7 @@ class _EventFieldsPanel extends StatelessWidget {
             hintText: AppStrings.createEditorEventLocationHint,
             prefixIcon: const Icon(Icons.place_outlined),
           ),
-          onChanged: provider.setEventLocation,
+          onChanged: widget.provider.setEventLocation,
         ),
       ],
     );

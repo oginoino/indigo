@@ -76,6 +76,8 @@ class AppStrings {
   static const addFriends = 'Adicionar amigos';
   static const avatarGroupOverflow = '+{count}';
   static const yourStory = 'Seu story';
+  static const createEditorAuthorYou = 'Você';
+  static const createEditorMediaNth = 'Mídia {n}';
   static const addStory = 'Adicionar story';
   static const openStory = 'Abrir story de {name}';
   static const closeStoryViewer = 'Fechar story';

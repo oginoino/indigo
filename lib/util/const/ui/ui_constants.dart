@@ -245,6 +245,9 @@ class UIConstants {
   static const double createEditorAvatarSize = avatarSmallSize;
   static const double createEditorAvatarSpacing = spaceSm;
   static const Duration createPublishFeedback = Duration(milliseconds: 1800);
+  static const int postBodySoftLimit = 240;
+  static const int postBodyHardLimit = 500;
+  static const double mediaThumbBadgeOffset = 2.0;
 
   // Media picker / camera tokens
   static const double mediaPickerHeaderHeight = 56;

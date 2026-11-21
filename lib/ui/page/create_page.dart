@@ -1,4 +1,5 @@
 import 'package:camera/camera.dart';
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
@@ -321,7 +322,11 @@ class _CameraPhase extends StatelessWidget {
                   _CameraIconButton(
                     icon: _flashIcon,
                     onTap: onFlash,
-                    tooltip: AppStrings.mediaPickerFlashAuto,
+                    tooltip: switch (flashMode) {
+                      FlashMode.always => AppStrings.mediaPickerFlashOn,
+                      FlashMode.off => AppStrings.mediaPickerFlashOff,
+                      _ => AppStrings.mediaPickerFlashAuto,
+                    },
                   ),
                   if (hasMultipleCameras) ...[
                     const SizedBox(width: UIConstants.spaceSm),
@@ -393,9 +398,15 @@ class _CameraPhase extends StatelessWidget {
                   ),
 
                   // Shutter
-                  GestureDetector(
-                    onTap: onCapture,
-                    child: Container(
+                  Semantics(
+                    button: true,
+                    label: AppStrings.mediaPickerTakePhoto,
+                    child: GestureDetector(
+                      onTap: () {
+                        HapticFeedback.mediumImpact();
+                        onCapture();
+                      },
+                      child: Container(
                       width: UIConstants.mediaPickerCameraButtonSize,
                       height: UIConstants.mediaPickerCameraButtonSize,
                       decoration: BoxDecoration(
@@ -415,6 +426,7 @@ class _CameraPhase extends StatelessWidget {
                           ),
                         ),
                       ),
+                    ),
                     ),
                   ),
 
@@ -535,13 +547,18 @@ class _EditorPhase extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          tooltip: AppStrings.createEditorDiscard,
-          icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: onBack,
-        ),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) onBack();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            tooltip: AppStrings.createEditorDiscard,
+            icon: const Icon(Icons.arrow_back_rounded),
+            onPressed: onBack,
+          ),
         title: Text(
           provider.draft.type.label,
           style: theme.textTheme.titleMedium,
@@ -561,8 +578,9 @@ class _EditorPhase extends StatelessWidget {
           ),
         ),
       ),
-      body: const CreatePostEditor(),
-      bottomNavigationBar: _PublishToolbar(provider: provider),
+        body: const CreatePostEditor(),
+        bottomNavigationBar: _PublishToolbar(provider: provider),
+      ),
     );
   }
 }
@@ -727,8 +745,6 @@ class _CharCounter extends StatelessWidget {
 
   final String body;
 
-  static const int _softLimit = 240;
-  static const int _hardLimit = 500;
 
   @override
   Widget build(BuildContext context) {
@@ -736,13 +752,13 @@ class _CharCounter extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
 
     final color = switch (count) {
-      > _hardLimit => colors.error,
-      > _softLimit => colors.tertiary,
+      > UIConstants.postBodyHardLimit => colors.error,
+      > UIConstants.postBodySoftLimit => colors.tertiary,
       _ => colors.onSurfaceVariant,
     };
 
     return Text(
-      '$count / $_hardLimit',
+      '$count / ${UIConstants.postBodyHardLimit}',
       style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color),
     );
   }
