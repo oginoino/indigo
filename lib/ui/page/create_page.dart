@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
@@ -92,13 +93,6 @@ class _CreatePageContentState extends State<_CreatePageContent>
   // ── Getters ───────────────────────────────────────────────────────────────
 
   ContentType get _currentType => ContentType.values[_typePageIndex];
-
-  bool get _goDirectToEditor =>
-      _currentType == ContentType.post ||
-      _currentType == ContentType.article ||
-      _currentType == ContentType.poll ||
-      _currentType == ContentType.event ||
-      _currentType == ContentType.live;
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
@@ -268,12 +262,14 @@ class _CreatePageContentState extends State<_CreatePageContent>
 
   void _onTypePageChanged(int index) {
     final type = ContentType.values[index];
-    context.read<CreatePostProvider>().selectType(type);
+    // Atualiza o tipo no provider sem notifyListeners durante o swipe.
+    // selectType chama notifyListeners — fazemos via post-frame para não
+    // interferir no gesto de scroll do PageView.
     setState(() => _typePageIndex = index);
-    // Tipos que vão direto ao editor são selecionados imediatamente
-    if (_goDirectToEditor) {
-      _goToEditor();
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<CreatePostProvider>().selectType(type);
+    });
   }
 
   void _selectTypeByChip(ContentType type) {
@@ -346,8 +342,8 @@ class _CreatePageContentState extends State<_CreatePageContent>
             if (_phase == _Phase.editor) {
               await _goBackToCapture(provider);
             } else {
-              // Fase capture: sai normalmente
-              if (context.mounted) Navigator.of(context).maybePop();
+              // Fase capture: sai normalmente (GoRouter)
+              if (context.mounted) context.pop();
             }
           },
           child: Scaffold(
@@ -356,12 +352,17 @@ class _CreatePageContentState extends State<_CreatePageContent>
               fit: StackFit.expand,
               children: [
                 // ── Fase 1: Capture contextual ─────────────────────────
-                _CapturePhase(
+                // Mantém o widget na árvore para preservar estado da câmera,
+                // mas não pinta quando o editor estiver visível.
+                Visibility(
+                  visible: _phase == _Phase.capture,
+                  maintainState: true,
+                  child: _CapturePhase(
                   typePageController: _typePageController,
                   currentType: _currentType,
                   onTypePageChanged: _onTypePageChanged,
                   onTypeChipTap: _selectTypeByChip,
-                  onClose: () => Navigator.of(context).maybePop(),
+                  onClose: () => context.pop(),
                   // Camera props
                   cameraController: _cameraController,
                   cameraReady: _cameraReady,
@@ -380,6 +381,7 @@ class _CreatePageContentState extends State<_CreatePageContent>
                   onToggleAudio: _toggleAudioRecording,
                   // Text-only types — go to editor directly
                   onDirectToEditor: _goToEditor,
+                  ),
                 ),
 
                 // ── Fase 2: Editor slide-up ────────────────────────────
@@ -1029,7 +1031,12 @@ class _DirectEditorPage extends StatelessWidget {
             FilledButton.icon(
               onPressed: onTap,
               icon: const Icon(Icons.edit_rounded),
-              label: Text('Criar ${type.label}'),
+              label: Text(
+                AppStrings.createDirectEditorCta.replaceFirst(
+                  '{type}',
+                  type.label,
+                ),
+              ),
               style: FilledButton.styleFrom(
                 backgroundColor: colors.primary,
                 foregroundColor: colors.onPrimary,
@@ -1194,7 +1201,7 @@ class _RecordingIndicatorState extends State<_RecordingIndicator>
             Icon(Icons.circle, color: Colors.white, size: 10),
             SizedBox(width: UIConstants.space2xs),
             Text(
-              'REC',
+              AppStrings.createVideoRecLabel,
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 12,

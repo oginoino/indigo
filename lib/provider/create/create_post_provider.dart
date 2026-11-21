@@ -101,6 +101,51 @@ class CreatePostProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setSubtitle(String v) {
+    _draft.subtitle = v;
+    notifyListeners();
+  }
+
+  void setLocation(String v) {
+    _draft.location = v;
+    notifyListeners();
+  }
+
+  void setPollDurationDays(int d) {
+    _draft.pollDurationDays = d;
+    notifyListeners();
+  }
+
+  void setEventEndDate(String? v) {
+    _draft.eventEndDate = v;
+    notifyListeners();
+  }
+
+  void setEventTime(String? v) {
+    _draft.eventTime = v;
+    notifyListeners();
+  }
+
+  void setEventIsOnline(bool v) {
+    _draft.eventIsOnline = v;
+    notifyListeners();
+  }
+
+  void setLiveCategory(String v) {
+    _draft.liveCategory = v;
+    notifyListeners();
+  }
+
+  void setIsLiveNow(bool v) {
+    _draft.isLiveNow = v;
+    notifyListeners();
+  }
+
+  void setLiveScheduledDate(String? v) {
+    _draft.liveScheduledDate = v;
+    notifyListeners();
+  }
+
   void setAudioDuration(Duration d) {
     _draft.audioDuration = d;
     notifyListeners();

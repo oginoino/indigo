@@ -9,19 +9,37 @@ class PostDraft {
     this.type = ContentType.post,
     this.title = '',
     this.body = '',
+    this.subtitle = '',
     List<DraftPollOption> pollOptions = const [],
     this.eventDate,
+    this.eventEndDate,
+    this.eventTime,
     this.eventLocation,
+    this.eventIsOnline = false,
     this.audioDuration = Duration.zero,
+    this.location = '',
+    this.pollDurationDays = 1,
+    this.liveScheduledDate,
+    this.liveCategory = '',
+    this.isLiveNow = true,
   }) : pollOptions = List<DraftPollOption>.of(pollOptions);
 
   ContentType type;
   String title;
+  String subtitle;
   String body;
   List<DraftPollOption> pollOptions;
   String? eventDate;
+  String? eventEndDate;
+  String? eventTime;
   String? eventLocation;
+  bool eventIsOnline;
   Duration audioDuration;
+  String location;        // for photo/video/post
+  int pollDurationDays;
+  String? liveScheduledDate;
+  String liveCategory;
+  bool isLiveNow;
 
   /// Número de itens de mídia adicionados (simulado — sem upload real).
   int mediaCount = 0;
@@ -54,7 +72,8 @@ class PostDraft {
   bool get hasTitle =>
       type == ContentType.article ||
       type == ContentType.event ||
-      type == ContentType.live;
+      type == ContentType.live ||
+      type == ContentType.video;
 
   bool get hasPollOptions => type == ContentType.poll;
 

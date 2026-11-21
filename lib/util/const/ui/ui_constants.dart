@@ -279,6 +279,16 @@ class UIConstants {
   // Type PageView / swipe
   static const Duration createTypeSwipeDuration = Duration(milliseconds: 220);
 
+  // Per-type editor layout
+  static const double createMediaPreviewAspectRatio = 0.75; // 4:3 portrait
+  static const double createStoryPreviewAspectRatio = 1.778; // 9:16
+  static const double createArticleCoverHeight = 180;
+  static const double createEventBannerHeight = 140;
+  static const double createLiveThumbnailHeight = 160;
+  static const double createAudioPlayerHeight = 80;
+  static const double createPollOptionMinHeight = 48;
+  static const double createEditorDividerThickness = 0.5;
+
   // Twitter-style composer
   static const double composerAvatarSize = avatarMediumSize;
   static const double composerThreadLineWidth = 1.5;

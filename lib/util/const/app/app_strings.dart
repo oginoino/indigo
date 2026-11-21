@@ -158,6 +158,7 @@ class AppStrings {
   static const createEditorPublish = 'Publicar';
   static const createEditorPublishing = 'Publicando…';
   static const createEditorDiscard = 'Descartar';
+  static const createDirectEditorCta = 'Criar {type}';
   static const createEditorDiscardConfirm =
       'Tem certeza que quer descartar este rascunho?';
   static const createEditorDiscardConfirmYes = 'Descartar';
@@ -226,6 +227,7 @@ class AppStrings {
   // Video recorder
   static const createVideoRecordHint = 'Pressione para gravar';
   static const createVideoRecordingHint = 'Gravando — solte para parar';
+  static const createVideoRecLabel = 'REC';
   static const createVideoOrGallery = 'ou escolha da galeria';
 
   // Story
@@ -235,4 +237,74 @@ class AppStrings {
 
   // Type swipe hint
   static const createSwipeHint = 'Deslize para mudar o tipo';
+
+  // Post editor
+  static const createPostBodyHint = 'No que você está pensando?';
+  static const createPostAddThread = 'Adicionar ao fio';
+  static const createPostHashtagHint = '#hashtag';
+
+  // Photo editor
+  static const createPhotoCaption = 'Escreva uma legenda…';
+  static const createPhotoAltText = 'Texto alternativo (acessibilidade)';
+  static const createPhotoLocation = 'Adicionar local';
+  static const createPhotoTagPeople = 'Marcar pessoas';
+
+  // Video editor
+  static const createVideoTitleHint = 'Título do vídeo';
+  static const createVideoDescriptionHint = 'Descrição do vídeo…';
+  static const createVideoHashtagsHint = 'Adicione hashtags';
+
+  // Audio editor
+  static const createAudioTitleHint = 'Título do áudio';
+  static const createAudioDescriptionHint = 'Descrição (opcional)';
+  static const createAudioDurationLabel = 'Duração';
+  static const createAudioRecorded = 'Gravado';
+  static const createAudioFromGallery = 'Importar áudio';
+
+  // Story editor
+  static const createStoryAddText = 'Aa';
+  static const createStoryTextOverlay = 'Toque para adicionar texto…';
+  static const createStoryNoMedia = 'Nenhuma mídia no story';
+  static const createStoryAddMediaHint = 'Adicione uma foto ou vídeo';
+
+  // Article editor
+  static const createArticleTitleHint = 'Título do artigo';
+  static const createArticleSubtitleHint = 'Subtítulo (opcional)';
+  static const createArticleBodyHint = 'Comece a escrever…';
+  static const createArticleCoverImage = 'Adicionar imagem de capa';
+  static const createArticleReadTime = 'Tempo de leitura estimado: {min} min';
+
+  // Poll editor
+  static const createPollQuestionHint = 'Qual é a sua pergunta?';
+  static const createPollOption = 'Opção {n}';
+  static const createPollDuration = 'Duração';
+  static const createPollDuration1d = '1 dia';
+  static const createPollDuration3d = '3 dias';
+  static const createPollDuration7d = '7 dias';
+  static const createPollVotesPlural = '{n} voto(s)';
+  static const createPollPreview = 'Pré-visualização';
+
+  // Event editor
+  static const createEventTitleHint = 'Nome do evento';
+  static const createEventDateHint = 'Data de início';
+  static const createEventEndDateHint = 'Data de término (opcional)';
+  static const createEventTimeHint = 'Horário';
+  static const createEventLocationHint = 'Local ou link do evento';
+  static const createEventDescHint = 'Descrição do evento…';
+  static const createEventOnline = 'Evento online';
+  static const createEventInPerson = 'Presencial';
+  static const createEventBanner = 'Adicionar banner';
+  static const createEventFormat = 'Formato';
+
+  // Live editor
+  static const createLiveTitleHint = 'Título da transmissão';
+  static const createLiveDescHint = 'Sobre o que será esta live?';
+  static const createLiveThumbnail = 'Adicionar thumbnail';
+  static const createLiveSchedule = 'Agendar para depois';
+  static const createLiveScheduleNow = 'Ir ao vivo agora';
+  static const createLiveScheduledFor = 'Agendada para {date}';
+  static const createLiveCategory = 'Categoria';
+  static const createLiveCategoryHint = 'Ex.: Tecnologia, Música…';
+  static const createLiveWarning =
+      'Sua live ficará disponível para gravação após o término.';
 }
