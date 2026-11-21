@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import '../../model/party/user_profile.dart';
 import '../../model/post/post.dart';
 import '../../model/post/post_content.dart';
+import '../../model/post/post_engagement_summary.dart';
+import '../../model/post/post_interaction.dart';
 import '../../model/post/post_media.dart';
 import '../../service/mapper/user_profile_json_mapper.dart';
 import '../../service/post_repository.dart';
@@ -30,6 +32,11 @@ class PostsProvider extends ChangeNotifier {
   final SocialDataService _socialDataService;
   final DateTime Function() _clock;
   final Map<String, UserProfile> _authorCache = {};
+
+  /// Overrides de engagement aplicados otimisticamente (antes de confirmação
+  /// do servidor). Indexados por post ID.
+  final Map<String, PostEngagementSummary> _engagementOverrides = {};
+
   List<Post> _posts = const [];
   PostsLoadStatus _status = PostsLoadStatus.initial;
   Object? _error;
@@ -47,6 +54,10 @@ class PostsProvider extends ChangeNotifier {
   bool get hasMore => _hasMore;
   bool get isRefreshing => _isRefreshing;
   bool get isLoadingMore => _isLoadingMore;
+
+  /// Retorna o engagement efetivo de um post, considerando overrides otimistas.
+  PostEngagementSummary engagementFor(Post post) =>
+      _engagementOverrides[post.id] ?? post.engagement;
 
   UserProfile? authorFor(Post post) {
     final roleId = post.authorPartyRoleId;
@@ -94,6 +105,78 @@ class PostsProvider extends ChangeNotifier {
       for (final media in post.media)
         if (media.isVideo) VideoFeedItem(post: post, media: media),
   ]);
+
+  // ---------------------------------------------------------------------------
+  // Interações otimistas
+  // ---------------------------------------------------------------------------
+
+  /// Alterna curtida do [post]. Aplica imediatamente na UI; reversível se o
+  /// servidor rejeitar (implementação futura).
+  void toggleLike(Post post) {
+    final current = engagementFor(post);
+    final wasLiked = current.viewer.isReacted;
+    _engagementOverrides[post.id] = PostEngagementSummary(
+      reactionCount: wasLiked
+          ? (current.reactionCount - 1).clamp(0, double.maxFinite.toInt())
+          : current.reactionCount + 1,
+      commentCount: current.commentCount,
+      saveCount: current.saveCount,
+      shareCount: current.shareCount,
+      viewCount: current.viewCount,
+      viewer: PostViewerEngagement(
+        reaction: wasLiked ? null : PostReactionType.like,
+        isSaved: current.viewer.isSaved,
+        isShared: current.viewer.isShared,
+      ),
+    );
+    notifyListeners();
+  }
+
+  /// Alterna salvamento do [post].
+  void toggleSave(Post post) {
+    final current = engagementFor(post);
+    final wasSaved = current.viewer.isSaved;
+    _engagementOverrides[post.id] = PostEngagementSummary(
+      reactionCount: current.reactionCount,
+      commentCount: current.commentCount,
+      saveCount: wasSaved
+          ? (current.saveCount - 1).clamp(0, double.maxFinite.toInt())
+          : current.saveCount + 1,
+      shareCount: current.shareCount,
+      viewCount: current.viewCount,
+      viewer: PostViewerEngagement(
+        reaction: current.viewer.reaction,
+        isSaved: !wasSaved,
+        isShared: current.viewer.isShared,
+      ),
+    );
+    notifyListeners();
+  }
+
+  /// Alterna republicação do [post].
+  void toggleRepost(Post post) {
+    final current = engagementFor(post);
+    final wasShared = current.viewer.isShared;
+    _engagementOverrides[post.id] = PostEngagementSummary(
+      reactionCount: current.reactionCount,
+      commentCount: current.commentCount,
+      saveCount: current.saveCount,
+      shareCount: wasShared
+          ? (current.shareCount - 1).clamp(0, double.maxFinite.toInt())
+          : current.shareCount + 1,
+      viewCount: current.viewCount,
+      viewer: PostViewerEngagement(
+        reaction: current.viewer.reaction,
+        isSaved: current.viewer.isSaved,
+        isShared: !wasShared,
+      ),
+    );
+    notifyListeners();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Carregamento
+  // ---------------------------------------------------------------------------
 
   Future<void> load({bool refresh = false}) async {
     if (refresh && _pendingLoadMore != null) {

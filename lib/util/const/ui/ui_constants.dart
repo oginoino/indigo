@@ -207,4 +207,17 @@ class UIConstants {
   static const double commentLikeButtonSize = 32;
   static const int commentMaxLines = 5;
   static const int commentRepliesInitialCount = 3;
+
+  // ---------------------------------------------------------------------------
+  // Comments bottom sheet tokens
+  // ---------------------------------------------------------------------------
+  static const double commentSheetInitialChildSize = 0.6;
+  static const double commentSheetMinChildSize = 0.4;
+  static const double commentSheetMaxChildSize = 0.92;
+  static const double commentSheetHeaderHeight = 56;
+  static const double commentSheetInputPadding = spaceMd;
+  static const double commentSheetDragHandleWidth = 36;
+  static const double commentSheetDragHandleHeight = 4;
+  static const double commentSheetDragHandleRadius = 2;
+  static const double commentSheetHorizontalPadding = spaceLg;
 }

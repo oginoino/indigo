@@ -1,10 +1,12 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:provider/provider.dart';
 
 import '../../model/party/user_profile.dart';
 import '../../model/post/post.dart';
+import '../../provider/post/posts_provider.dart';
 import '../../util/const/app/app_strings.dart';
 import '../../util/const/ui/ui_constants.dart';
-import '../components/post/comments_section.dart';
+import '../components/post/comments_bottom_sheet.dart';
 import '../components/post/post_author_header.dart';
 import '../components/post/post_content_text.dart';
 import '../components/post/post_engagement_bar.dart';
@@ -19,6 +21,7 @@ class PostArticlePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final postsProvider = context.read<PostsProvider>();
     final title = post.title?.trim();
 
     return Scaffold(
@@ -26,10 +29,6 @@ class PostArticlePage extends StatelessWidget {
       body: SafeArea(
         top: false,
         child: SingleChildScrollView(
-          // Garante que o campo de comentário suba com o teclado.
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.viewInsetsOf(context).bottom,
-          ),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(
@@ -73,17 +72,23 @@ class PostArticlePage extends StatelessWidget {
                       height: UIConstants.postArticleSectionSpacing,
                     ),
                     const Divider(),
-                    PostEngagementBar(post: post),
-                    const SizedBox(
-                      height: UIConstants.postArticleSectionSpacing,
-                    ),
-                    const Divider(),
-                    const SizedBox(height: UIConstants.commentSpacing),
-                    CommentsSection(
-                      postId: post.id,
-                      // Enquanto não há autenticação, o autor do post é usado
-                      // como proxy do usuário corrente no avatar do input.
-                      currentUser: author,
+                    // Selector: reconstrói apenas quando o engagement muda.
+                    Selector<PostsProvider, bool>(
+                      selector: (_, p) =>
+                          p.engagementFor(post).viewer.isReacted,
+                      builder: (context, _, _) {
+                        return PostEngagementBar(
+                          post: post,
+                          onComment: () => CommentsBottomSheet.show(
+                            context,
+                            postId: post.id,
+                            currentUser: author,
+                          ),
+                          onLike: () => postsProvider.toggleLike(post),
+                          onRepost: () => postsProvider.toggleRepost(post),
+                          onSave: () => postsProvider.toggleSave(post),
+                        );
+                      },
                     ),
                   ],
                 ),

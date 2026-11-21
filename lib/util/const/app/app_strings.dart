@@ -134,4 +134,17 @@ class AppStrings {
   // Comment mapper error strings
   // ---------------------------------------------------------------------------
   static const invalidCommentField = 'Invalid {field} in comment data.';
+
+  // ---------------------------------------------------------------------------
+  // Post interaction strings
+  // ---------------------------------------------------------------------------
+  static const postLiked = 'Publicação curtida';
+  static const postUnliked = 'Curtida removida';
+  static const postSaved = 'Publicação salva';
+  static const postUnsaved = 'Publicação removida dos salvos';
+  static const postReposted = 'Publicação republicada';
+  static const postUnreposted = 'Republicação desfeita';
+  static const postShareSheet = 'Compartilhar publicação';
+  static const closeComments = 'Fechar comentários';
+  static const commentsTitle = 'Comentários';
 }

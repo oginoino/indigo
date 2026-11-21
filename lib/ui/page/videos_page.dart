@@ -10,6 +10,7 @@ import '../../util/const/app/app_strings.dart';
 import '../../util/const/ui/ui_constants.dart';
 import '../../util/log/error_handler.dart';
 import '../components/app_bottom_navigation_bar.dart';
+import '../components/post/comments_bottom_sheet.dart';
 import '../components/post/fullscreen_post_layout.dart';
 import '../components/post/post_engagement_bar.dart';
 import '../components/post/post_media_information.dart';
@@ -393,12 +394,35 @@ class _FullscreenVideoItemState extends State<_FullscreenVideoItem> {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  PostEngagementBar(
-                                    post: widget.item.post,
-                                    layout: isLandscape
-                                        ? PostEngagementLayout.horizontal
-                                        : PostEngagementLayout.vertical,
-                                    onMedia: true,
+                                  Selector<PostsProvider, bool>(
+                                    selector: (_, p) => p
+                                        .engagementFor(widget.item.post)
+                                        .viewer
+                                        .isReacted,
+                                    builder: (context, _, _) {
+                                      final provider =
+                                          context.read<PostsProvider>();
+                                      return PostEngagementBar(
+                                        post: widget.item.post,
+                                        layout: isLandscape
+                                            ? PostEngagementLayout.horizontal
+                                            : PostEngagementLayout.vertical,
+                                        onMedia: true,
+                                        onComment: () =>
+                                            CommentsBottomSheet.show(
+                                          context,
+                                          postId: widget.item.post.id,
+                                          currentUser: widget.author,
+                                        ),
+                                        onLike: () =>
+                                            provider.toggleLike(widget.item.post),
+                                        onRepost: () => provider.toggleRepost(
+                                          widget.item.post,
+                                        ),
+                                        onSave: () =>
+                                            provider.toggleSave(widget.item.post),
+                                      );
+                                    },
                                   ),
                                   const SizedBox(
                                     height:
