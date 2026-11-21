@@ -1,16 +1,20 @@
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:provider/provider.dart';
 
 import '../../../model/party/user_profile.dart';
 import '../../../model/post/post.dart';
 import '../../../model/post/post_media.dart';
+import '../../../provider/post/posts_provider.dart';
 import '../../../route/routes.dart';
 import '../../../util/const/app/app_strings.dart';
 import '../../../util/const/ui/ui_constants.dart';
 import '../../theme/media_overlay_theme.dart';
+import 'comments_bottom_sheet.dart';
 import 'fullscreen_post_layout.dart';
 import 'post_audio_player.dart';
 import 'post_engagement_bar.dart';
+import 'post_engagement_proxy.dart';
 import 'post_media_information.dart';
 import 'post_media_load_error.dart';
 
@@ -222,6 +226,10 @@ class _PhotoCollection extends StatelessWidget {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Visualizador em tela cheia (carrossel de fotos)
+// ---------------------------------------------------------------------------
+
 class _FullscreenPhotoViewer extends StatefulWidget {
   const _FullscreenPhotoViewer({
     required this.post,
@@ -259,6 +267,7 @@ class _FullscreenPhotoViewerState extends State<_FullscreenPhotoViewer> {
   @override
   Widget build(BuildContext context) {
     final mediaTheme = MediaOverlayTheme.of(context);
+    final postsProvider = context.read<PostsProvider>();
     final counter = AppStrings.imageViewerCounter
         .replaceAll('{current}', '${_currentIndex + 1}')
         .replaceAll('{total}', '${widget.media.length}');
@@ -268,6 +277,7 @@ class _FullscreenPhotoViewerState extends State<_FullscreenPhotoViewer> {
       body: Stack(
         fit: StackFit.expand,
         children: [
+          // ---- Carrossel de fotos -------------------------------------------
           PageView.builder(
             controller: _pageController,
             itemCount: widget.media.length,
@@ -288,6 +298,8 @@ class _FullscreenPhotoViewerState extends State<_FullscreenPhotoViewer> {
               );
             },
           ),
+
+          // ---- Barra superior (fechar + contador) ---------------------------
           SafeArea(
             child: Align(
               alignment: Alignment.topCenter,
@@ -305,30 +317,33 @@ class _FullscreenPhotoViewerState extends State<_FullscreenPhotoViewer> {
                       icon: const Icon(Icons.close),
                     ),
                     const Spacer(),
-                    DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: mediaTheme.controlBackgroundColor,
-                        borderRadius: BorderRadius.circular(
-                          UIConstants.postMediaRadius,
+                    if (widget.media.length > 1)
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: mediaTheme.controlBackgroundColor,
+                          borderRadius: BorderRadius.circular(
+                            UIConstants.postMediaRadius,
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: UIConstants.postCardSpacing,
+                            vertical: UIConstants.postCardSpacing / 2,
+                          ),
+                          child: Text(
+                            counter,
+                            style: Theme.of(context).textTheme.labelLarge
+                                ?.copyWith(color: mediaTheme.foregroundColor),
+                          ),
                         ),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: UIConstants.postCardSpacing,
-                          vertical: UIConstants.postCardSpacing / 2,
-                        ),
-                        child: Text(
-                          counter,
-                          style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(color: mediaTheme.foregroundColor),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
             ),
           ),
+
+          // ---- Rodapé: informações + engajamento ----------------------------
           Align(
             alignment: Alignment.bottomCenter,
             child: SafeArea(
@@ -351,6 +366,7 @@ class _FullscreenPhotoViewerState extends State<_FullscreenPhotoViewer> {
                     ),
                     child: Stack(
                       children: [
+                        // Gradiente decorativo
                         Positioned.fill(
                           child: IgnorePointer(
                             child: DecoratedBox(
@@ -382,12 +398,39 @@ class _FullscreenPhotoViewerState extends State<_FullscreenPhotoViewer> {
                             ),
                             SizedBox(
                               width: actionRailWidth,
-                              child: PostEngagementBar(
-                                post: widget.post,
-                                layout: isLandscape
-                                    ? PostEngagementLayout.horizontal
-                                    : PostEngagementLayout.vertical,
-                                onMedia: true,
+                              // Selector granular: reconstrói só quando o
+                              // engagement deste post muda.
+                              child: Selector<PostsProvider, (bool, bool, bool)>(
+                                selector: (_, p) {
+                                  final v = p.engagementFor(widget.post).viewer;
+                                  return (v.isReacted, v.isSaved, v.isShared);
+                                },
+                                builder: (context, _, _) {
+                                  final engagement =
+                                      postsProvider.engagementFor(widget.post);
+                                  final effectivePost = PostEngagementProxy(
+                                    widget.post,
+                                    engagement,
+                                  );
+                                  return PostEngagementBar(
+                                    post: effectivePost,
+                                    layout: isLandscape
+                                        ? PostEngagementLayout.horizontal
+                                        : PostEngagementLayout.vertical,
+                                    onMedia: true,
+                                    onComment: () => CommentsBottomSheet.show(
+                                      context,
+                                      postId: widget.post.id,
+                                      currentUser: widget.author,
+                                    ),
+                                    onLike: () =>
+                                        postsProvider.toggleLike(widget.post),
+                                    onRepost: () =>
+                                        postsProvider.toggleRepost(widget.post),
+                                    onSave: () =>
+                                        postsProvider.toggleSave(widget.post),
+                                  );
+                                },
                               ),
                             ),
                           ],
@@ -404,6 +447,10 @@ class _FullscreenPhotoViewerState extends State<_FullscreenPhotoViewer> {
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Preview de vídeo (thumb clicável que navega para a tela de vídeos)
+// ---------------------------------------------------------------------------
 
 class _VideoPreview extends StatelessWidget {
   const _VideoPreview({required this.postId, required this.media});
@@ -459,6 +506,10 @@ class _VideoPreview extends StatelessWidget {
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Widget de imagem em rede com retry e fallback
+// ---------------------------------------------------------------------------
 
 class _NetworkPhoto extends StatefulWidget {
   const _NetworkPhoto({

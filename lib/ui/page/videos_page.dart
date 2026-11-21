@@ -13,6 +13,7 @@ import '../components/app_bottom_navigation_bar.dart';
 import '../components/post/comments_bottom_sheet.dart';
 import '../components/post/fullscreen_post_layout.dart';
 import '../components/post/post_engagement_bar.dart';
+import '../components/post/post_engagement_proxy.dart';
 import '../components/post/post_media_information.dart';
 import '../components/post/post_media_load_error.dart';
 import '../theme/media_overlay_theme.dart';
@@ -394,16 +395,28 @@ class _FullscreenVideoItemState extends State<_FullscreenVideoItem> {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Selector<PostsProvider, bool>(
-                                    selector: (_, p) => p
-                                        .engagementFor(widget.item.post)
-                                        .viewer
-                                        .isReacted,
+                                  Selector<PostsProvider, (bool, bool, bool)>(
+                                    selector: (_, p) {
+                                      final v = p
+                                          .engagementFor(widget.item.post)
+                                          .viewer;
+                                      return (
+                                        v.isReacted,
+                                        v.isSaved,
+                                        v.isShared,
+                                      );
+                                    },
                                     builder: (context, _, _) {
                                       final provider =
                                           context.read<PostsProvider>();
+                                      final engagement = provider
+                                          .engagementFor(widget.item.post);
+                                      final effectivePost = PostEngagementProxy(
+                                        widget.item.post,
+                                        engagement,
+                                      );
                                       return PostEngagementBar(
-                                        post: widget.item.post,
+                                        post: effectivePost,
                                         layout: isLandscape
                                             ? PostEngagementLayout.horizontal
                                             : PostEngagementLayout.vertical,
