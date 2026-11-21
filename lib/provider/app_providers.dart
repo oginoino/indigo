@@ -32,7 +32,11 @@ List<SingleChildWidget> get appProviders => [
   ChangeNotifierProvider(
     create: (_) => FriendsProvider(socialDataService: socialDataService),
   ),
-  ChangeNotifierProvider(create: (_) => StorySeenProvider()),
+  // SharedPreferences injetado explicitamente para garantir a persistência
+  // dos stories vistos entre sessões.
+  ChangeNotifierProvider(
+    create: (_) => StorySeenProvider(preferences: sharedPreferences),
+  ),
   ChangeNotifierProvider(
     create: (_) => PostsProvider(
       repository: postRepository,

@@ -115,7 +115,7 @@ class _NavItemState extends State<NavItem> {
             },
             // Leve "afundar" ao pressionar, como feedback tátil visual.
             child: AnimatedScale(
-              scale: _pressed ? 0.95 : 1,
+              scale: _pressed ? UIConstants.navItemPressScale : 1,
               duration: NavMotion.of(context, NavMotion.fast),
               curve: Curves.easeOut,
               child: ConstrainedBox(

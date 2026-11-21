@@ -31,23 +31,29 @@ class VideosPage extends StatelessWidget {
       extendBody: true,
       body: Consumer<PostsProvider>(
         builder: (context, provider, _) {
-          if (provider.status == PostsLoadStatus.loading ||
-              provider.status == PostsLoadStatus.initial) {
+          final isLoading = provider.status == PostsLoadStatus.loading ||
+              provider.status == PostsLoadStatus.initial;
+          final isError = provider.status == PostsLoadStatus.error;
+          final videos = provider.videoFeedItems;
+
+          if (isLoading) {
             return Center(
               child: CircularProgressIndicator(
                 color: mediaTheme.foregroundColor,
               ),
             );
           }
-          if (provider.status == PostsLoadStatus.error) {
+
+          if (isError) {
             return Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     AppStrings.postsLoadFailed,
-                    style: Theme.of(context).textTheme.bodyMedium
-                        ?.copyWith(color: mediaTheme.foregroundColor),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: mediaTheme.foregroundColor,
+                        ),
                   ),
                   TextButton(
                     onPressed: provider.load,
@@ -58,13 +64,13 @@ class VideosPage extends StatelessWidget {
             );
           }
 
-          final videos = provider.videoFeedItems;
           if (videos.isEmpty) {
             return Center(
               child: Text(
                 AppStrings.noVideosAvailable,
-                style: Theme.of(context).textTheme.bodyMedium
-                    ?.copyWith(color: mediaTheme.foregroundColor),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: mediaTheme.foregroundColor,
+                    ),
               ),
             );
           }

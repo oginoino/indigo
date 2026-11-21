@@ -213,7 +213,8 @@ class _StoryRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final gradient = isOwn || isSeen
         ? null
         : LinearGradient(
@@ -239,7 +240,7 @@ class _StoryRing extends StatelessWidget {
         padding: const EdgeInsets.all(UIConstants.storyRingGap),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Theme.of(context).scaffoldBackgroundColor,
+          color: theme.scaffoldBackgroundColor,
         ),
         child: child,
       ),
@@ -252,7 +253,8 @@ class _AddBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Container(
       width: UIConstants.storyAddBadgeSize,
@@ -261,7 +263,7 @@ class _AddBadge extends StatelessWidget {
         shape: BoxShape.circle,
         color: colorScheme.primary,
         border: Border.all(
-          color: Theme.of(context).scaffoldBackgroundColor,
+          color: theme.scaffoldBackgroundColor,
           width: UIConstants.avatarGroupRingWidth,
         ),
       ),

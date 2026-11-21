@@ -10,6 +10,7 @@ ThemeData _buildTheme({
   required Color backgroundColor,
   required Color foregroundColor,
 }) {
+  const noColor = Colors.transparent;
   final colorScheme = ColorScheme.fromSeed(
     seedColor: seedColor,
     brightness: brightness,
@@ -34,14 +35,14 @@ ThemeData _buildTheme({
       iconTheme: iconTheme,
       elevation: UIConstants.noElevation,
       scrolledUnderElevation: UIConstants.noElevation,
-      surfaceTintColor: Colors.transparent,
+      surfaceTintColor: noColor,
       toolbarHeight: UIConstants.appBarToolbarHeight,
     ),
     iconTheme: iconTheme,
     cardTheme: CardThemeData(
       color: backgroundColor,
-      surfaceTintColor: Colors.transparent,
-      shadowColor: Colors.transparent,
+      surfaceTintColor: noColor,
+      shadowColor: noColor,
       elevation: UIConstants.noElevation,
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,

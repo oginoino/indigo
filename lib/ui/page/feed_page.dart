@@ -14,6 +14,7 @@ import '../../util/const/app/feed_constants.dart';
 import '../../util/const/ui/ui_constants.dart';
 import '../components/app_bar/feed_app_bar_resolver.dart';
 import '../components/post/post_card.dart';
+import '../components/post/posts_load_state_view.dart';
 import '../components/screen.dart';
 import '../components/story/stories_row.dart';
 
@@ -25,103 +26,98 @@ class FeedPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isFriendsFeed = feed.route == FeedConstants.friendsFeedRoute;
+    final feedRoute = feed.route;
 
-    return Consumer<PostsProvider>(
-      builder: (context, provider, _) {
-        final posts = provider.postsForFeed(feed.route);
+    // Selector limita os rebuilds às propriedades que a página realmente usa:
+    // a lista de posts do feed atual e o status de carregamento.
+    return Selector<PostsProvider, (List, PostsLoadStatus)>(
+      selector: (_, p) => (p.postsForFeed(feedRoute), p.status),
+      builder: (context, _, _) {
+        final provider = context.read<PostsProvider>();
+        final posts = provider.postsForFeed(feedRoute);
 
         return NotificationListener<Notification>(
-          onNotification: (notification) {
-            if (notification is UserScrollNotification &&
-                notification.metrics.axis == Axis.vertical) {
-              final isCompact = switch (notification.direction) {
-                ScrollDirection.reverse => true,
-                ScrollDirection.forward => false,
-                ScrollDirection.idle => null,
-              };
-              if (isCompact != null) {
-                context.read<BottomNavigationProvider>().setCompact(isCompact);
-              }
-            }
-
-            final metrics = switch (notification) {
-              ScrollNotification(:final metrics) => metrics,
-              ScrollMetricsNotification(:final metrics) => metrics,
-              _ => null,
-            };
-            if (metrics != null &&
-                metrics.axis == Axis.vertical &&
-                metrics.extentAfter < FeedConstants.loadMoreExtent) {
-              unawaited(provider.loadMore());
-            }
-            return false;
-          },
+          onNotification: (notification) =>
+              _handleScrollNotification(context, provider, notification),
           child: Screen(
             appBar: FeedAppBarResolver.resolve(feed.appBar, feed.name),
             onRefresh: () => _refresh(context, provider),
             slivers: [
               if (isFriendsFeed)
-                SliverToBoxAdapter(child: _FeedStories(feedRoute: feed.route)),
-              if ((provider.status == PostsLoadStatus.initial ||
-                      provider.status == PostsLoadStatus.loading) &&
-                  posts.isEmpty)
-                const SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Center(child: CircularProgressIndicator()),
-                )
-              else if (provider.status == PostsLoadStatus.error &&
-                  posts.isEmpty)
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text(AppStrings.postsLoadFailed),
-                        TextButton(
-                          onPressed: provider.load,
-                          child: const Text(AppStrings.retry),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              else if (posts.isEmpty)
-                const SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Center(child: Text(AppStrings.noPostsAvailable)),
-                )
-              else
-                SliverList(
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    if (index.isOdd) {
-                      final postIndex = index ~/ 2;
-                      if (postIndex < posts.length - 1) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: UIConstants.postCardHorizontalInset,
-                          ),
-                          child: const Divider(
-                            height: UIConstants.postFeedDividerHeight,
-                            thickness: UIConstants.postFeedDividerThickness,
-                          ),
-                        );
-                      }
-                      return _FeedFooter(provider: provider);
-                    }
-
-                    final post = posts[index ~/ 2];
-                    return PostCard(
-                      post: post,
-                      author: provider.authorFor(post),
-                    );
-                  }, childCount: posts.length * 2),
+                SliverToBoxAdapter(
+                  child: _FeedStories(feedRoute: feedRoute),
                 ),
+              PostsLoadStateView(
+                status: provider.status,
+                hasPosts: posts.isNotEmpty,
+                onRetry: provider.load,
+                loadedChild: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      if (index.isOdd) {
+                        final postIndex = index ~/ 2;
+                        if (postIndex < posts.length - 1) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: UIConstants.postCardHorizontalInset,
+                            ),
+                            child: const Divider(
+                              height: UIConstants.postFeedDividerHeight,
+                              thickness: UIConstants.postFeedDividerThickness,
+                            ),
+                          );
+                        }
+                        return _FeedFooter(provider: provider);
+                      }
+
+                      final post = posts[index ~/ 2];
+                      return PostCard(
+                        post: post,
+                        author: provider.authorFor(post),
+                      );
+                    },
+                    childCount: posts.length * 2,
+                  ),
+                ),
+              ),
             ],
           ),
         );
       },
     );
+  }
+
+  /// Trata as duas responsabilidades do scroll em um único método extraído:
+  /// 1. compactação da barra de navegação ao rolar para baixo;
+  /// 2. carregamento de mais posts ao se aproximar do fim da lista.
+  bool _handleScrollNotification(
+    BuildContext context,
+    PostsProvider provider,
+    Notification notification,
+  ) {
+    if (notification is UserScrollNotification &&
+        notification.metrics.axis == Axis.vertical) {
+      final isCompact = switch (notification.direction) {
+        ScrollDirection.reverse => true,
+        ScrollDirection.forward => false,
+        ScrollDirection.idle => null,
+      };
+      if (isCompact != null) {
+        context.read<BottomNavigationProvider>().setCompact(isCompact);
+      }
+    }
+
+    final metrics = switch (notification) {
+      ScrollNotification(:final metrics) => metrics,
+      ScrollMetricsNotification(:final metrics) => metrics,
+      _ => null,
+    };
+    if (metrics != null &&
+        metrics.axis == Axis.vertical &&
+        metrics.extentAfter < FeedConstants.loadMoreExtent) {
+      unawaited(provider.loadMore());
+    }
+    return false;
   }
 
   Future<void> _refresh(BuildContext context, PostsProvider provider) async {

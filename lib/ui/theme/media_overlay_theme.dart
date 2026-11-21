@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
+import '../../util/const/ui/ui_constants.dart';
+
 @immutable
 class MediaOverlayTheme extends ThemeExtension<MediaOverlayTheme> {
   const MediaOverlayTheme({
@@ -19,7 +21,7 @@ class MediaOverlayTheme extends ThemeExtension<MediaOverlayTheme> {
     controlBackgroundColor: Colors.black54,
     gradientTopColor: Colors.black38,
     gradientBottomColor: Colors.black87,
-    likedColor: Color(0xFFFF5A6A),
+    likedColor: UIConstants.likedColor,
   );
 
   static MediaOverlayTheme of(BuildContext context) =>

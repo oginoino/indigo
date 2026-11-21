@@ -169,7 +169,7 @@ class _EngagementMetric extends StatelessWidget {
                 _buildButton(accessibleLabel, iconSize),
                 const SizedBox(height: UIConstants.postEngagementItemSpacing),
                 AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 250),
+                  duration: UIConstants.engagementColorDuration,
                   transitionBuilder: (child, anim) => FadeTransition(
                     opacity: anim,
                     child: SlideTransition(

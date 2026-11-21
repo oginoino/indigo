@@ -5,24 +5,23 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../model/post/post.dart'; // ajuste o caminho
+import '../../model/post/post.dart';
+import '../../util/const/app/app_strings.dart';
 
 /// Guarda quais stories já foram vistos, persiste entre sessões e expõe
 /// consultas usadas pela fila de stories.
 class StorySeenProvider extends ChangeNotifier {
-  StorySeenProvider({SharedPreferences? preferences})
+  StorySeenProvider({required SharedPreferences preferences})
     : _preferences = preferences {
-    final saved = preferences?.getStringList(_storageKey);
+    final saved = preferences.getStringList(AppStrings.storySeenStorageKey);
     if (saved != null) _seenStoryIds.addAll(saved);
   }
-
-  static const String _storageKey = 'seen_story_ids';
 
   /// Limite de ids guardados: stories expiram, então não faz sentido
   /// acumular para sempre. Os mais antigos são descartados primeiro.
   static const int _maxStoredIds = 500;
 
-  final SharedPreferences? _preferences;
+  final SharedPreferences _preferences;
 
   // Set literal é um LinkedHashSet: mantém a ordem de inserção.
   final Set<String> _seenStoryIds = <String>{};
@@ -53,8 +52,8 @@ class StorySeenProvider extends ChangeNotifier {
 
   Future<void> _persist() async {
     try {
-      await _preferences?.setStringList(
-        _storageKey,
+      await _preferences.setStringList(
+        AppStrings.storySeenStorageKey,
         _seenStoryIds.toList(growable: false),
       );
     } catch (error, stackTrace) {

@@ -11,6 +11,7 @@ import '../../util/const/app/feed_constants.dart';
 import '../../util/const/ui/ui_constants.dart';
 import '../components/app_bar/app_bar.dart';
 import '../components/post/post_card.dart';
+import '../components/post/posts_load_state_view.dart';
 import '../components/screen.dart';
 
 class HashtagFeedPage extends StatelessWidget {
@@ -36,6 +37,7 @@ class HashtagFeedPage extends StatelessWidget {
       child: Consumer<PostsProvider>(
         builder: (context, provider, _) {
           final posts = provider.postsForHashtag(hashtagId);
+
           return NotificationListener<ScrollNotification>(
             onNotification: (notification) {
               if (notification.metrics.extentAfter <
@@ -57,77 +59,55 @@ class HashtagFeedPage extends StatelessWidget {
                     child: _HashtagHeader(hashtag: hashtag),
                   ),
                 ),
-                if (provider.status == PostsLoadStatus.loading && posts.isEmpty)
-                  const SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Center(child: CircularProgressIndicator()),
-                  )
-                else if (provider.status == PostsLoadStatus.error &&
-                    posts.isEmpty)
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text(AppStrings.postsLoadFailed),
-                          TextButton(
-                            onPressed: provider.load,
-                            child: const Text(AppStrings.retry),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                else if (posts.isEmpty && provider.hasMore)
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text(AppStrings.noHashtagPosts),
-                          TextButton(
-                            onPressed: provider.loadMore,
-                            child: const Text(AppStrings.loadMorePosts),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                else if (posts.isEmpty)
-                  const SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Center(child: Text(AppStrings.noHashtagPosts)),
-                  )
-                else
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate((context, index) {
-                      if (index == posts.length) {
-                        return Padding(
-                          padding: const EdgeInsets.all(UIConstants.spaceLg),
-                          child: Center(
-                            child: provider.isLoadingMore
-                                ? const CircularProgressIndicator()
-                                : provider.loadMoreError != null
-                                ? TextButton(
-                                    onPressed: provider.loadMore,
-                                    child: const Text(AppStrings.retry),
-                                  )
-                                : !provider.hasMore
-                                ? const Text(AppStrings.postsEndReached)
-                                : const SizedBox.shrink(),
-                          ),
-                        );
-                      }
-
-                      final post = posts[index];
-                      return PostCard(
-                        post: post,
-                        author: provider.authorFor(post),
-                      );
-                    }, childCount: posts.length + 1),
+                PostsLoadStateView(
+                  status: provider.status,
+                  hasPosts: posts.isNotEmpty,
+                  onRetry: provider.load,
+                  emptyChild: Center(
+                    child: provider.hasMore
+                        ? Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(AppStrings.noHashtagPosts),
+                              TextButton(
+                                onPressed: provider.loadMore,
+                                child: const Text(AppStrings.loadMorePosts),
+                              ),
+                            ],
+                          )
+                        : const Text(AppStrings.noHashtagPosts),
                   ),
+                  loadedChild: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        if (index == posts.length) {
+                          return Padding(
+                            padding: const EdgeInsets.all(UIConstants.spaceLg),
+                            child: Center(
+                              child: provider.isLoadingMore
+                                  ? const CircularProgressIndicator()
+                                  : provider.loadMoreError != null
+                                  ? TextButton(
+                                      onPressed: provider.loadMore,
+                                      child: const Text(AppStrings.retry),
+                                    )
+                                  : !provider.hasMore
+                                  ? const Text(AppStrings.postsEndReached)
+                                  : const SizedBox.shrink(),
+                            ),
+                          );
+                        }
+
+                        final post = posts[index];
+                        return PostCard(
+                          post: post,
+                          author: provider.authorFor(post),
+                        );
+                      },
+                      childCount: posts.length + 1,
+                    ),
+                  ),
+                ),
               ],
             ),
           );

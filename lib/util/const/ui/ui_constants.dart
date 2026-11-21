@@ -144,10 +144,42 @@ class UIConstants {
   static const double storyViewerCaptionBottomPadding = space2xl;
   static const double storyViewerCaptionSpacing = spaceXl;
 
+  // ---------------------------------------------------------------------------
+  // Engagement animation tokens
+  // ---------------------------------------------------------------------------
+  static const Duration engagementFxDuration = Duration(milliseconds: 650);
+  static const Duration engagementPressDuration = Duration(milliseconds: 110);
+  static const Duration engagementColorDuration = Duration(milliseconds: 250);
+  static const Duration engagementIconSwitchDuration = Duration(
+    milliseconds: 180,
+  );
+  static const double engagementPressScale = 0.82;
+  static const double engagementBurstSizeFactor = 1.6;
+
+  // ---------------------------------------------------------------------------
+  // Nav item animation tokens
+  // ---------------------------------------------------------------------------
+  static const double navItemPressScale = 0.95;
+
+  // ---------------------------------------------------------------------------
+  // Audio player waveform tokens
+  // ---------------------------------------------------------------------------
+  static const double audioPlayerWaveformIntroScale = 1.6;
+  static const double audioPlayerWaveformIntroSweep = 0.6;
+
+  // ---------------------------------------------------------------------------
+  // Bottom navigation bar opacities
+  // ---------------------------------------------------------------------------
   static const double lightBottomNavigationBackgroundOpacity = 0.66;
   static const double darkBottomNavigationBackgroundOpacity = 0.72;
   static const double lightBottomNavigationSelectionOpacity = 0.1;
   static const double darkBottomNavigationSelectionOpacity = 0.2;
+
+  // ---------------------------------------------------------------------------
+  // Colors & tokens
+  // ---------------------------------------------------------------------------
+  /// Cor de destaque para reações (curtidas) — usada em overlays e cards.
+  static const Color likedColor = Color(0xFFFF5A6A);
 
   static const Color lightPrimaryColor = Color(0xFF121212);
   static const Color darkPrimaryColor = Color(0xFFF8F8F8);

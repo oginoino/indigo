@@ -39,6 +39,9 @@ class AppStrings {
   static const postLikes = 'Curtidas';
   static const postReposts = 'Republicações';
   static const postSaves = 'Salvamentos';
+  /// Chave de persistência usada pelo [StorySeenProvider].
+  static const storySeenStorageKey = 'seen_story_ids';
+
   static const invalidSocialUserProfileField =
       'Invalid {field} in social user profile data.';
   static const invalidSocialFriendshipField =

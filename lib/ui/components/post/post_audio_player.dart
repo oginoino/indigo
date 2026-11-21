@@ -450,7 +450,7 @@ class _WaveformProgressState extends State<_WaveformProgress> {
                 tween: Tween<double>(end: progress),
                 duration: isDragging || reduceMotion
                     ? Duration.zero
-                    : const Duration(milliseconds: 250),
+                    : UIConstants.engagementColorDuration,
                 curve: Curves.linear,
                 builder: (context, animatedProgress, _) =>
                     TweenAnimationBuilder<double>(
@@ -545,7 +545,9 @@ class _WaveformPainter extends CustomPainter {
 
       // Entrada em cascata.
       final reveal = Curves.easeOutCubic.transform(
-        (intro * 1.6 - (i / barCount) * 0.6).clamp(0.0, 1.0),
+        (intro * UIConstants.audioPlayerWaveformIntroScale -
+                (i / barCount) * UIConstants.audioPlayerWaveformIntroSweep)
+            .clamp(0.0, 1.0),
       );
 
       var barHeight =

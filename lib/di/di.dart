@@ -69,3 +69,5 @@ AppDataService get appDataService => GetIt.instance<AppDataService>();
 SocialDataService get socialDataService => GetIt.instance<SocialDataService>();
 
 PostRepository get postRepository => GetIt.instance<PostRepository>();
+
+SharedPreferences get sharedPreferences => GetIt.instance<SharedPreferences>();

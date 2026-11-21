@@ -3,6 +3,8 @@ import 'dart:math' as math;
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../util/const/ui/ui_constants.dart';
+
 enum EngagementEffect { pop, bounce, spin, wiggle }
 
 class AnimatedEngagementIcon extends StatefulWidget {
@@ -42,14 +44,21 @@ class _AnimatedEngagementIconState extends State<AnimatedEngagementIcon>
   // value: 1 => estado de repouso (animação concluída)
   late final AnimationController _fx = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 650),
+    duration: UIConstants.engagementFxDuration,
     value: 1,
   );
+
+  // Mantido como field para evitar restart de animação a cada build().
+  late ColorTween _colorTween = ColorTween(end: widget.color);
+
   bool _pressed = false;
 
   @override
   void didUpdateWidget(covariant AnimatedEngagementIcon old) {
     super.didUpdateWidget(old);
+    if (old.color != widget.color) {
+      _colorTween = ColorTween(begin: old.color, end: widget.color);
+    }
     if (!old.isActive && widget.isActive) _play();
   }
 
@@ -84,8 +93,8 @@ class _AnimatedEngagementIconState extends State<AnimatedEngagementIcon>
       onPointerUp: (_) => _setPressed(false),
       onPointerCancel: (_) => _setPressed(false),
       child: AnimatedScale(
-        scale: _pressed ? 0.82 : 1,
-        duration: const Duration(milliseconds: 110),
+        scale: _pressed ? UIConstants.engagementPressScale : 1,
+        duration: UIConstants.engagementPressDuration,
         curve: Curves.easeOut,
         child: SizedBox.square(
           dimension: widget.buttonSize,
@@ -97,7 +106,10 @@ class _AnimatedEngagementIconState extends State<AnimatedEngagementIcon>
                 AnimatedBuilder(
                   animation: _fx,
                   builder: (_, _) => CustomPaint(
-                    size: Size.square(widget.buttonSize * 1.6),
+                    size: Size.square(
+                      widget.buttonSize *
+                          UIConstants.engagementBurstSizeFactor,
+                    ),
                     painter: _BurstPainter(
                       progress: _fx.value,
                       color: widget.color,
@@ -105,8 +117,8 @@ class _AnimatedEngagementIconState extends State<AnimatedEngagementIcon>
                   ),
                 ),
               TweenAnimationBuilder<Color?>(
-                tween: ColorTween(end: widget.color),
-                duration: const Duration(milliseconds: 250),
+                tween: _colorTween,
+                duration: UIConstants.engagementColorDuration,
                 builder: (context, color, _) => AnimatedBuilder(
                   animation: _fx,
                   builder: (context, child) =>
@@ -122,7 +134,7 @@ class _AnimatedEngagementIconState extends State<AnimatedEngagementIcon>
                       height: widget.buttonSize,
                     ),
                     icon: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 180),
+                      duration: UIConstants.engagementIconSwitchDuration,
                       transitionBuilder: (child, anim) =>
                           ScaleTransition(scale: anim, child: child),
                       child: Icon(

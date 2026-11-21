@@ -1,10 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:indigo/di/di.dart';
 import 'package:indigo/provider/story/story_seen_provider.dart';
 
 void main() {
   group('StorySeenProvider', () {
     test('starts empty and reports unseen stories', () {
-      final provider = StorySeenProvider();
+      final provider = StorySeenProvider(preferences: sharedPreferences);
 
       expect(provider.seenStoryIds, isEmpty);
       expect(provider.isSeen('story-1'), isFalse);
@@ -12,7 +13,7 @@ void main() {
     });
 
     test('marks stories as seen and notifies listeners once', () {
-      final provider = StorySeenProvider();
+      final provider = StorySeenProvider(preferences: sharedPreferences);
       var notifications = 0;
       provider.addListener(() => notifications++);
 
@@ -25,7 +26,7 @@ void main() {
     });
 
     test('exposes an unmodifiable set of seen ids', () {
-      final provider = StorySeenProvider();
+      final provider = StorySeenProvider(preferences: sharedPreferences);
       provider.markSeen('story-1');
 
       expect(provider.seenStoryIds, contains('story-1'));
