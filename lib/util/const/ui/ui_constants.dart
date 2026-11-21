@@ -220,4 +220,29 @@ class UIConstants {
   static const double commentSheetDragHandleHeight = 4;
   static const double commentSheetDragHandleRadius = 2;
   static const double commentSheetHorizontalPadding = spaceLg;
+
+  // ---------------------------------------------------------------------------
+  // Create page tokens
+  // ---------------------------------------------------------------------------
+  static const double createTypeGridColumns = 3;
+  static const double createTypeGridChildAspectRatio = 0.9;
+  static const double createTypeGridSpacing = spaceSm;
+  static const double createTypeGridPadding = spaceLg;
+  static const double createTypeCardRadius = radiusLg;
+  static const double createTypeIconSize = 28;
+  static const double createTypeCardIconPadding = spaceLg;
+  static const double createTypeCardLabelSpacing = spaceXs;
+
+  static const double createEditorVerticalPadding = spaceLg;
+  static const double createEditorHorizontalPadding = spaceLg;
+  static const double createEditorSectionSpacing = spaceMd;
+  static const double createEditorFieldRadius = radiusMd;
+  static const double createEditorMediaPreviewSize = 72;
+  static const double createEditorMediaAddRadius = radiusMd;
+  static const double createEditorPollOptionRadius = radiusMd;
+  static const double createEditorPollSpacing = spaceXs;
+  static const double createEditorToolbarHeight = 48;
+  static const double createEditorAvatarSize = avatarSmallSize;
+  static const double createEditorAvatarSpacing = spaceSm;
+  static const Duration createPublishFeedback = Duration(milliseconds: 1800);
 }

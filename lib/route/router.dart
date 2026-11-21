@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 
 import '../di/di.dart';
 import '../ui/components/app_bar/app_bar.dart';
+import '../ui/page/create_page.dart';
 import '../ui/page/feed_page.dart';
 import '../ui/page/hashtag_feed_page.dart';
 import '../ui/page/home_page.dart';
@@ -53,13 +54,7 @@ List<GoRoute> _buildRoutes() {
       (context, state) =>
           HashtagFeedPage(hashtagId: state.pathParameters['hashtagId']!),
     ),
-    AppRoute(
-      Routes.create,
-      (context, state) => const PlaceholderPage(
-        title: AppStrings.createTitle,
-        appBar: CustomAppBar(),
-      ),
-    ),
+    AppRoute(Routes.create, (context, state) => const CreatePage()),
     AppRoute(
       Routes.messages,
       (context, state) => const PlaceholderPage(

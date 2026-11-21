@@ -147,4 +147,36 @@ class AppStrings {
   static const postShareSheet = 'Compartilhar publicação';
   static const closeComments = 'Fechar comentários';
   static const commentsTitle = 'Comentários';
+
+  // ---------------------------------------------------------------------------
+  // Criação de conteúdo
+  // ---------------------------------------------------------------------------
+  static const createPageTitle = 'Criar';
+  static const createTypeSelectionTitle = 'O que você quer criar?';
+  static const createEditorPublish = 'Publicar';
+  static const createEditorPublishing = 'Publicando…';
+  static const createEditorDiscard = 'Descartar';
+  static const createEditorDiscardConfirm =
+      'Tem certeza que quer descartar este rascunho?';
+  static const createEditorDiscardConfirmYes = 'Descartar';
+  static const createEditorDiscardConfirmNo = 'Continuar editando';
+  static const createEditorTitleHint = 'Título';
+  static const createEditorBodyHint = 'No que você está pensando?';
+  static const createEditorArticleBodyHint = 'Escreva o seu artigo…';
+  static const createEditorAddMedia = 'Adicionar mídia';
+  static const createEditorMediaCount = '{count} mídia(s) selecionada(s)';
+  static const createEditorAddPollOption = 'Adicionar opção';
+  static const createEditorPollOptionHint = 'Opção {number}';
+  static const createEditorEventDateHint = 'Data e hora do evento';
+  static const createEditorEventLocationHint = 'Local do evento';
+  static const createEditorVisibilityPublic = 'Público';
+  static const createEditorVisibilityFriends = 'Somente amigos';
+  static const createEditorVisibilityLabel = 'Visibilidade';
+  static const createEditorLiveTitleHint = 'Título da live';
+  static const createPublishSuccess = 'Publicado com sucesso!';
+  static const createPublishFailed = 'Não foi possível publicar. Tente novamente.';
+  static const createMediaSimulatedHint =
+      'Seleção de mídia disponível no app completo.';
+  static const createPollMinOptions = 'Adicione pelo menos 2 opções.';
+  static const createFieldRequired = 'Campo obrigatório.';
 }
