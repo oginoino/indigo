@@ -7,6 +7,7 @@ import '../service/persistence/avatar_image_service.dart';
 import '../service/social_data_service.dart';
 import 'bottom_navigation_bar/bottom_navigation_provider.dart';
 import 'feed/feeds_list_provider.dart';
+import 'post/comments_provider.dart';
 import 'post/posts_provider.dart';
 import 'social/friends_provider.dart';
 import 'story/story_seen_provider.dart';
@@ -42,5 +43,9 @@ List<SingleChildWidget> get appProviders => [
       repository: postRepository,
       socialDataService: socialDataService,
     )..load(),
+  ),
+  ChangeNotifierProvider(
+    create: (_) =>
+        CommentsProvider(socialDataService: socialDataService),
   ),
 ];

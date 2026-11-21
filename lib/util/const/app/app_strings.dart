@@ -112,4 +112,26 @@ class AppStrings {
   static const avatarPathSaveFailed = 'Could not save the avatar image path.';
   static const avatarPathRemoveFailed =
       'Could not remove the avatar image path.';
+
+  // ---------------------------------------------------------------------------
+  // Comment section strings
+  // ---------------------------------------------------------------------------
+  static const comments = 'Comentários';
+  static const commentInputHint = 'Adicionar comentário…';
+  static const commentReply = 'Responder';
+  static const commentLike = 'Curtir comentário';
+  static const commentUnlike = 'Descurtir comentário';
+  /// Substitua {count} pelo número de respostas.
+  static const commentLoadReplies = 'Ver {count} respostas';
+  static const commentHideReplies = 'Ocultar respostas';
+  static const commentDeleteTooltip = 'Excluir comentário';
+  static const commentNoComments = 'Seja o primeiro a comentar.';
+  static const commentSend = 'Publicar';
+  /// Substitua {username} pelo @username do autor do comentário pai.
+  static const commentReplyingTo = 'Respondendo a @{username}';
+
+  // ---------------------------------------------------------------------------
+  // Comment mapper error strings
+  // ---------------------------------------------------------------------------
+  static const invalidCommentField = 'Invalid {field} in comment data.';
 }

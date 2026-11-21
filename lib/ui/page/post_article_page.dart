@@ -4,6 +4,7 @@ import '../../model/party/user_profile.dart';
 import '../../model/post/post.dart';
 import '../../util/const/app/app_strings.dart';
 import '../../util/const/ui/ui_constants.dart';
+import '../components/post/comments_section.dart';
 import '../components/post/post_author_header.dart';
 import '../components/post/post_content_text.dart';
 import '../components/post/post_engagement_bar.dart';
@@ -25,6 +26,10 @@ class PostArticlePage extends StatelessWidget {
       body: SafeArea(
         top: false,
         child: SingleChildScrollView(
+          // Garante que o campo de comentário suba com o teclado.
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.viewInsetsOf(context).bottom,
+          ),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(
@@ -69,6 +74,17 @@ class PostArticlePage extends StatelessWidget {
                     ),
                     const Divider(),
                     PostEngagementBar(post: post),
+                    const SizedBox(
+                      height: UIConstants.postArticleSectionSpacing,
+                    ),
+                    const Divider(),
+                    const SizedBox(height: UIConstants.commentSpacing),
+                    CommentsSection(
+                      postId: post.id,
+                      // Enquanto não há autenticação, o autor do post é usado
+                      // como proxy do usuário corrente no avatar do input.
+                      currentUser: author,
+                    ),
                   ],
                 ),
               ),

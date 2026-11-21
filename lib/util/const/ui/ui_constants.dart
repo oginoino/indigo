@@ -189,4 +189,22 @@ class UIConstants {
   static const Color darkTextColor = Color(0xFFF8F8F8);
   static const Color lightHashtagLinkColor = Color(0xFF1565C0);
   static const Color darkHashtagLinkColor = Color(0xFF90CAF9);
+
+  // ---------------------------------------------------------------------------
+  // Comment section tokens
+  // ---------------------------------------------------------------------------
+  static const double commentAvatarSize = avatarSmallSize;
+  static const double commentInputAvatarSize = avatarXSmallSize;
+  /// Recuo horizontal aplicado a respostas (replies).
+  static const double commentIndent = spaceLg;
+  static const double commentSpacing = spaceMd;
+  static const double commentItemSpacing = spaceSm;
+  static const double commentContentSpacing = space2xs;
+  static const double commentInputHeight = 48;
+  static const double commentInputBorderRadius = radiusPill;
+  static const double commentInputHorizontalPadding = spaceSm;
+  static const double commentLikeIconSize = 16;
+  static const double commentLikeButtonSize = 32;
+  static const int commentMaxLines = 5;
+  static const int commentRepliesInitialCount = 3;
 }
