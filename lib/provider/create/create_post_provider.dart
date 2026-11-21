@@ -1,3 +1,4 @@
+import 'package:image_picker/image_picker.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../model/create/content_type.dart';
@@ -8,13 +9,20 @@ import '../../model/create/post_draft.dart';
 /// Gerencia o rascunho ativo e coordena as transições entre etapas do editor.
 /// É descartado ao fechar a tela de criação.
 class CreatePostProvider extends ChangeNotifier {
-  CreatePostProvider() : _draft = PostDraft();
+  CreatePostProvider() : _draft = PostDraft() {
+    _draft.pollOptions
+      ..add(DraftPollOption())
+      ..add(DraftPollOption());
+  }
 
   PostDraft _draft;
   bool _isPublishing = false;
+  final List<XFile> _mediaItems = [];
 
   PostDraft get draft => _draft;
   bool get isPublishing => _isPublishing;
+  List<XFile> get mediaItems => List.unmodifiable(_mediaItems);
+  int get mediaCount => _mediaItems.length;
 
   // ---------------------------------------------------------------------------
   // Tipo de conteúdo
@@ -23,6 +31,7 @@ class CreatePostProvider extends ChangeNotifier {
   void selectType(ContentType type) {
     if (_draft.type == type) return;
     _draft = PostDraft(type: type);
+    _mediaItems.clear();
     notifyListeners();
   }
 
@@ -30,37 +39,35 @@ class CreatePostProvider extends ChangeNotifier {
   // Campos de texto
   // ---------------------------------------------------------------------------
 
-  void setTitle(String value) {
-    _draft.title = value;
+  void setTitle(String v) {
+    _draft.title = v;
     notifyListeners();
   }
 
-  void setBody(String value) {
-    _draft.body = value;
+  void setBody(String v) {
+    _draft.body = v;
     notifyListeners();
   }
 
-  // ---------------------------------------------------------------------------
-  // Visibilidade
-  // ---------------------------------------------------------------------------
-
-  void setVisibility(DraftVisibility visibility) {
-    _draft.visibility = visibility;
+  void setVisibility(DraftVisibility v) {
+    _draft.visibility = v;
     notifyListeners();
   }
 
   // ---------------------------------------------------------------------------
-  // Mídia (simulado)
+  // Mídia real
   // ---------------------------------------------------------------------------
 
-  void addMedia() {
-    _draft.mediaCount++;
+  void addMediaItems(List<XFile> files) {
+    _mediaItems.addAll(files);
+    _draft.mediaCount = _mediaItems.length;
     notifyListeners();
   }
 
-  void removeMedia() {
-    if (_draft.mediaCount <= 0) return;
-    _draft.mediaCount--;
+  void removeMediaAt(int index) {
+    if (index < 0 || index >= _mediaItems.length) return;
+    _mediaItems.removeAt(index);
+    _draft.mediaCount = _mediaItems.length;
     notifyListeners();
   }
 
@@ -73,15 +80,15 @@ class CreatePostProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void removePollOption(int index) {
-    if (index < 0 || index >= _draft.pollOptions.length) return;
-    _draft.pollOptions.removeAt(index);
+  void removePollOption(int i) {
+    if (i < 0 || i >= _draft.pollOptions.length) return;
+    _draft.pollOptions.removeAt(i);
     notifyListeners();
   }
 
-  void setPollOptionText(int index, String text) {
-    if (index < 0 || index >= _draft.pollOptions.length) return;
-    _draft.pollOptions[index].text = text;
+  void setPollOptionText(int i, String text) {
+    if (i < 0 || i >= _draft.pollOptions.length) return;
+    _draft.pollOptions[i].text = text;
     notifyListeners();
   }
 
@@ -89,13 +96,13 @@ class CreatePostProvider extends ChangeNotifier {
   // Campos de evento
   // ---------------------------------------------------------------------------
 
-  void setEventDate(String? value) {
-    _draft.eventDate = value;
+  void setEventDate(String? v) {
+    _draft.eventDate = v;
     notifyListeners();
   }
 
-  void setEventLocation(String? value) {
-    _draft.eventLocation = value;
+  void setEventLocation(String? v) {
+    _draft.eventLocation = v;
     notifyListeners();
   }
 
@@ -116,13 +123,16 @@ class CreatePostProvider extends ChangeNotifier {
     _isPublishing = false;
     notifyListeners();
 
-    // Reseta para novo rascunho após publicação.
     reset();
     return true;
   }
 
   void reset() {
     _draft = PostDraft();
+    _mediaItems.clear();
+    _draft.pollOptions
+      ..add(DraftPollOption())
+      ..add(DraftPollOption());
     notifyListeners();
   }
 }

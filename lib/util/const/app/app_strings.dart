@@ -179,4 +179,36 @@ class AppStrings {
       'Seleção de mídia disponível no app completo.';
   static const createPollMinOptions = 'Adicione pelo menos 2 opções.';
   static const createFieldRequired = 'Campo obrigatório.';
+  static const createLiveHint =
+      'A transmissão ao vivo começará assim que você publicar.';
+
+  // Media picker strings
+  static const mediaPickerTitle = 'Selecionar mídia';
+  static const mediaPickerCamera = 'Câmera';
+  static const mediaPickerGallery = 'Galeria';
+  static const mediaPickerGalleryHint =
+      'Toque para abrir a galeria do dispositivo.';
+  static const mediaPickerRecents = 'Recentes';
+  static const mediaPickerDone = 'Concluído';
+  static const mediaPickerCancel = 'Cancelar';
+  static const mediaPickerTakePhoto = 'Tirar foto';
+  static const mediaPickerTakeVideo = 'Gravar vídeo';
+  static const mediaPickerFlipCamera = 'Virar câmera';
+  static const mediaPickerFlashOn = 'Flash ligado';
+  static const mediaPickerFlashOff = 'Flash desligado';
+  static const mediaPickerFlashAuto = 'Flash automático';
+  static const mediaPickerPermissionTitle = 'Acesso à câmera e galeria';
+  static const mediaPickerPermissionBody =
+      'Para tirar fotos e selecionar mídia, o Indigo precisa de acesso à sua câmera e galeria.';
+  static const mediaPickerPermissionOpen = 'Abrir configurações';
+  static const mediaPickerNoMedia = 'Nenhuma mídia encontrada.';
+  static const mediaPickerSelectedCount = '{count} selecionado(s)';
+  static const mediaPickerMaxSelection = 'Máximo de {max} itens.';
+  static const mediaPickerRemove = 'Remover';
+  static const mediaPickerCameraError = 'Câmera não disponível neste dispositivo.';
+  static const composerThread = 'Adicionar ao fio';
+  static const composerAudience = 'Público';
+  static const composerReplyPermission = 'Quem pode responder?';
+  static const composerAddGif = 'Adicionar GIF';
+  static const composerAddLocation = 'Adicionar localização';
 }

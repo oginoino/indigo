@@ -7,13 +7,15 @@ import '../../../provider/create/create_post_provider.dart';
 import '../../../util/const/app/app_strings.dart';
 import '../../../util/const/ui/ui_constants.dart';
 import '../avatar.dart';
+import 'media_picker_sheet.dart';
+import 'media_preview_strip.dart';
 
 /// Editor de rascunho de publicação.
 ///
 /// Adapta seus campos ao [ContentType] do rascunho:
 /// - Texto/Story → campo de texto simples
 /// - Artigo     → título + corpo
-/// - Foto/Vídeo/Áudio → painel de mídia + legenda
+/// - Foto/Vídeo/Áudio → strip de mídia + legenda
 /// - Enquete    → pergunta + opções dinâmicas
 /// - Evento     → título + data + local
 /// - Live       → título da transmissão
@@ -45,7 +47,7 @@ class CreatePostEditor extends StatelessWidget {
             _BodyField(provider: provider, draft: draft),
             if (draft.requiresMedia) ...[
               const SizedBox(height: UIConstants.createEditorSectionSpacing),
-              _MediaPanel(provider: provider, draft: draft),
+              _MediaSection(provider: provider, draft: draft),
             ],
             if (draft.hasPollOptions) ...[
               const SizedBox(height: UIConstants.createEditorSectionSpacing),
@@ -99,8 +101,6 @@ class _TitleField extends StatelessWidget {
   final PostDraft draft;
 
   String get _hint => switch (draft.type) {
-    ContentType.article => AppStrings.createEditorTitleHint,
-    ContentType.event => AppStrings.createEditorTitleHint,
     ContentType.live => AppStrings.createEditorLiveTitleHint,
     _ => AppStrings.createEditorTitleHint,
   };
@@ -135,12 +135,6 @@ class _BodyField extends StatelessWidget {
 
   String get _hint => switch (draft.type) {
     ContentType.article => AppStrings.createEditorArticleBodyHint,
-    ContentType.photo ||
-    ContentType.video ||
-    ContentType.audio =>
-      AppStrings.createEditorBodyHint,
-    ContentType.poll => AppStrings.createEditorBodyHint,
-    ContentType.event => AppStrings.createEditorBodyHint,
     _ => AppStrings.createEditorBodyHint,
   };
 
@@ -153,10 +147,7 @@ class _BodyField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextField(
-      decoration: InputDecoration(
-        hintText: _hint,
-        border: InputBorder.none,
-      ),
+      decoration: InputDecoration(hintText: _hint, border: InputBorder.none),
       style: Theme.of(context).textTheme.bodyLarge,
       textCapitalization: TextCapitalization.sentences,
       maxLines: _maxLines ?? 999,
@@ -167,112 +158,43 @@ class _BodyField extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Painel de mídia (simulado)
+// Seção de mídia (strip real + botão adicionar)
 // ---------------------------------------------------------------------------
 
-class _MediaPanel extends StatelessWidget {
-  const _MediaPanel({required this.provider, required this.draft});
+class _MediaSection extends StatelessWidget {
+  const _MediaSection({required this.provider, required this.draft});
 
   final CreatePostProvider provider;
   final PostDraft draft;
 
+  Future<void> _openPicker(BuildContext context) => showMediaPickerSheet(
+    context,
+    allowVideo: draft.type == ContentType.video,
+  );
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    final count = draft.mediaCount;
+    final hasMedia = provider.mediaItems.isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (count > 0) ...[
-          Wrap(
-            spacing: UIConstants.createEditorSectionSpacing,
-            runSpacing: UIConstants.createEditorSectionSpacing,
-            children: [
-              for (var i = 0; i < count; i++)
-                _MediaPreviewChip(
-                  index: i,
-                  type: draft.type,
-                  onRemove: provider.removeMedia,
-                ),
-            ],
+        if (hasMedia) ...[
+          MediaPreviewStrip(
+            items: provider.mediaItems,
+            onRemove: provider.removeMediaAt,
+            onAdd: () => _openPicker(context),
           ),
           const SizedBox(height: UIConstants.createEditorSectionSpacing),
         ],
         OutlinedButton.icon(
-          onPressed: provider.addMedia,
+          onPressed: () => _openPicker(context),
           icon: const Icon(Icons.add_photo_alternate_outlined),
           label: const Text(AppStrings.createEditorAddMedia),
           style: OutlinedButton.styleFrom(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(
                 UIConstants.createEditorMediaAddRadius,
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: UIConstants.createEditorPollSpacing),
-        Text(
-          AppStrings.createMediaSimulatedHint,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: colors.onSurfaceVariant,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _MediaPreviewChip extends StatelessWidget {
-  const _MediaPreviewChip({
-    required this.index,
-    required this.type,
-    required this.onRemove,
-  });
-
-  final int index;
-  final ContentType type;
-  final VoidCallback onRemove;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final icon = switch (type) {
-      ContentType.video => Icons.videocam_rounded,
-      ContentType.audio => Icons.mic_rounded,
-      _ => Icons.photo_rounded,
-    };
-
-    return Stack(
-      children: [
-        Container(
-          width: UIConstants.createEditorMediaPreviewSize,
-          height: UIConstants.createEditorMediaPreviewSize,
-          decoration: BoxDecoration(
-            color: colors.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(
-              UIConstants.createEditorMediaAddRadius,
-            ),
-          ),
-          child: Icon(icon, color: colors.onSurfaceVariant),
-        ),
-        Positioned(
-          top: 2,
-          right: 2,
-          child: GestureDetector(
-            onTap: onRemove,
-            child: Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                color: colors.error,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.close,
-                size: 12,
-                color: colors.onError,
               ),
             ),
           ),
@@ -462,10 +384,10 @@ class _LiveHintChip extends StatelessWidget {
           const SizedBox(width: UIConstants.spaceSm),
           Expanded(
             child: Text(
-              'A transmissão ao vivo começará assim que você publicar.',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: colors.onErrorContainer),
+              AppStrings.createLiveHint,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: colors.onErrorContainer,
+              ),
             ),
           ),
         ],
@@ -514,8 +436,7 @@ class _VisibilitySelector extends StatelessWidget {
         ChoiceChip(
           label: const Text(AppStrings.createEditorVisibilityFriends),
           selected: !isPublic,
-          onSelected: (_) =>
-              provider.setVisibility(DraftVisibility.friendsOnly),
+          onSelected: (_) => provider.setVisibility(DraftVisibility.friendsOnly),
         ),
       ],
     );

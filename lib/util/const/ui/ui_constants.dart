@@ -245,4 +245,33 @@ class UIConstants {
   static const double createEditorAvatarSize = avatarSmallSize;
   static const double createEditorAvatarSpacing = spaceSm;
   static const Duration createPublishFeedback = Duration(milliseconds: 1800);
+
+  // Media picker / camera tokens
+  static const double mediaPickerHeaderHeight = 56;
+  static const double mediaPickerCameraPreviewRatio = 0.75;
+  static const double mediaPickerGridSpacing = space2xs;
+  static const double mediaPickerGridColumns = 3;
+  static const double mediaPickerThumbRadius = radiusSm;
+  static const double mediaPickerSelectionBadgeSize = 22;
+  static const double mediaPickerSelectionBorderWidth = 2.5;
+  static const double mediaPickerCameraButtonSize = 72;
+  static const double mediaPickerCameraButtonInner = 60;
+  static const double mediaPickerTabBarHeight = 44;
+  static const double mediaPickerFabSize = 56;
+  static const Duration mediaPickerSheetSnap = Duration(milliseconds: 320);
+  static const double mediaPickerSheetMinFraction = 0.45;
+  static const double mediaPickerSheetMaxFraction = 0.95;
+  static const double mediaPickerSheetInitialFraction = 0.55;
+  static const double mediaPickerDragHandleWidth = 36;
+  static const double mediaPickerDragHandleHeight = 4;
+  static const double mediaPickerDragHandleRadius = 2;
+
+  // Twitter-style composer
+  static const double composerAvatarSize = avatarMediumSize;
+  static const double composerThreadLineWidth = 1.5;
+  static const double composerAttachBarHeight = 48;
+  static const double composerTypeChipHeight = 32;
+  static const double composerTypeChipSpacing = spaceXs;
+  static const double composerTypeChipRadius = radiusPill;
+  static const double composerAttachIconSize = 22;
 }
