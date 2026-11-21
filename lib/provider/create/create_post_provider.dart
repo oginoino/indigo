@@ -101,6 +101,11 @@ class CreatePostProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setAudioDuration(Duration d) {
+    _draft.audioDuration = d;
+    notifyListeners();
+  }
+
   void setEventLocation(String? v) {
     _draft.eventLocation = v;
     notifyListeners();

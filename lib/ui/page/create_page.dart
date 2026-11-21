@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
@@ -10,13 +12,16 @@ import '../../util/const/app/app_strings.dart';
 import '../../util/const/ui/ui_constants.dart';
 import '../components/create/create_post_editor.dart';
 
-/// Tela de criação de conteúdo — UX em duas fases estilo Instagram/TikTok.
+/// Tela de criação de conteúdo — UX contextual por tipo.
 ///
-/// **Fase 1 — Câmera fullscreen**: câmera em tela cheia com chips de tipo,
-/// botão galeria e shutter. Para tipos sem mídia vai direto à fase 2.
+/// **Fase 1 — Captura**: UI adaptada ao tipo selecionado via swipe horizontal.
+///   - Foto/Story: câmera fullscreen + shutter
+///   - Vídeo: câmera + hold-to-record
+///   - Áudio: gravador de microfone
+///   - Post/Artigo/Enquete/Evento/Live: vai direto ao editor
 ///
-/// **Fase 2 — Editor**: compositor estilo Twitter/Instagram com AppBar,
-/// strip de mídia e campos adaptados ao tipo escolhido.
+/// **Fase 2 — Editor**: compositor com AppBar, strip de mídia e campos
+///   adaptados ao tipo. PopScope protege contra saída acidental.
 class CreatePage extends StatelessWidget {
   const CreatePage({super.key});
 
@@ -30,10 +35,14 @@ class CreatePage extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Conteúdo interno (stateful para controlar fases e câmera)
+// Enums internos
 // ---------------------------------------------------------------------------
 
-enum _Phase { camera, editor }
+enum _Phase { capture, editor }
+
+// ---------------------------------------------------------------------------
+// Conteúdo interno (stateful — fases + câmera + pageview)
+// ---------------------------------------------------------------------------
 
 class _CreatePageContent extends StatefulWidget {
   const _CreatePageContent();
@@ -43,17 +52,30 @@ class _CreatePageContent extends StatefulWidget {
 }
 
 class _CreatePageContentState extends State<_CreatePageContent>
-    with SingleTickerProviderStateMixin {
-  _Phase _phase = _Phase.camera;
+    with TickerProviderStateMixin {
+  _Phase _phase = _Phase.capture;
 
-  // Camera
+  // ── Câmera ────────────────────────────────────────────────────────────────
   List<CameraDescription> _cameras = [];
   CameraController? _cameraController;
   bool _cameraReady = false;
   int _cameraIndex = 0;
   FlashMode _flashMode = FlashMode.auto;
+  bool _isRecordingVideo = false;
 
-  // Editor slide animation
+  // ── Áudio ─────────────────────────────────────────────────────────────────
+  bool _isRecordingAudio = false;
+  Duration _audioDuration = Duration.zero;
+  Timer? _audioTimer;
+
+  // ── Type PageView (swipe horizontal) ──────────────────────────────────────
+  late final PageController _typePageController = PageController(
+    initialPage: ContentType.values.indexOf(ContentType.photo),
+    viewportFraction: 1,
+  );
+  int _typePageIndex = ContentType.values.indexOf(ContentType.photo);
+
+  // ── Editor slide-up ───────────────────────────────────────────────────────
   late final AnimationController _slideController = AnimationController(
     vsync: this,
     duration: UIConstants.bottomNavigationAnimationDuration,
@@ -61,24 +83,48 @@ class _CreatePageContentState extends State<_CreatePageContent>
   late final Animation<Offset> _slideAnimation = Tween<Offset>(
     begin: const Offset(0, 1),
     end: Offset.zero,
-  ).animate(CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic));
+  ).animate(
+    CurvedAnimation(parent: _slideController, curve: Curves.easeOutCubic),
+  );
 
   final _pickerService = MediaPickerService();
+
+  // ── Getters ───────────────────────────────────────────────────────────────
+
+  ContentType get _currentType => ContentType.values[_typePageIndex];
+
+  bool get _goDirectToEditor =>
+      _currentType == ContentType.post ||
+      _currentType == ContentType.article ||
+      _currentType == ContentType.poll ||
+      _currentType == ContentType.event ||
+      _currentType == ContentType.live;
+
+  // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   @override
   void initState() {
     super.initState();
-    _initCamera();
+    unawaited(_initCamera());
   }
+
+  @override
+  void dispose() {
+    _cameraController?.dispose();
+    _slideController.dispose();
+    _typePageController.dispose();
+    _audioTimer?.cancel();
+    super.dispose();
+  }
+
+  // ── Câmera ────────────────────────────────────────────────────────────────
 
   Future<void> _initCamera() async {
     try {
       _cameras = await availableCameras();
-      if (_cameras.isEmpty) return;
+      if (_cameras.isEmpty || !mounted) return;
       await _startCamera(_cameras[_cameraIndex]);
-    } catch (_) {
-      // Câmera indisponível (simulador ou permissão negada).
-    }
+    } catch (_) {}
   }
 
   Future<void> _startCamera(CameraDescription camera) async {
@@ -119,36 +165,142 @@ class _CreatePageContentState extends State<_CreatePageContent>
     setState(() {});
   }
 
-  void _selectType(ContentType type) {
+  // ── Captura de foto ───────────────────────────────────────────────────────
+
+  Future<void> _capturePhoto() async {
+    if (!_cameraReady || _cameraController == null) return;
+    HapticFeedback.mediumImpact();
+    try {
+      final file = await _cameraController!.takePicture();
+      if (!mounted) return;
+      context.read<CreatePostProvider>().addMediaItems([file]);
+      _goToEditor();
+    } catch (_) {}
+  }
+
+  // ── Gravação de vídeo ────────────────────────────────────────────────────
+
+  Future<void> _startVideoRecording() async {
+    if (!_cameraReady || _cameraController == null || _isRecordingVideo) return;
+    HapticFeedback.mediumImpact();
+    try {
+      await _cameraController!.startVideoRecording();
+      setState(() => _isRecordingVideo = true);
+    } catch (_) {}
+  }
+
+  Future<void> _stopVideoRecording() async {
+    if (!_cameraReady || _cameraController == null || !_isRecordingVideo) {
+      return;
+    }
+    HapticFeedback.heavyImpact();
+    try {
+      final file = await _cameraController!.stopVideoRecording();
+      if (!mounted) return;
+      setState(() => _isRecordingVideo = false);
+      context.read<CreatePostProvider>().addMediaItems([file]);
+      _goToEditor();
+    } catch (_) {
+      setState(() => _isRecordingVideo = false);
+    }
+  }
+
+  // ── Gravação de áudio (simulada — sem package de record) ──────────────────
+
+  void _toggleAudioRecording() {
+    HapticFeedback.mediumImpact();
+    if (_isRecordingAudio) {
+      _stopAudioRecording();
+    } else {
+      _startAudioRecording();
+    }
+  }
+
+  void _startAudioRecording() {
+    setState(() {
+      _isRecordingAudio = true;
+      _audioDuration = Duration.zero;
+    });
+    _audioTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+      setState(() => _audioDuration += const Duration(seconds: 1));
+    });
+  }
+
+  void _stopAudioRecording() {
+    _audioTimer?.cancel();
+    _audioTimer = null;
+    // Áudio simulado: gera XFile fictício com duração registrada
+    // (backend real substituirá por arquivo real)
+    setState(() => _isRecordingAudio = false);
+    // Vai direto ao editor com duração registrada no provider
+    context.read<CreatePostProvider>().setAudioDuration(_audioDuration);
+    _goToEditor();
+  }
+
+  void _resetAudio() {
+    _audioTimer?.cancel();
+    _audioTimer = null;
+    setState(() {
+      _isRecordingAudio = false;
+      _audioDuration = Duration.zero;
+    });
+  }
+
+  // ── Galeria ───────────────────────────────────────────────────────────────
+
+  Future<void> _pickFromGallery() async {
     final provider = context.read<CreatePostProvider>();
-    provider.selectType(type);
-
-    // Tipos sem mídia vão direto ao editor.
-    final noCamera = type == ContentType.post ||
-        type == ContentType.article ||
-        type == ContentType.poll ||
-        type == ContentType.event ||
-        type == ContentType.live;
-
-    if (noCamera) {
+    final type = provider.draft.type;
+    final allowVideo =
+        type == ContentType.video || type == ContentType.story;
+    final files = allowVideo
+        ? await _pickerService.pickMedia()
+        : await _pickerService.pickPhotos();
+    if (!mounted) return;
+    if (files.isNotEmpty) {
+      provider.addMediaItems(files);
       _goToEditor();
     }
-    // Para foto/vídeo/áudio/story permanece na câmera.
   }
+
+  // ── Navegação de tipo (PageView) ──────────────────────────────────────────
+
+  void _onTypePageChanged(int index) {
+    final type = ContentType.values[index];
+    context.read<CreatePostProvider>().selectType(type);
+    setState(() => _typePageIndex = index);
+    // Tipos que vão direto ao editor são selecionados imediatamente
+    if (_goDirectToEditor) {
+      _goToEditor();
+    }
+  }
+
+  void _selectTypeByChip(ContentType type) {
+    final index = ContentType.values.indexOf(type);
+    _typePageController.animateToPage(
+      index,
+      duration: UIConstants.createTypeSwipeDuration,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  // ── Fases ─────────────────────────────────────────────────────────────────
 
   void _goToEditor() {
     setState(() => _phase = _Phase.editor);
     _slideController.forward(from: 0);
   }
 
-  Future<void> _goBackToCamera(CreatePostProvider provider) async {
+  Future<void> _goBackToCapture(CreatePostProvider provider) async {
     if (provider.draft.hasContent || provider.mediaItems.isNotEmpty) {
       final discard = await _confirmDiscard();
       if (!discard) return;
     }
     provider.reset();
+    _resetAudio();
     _slideController.reverse();
-    setState(() => _phase = _Phase.camera);
+    setState(() => _phase = _Phase.capture);
   }
 
   Future<bool> _confirmDiscard() async {
@@ -172,77 +324,76 @@ class _CreatePageContentState extends State<_CreatePageContent>
     return result ?? false;
   }
 
-  Future<void> _capturePhoto() async {
-    if (!_cameraReady || _cameraController == null) return;
-    try {
-      final file = await _cameraController!.takePicture();
-      if (!mounted) return;
-      context.read<CreatePostProvider>().addMediaItems([file]);
-      _goToEditor();
-    } catch (_) {}
-  }
-
-  Future<void> _pickFromGallery() async {
-    final provider = context.read<CreatePostProvider>();
-    final type = provider.draft.type;
-    final allowVideo = type == ContentType.video;
-    final files = allowVideo
-        ? await _pickerService.pickMedia()
-        : await _pickerService.pickPhotos();
-    if (!mounted) return;
-    if (files.isNotEmpty) {
-      provider.addMediaItems(files);
-      _goToEditor();
-    }
-  }
+  // ── Publicação ────────────────────────────────────────────────────────────
 
   void _onPublished() {
+    _resetAudio();
     _slideController.reverse();
-    setState(() => _phase = _Phase.camera);
+    setState(() => _phase = _Phase.capture);
   }
 
-  @override
-  void dispose() {
-    _cameraController?.dispose();
-    _slideController.dispose();
-    super.dispose();
-  }
+  // ── Build ─────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
     return Consumer<CreatePostProvider>(
       builder: (context, provider, _) {
-        return Scaffold(
-          backgroundColor: Colors.black,
-          body: Stack(
-            fit: StackFit.expand,
-            children: [
-              // ── Fase 1: câmera fullscreen ──────────────────────────────
-              _CameraPhase(
-                cameraController: _cameraController,
-                cameraReady: _cameraReady,
-                flashMode: _flashMode,
-                hasMultipleCameras: _cameras.length > 1,
-                selectedType: provider.draft.type,
-                onTypeSelect: _selectType,
-                onCapture: _capturePhoto,
-                onGallery: _pickFromGallery,
-                onFlip: _flipCamera,
-                onFlash: _cycleFlash,
-                onClose: () => Navigator.of(context).maybePop(),
-              ),
-
-              // ── Fase 2: editor deslizante ──────────────────────────────
-              if (_phase == _Phase.editor)
-                SlideTransition(
-                  position: _slideAnimation,
-                  child: _EditorPhase(
-                    provider: provider,
-                    onBack: () => _goBackToCamera(provider),
-                    onPublished: _onPublished,
-                  ),
+        // PopScope no nível raiz — intercepta back em ambas as fases
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, _) async {
+            if (didPop) return;
+            if (_phase == _Phase.editor) {
+              await _goBackToCapture(provider);
+            } else {
+              // Fase capture: sai normalmente
+              if (context.mounted) Navigator.of(context).maybePop();
+            }
+          },
+          child: Scaffold(
+            backgroundColor: Colors.black,
+            body: Stack(
+              fit: StackFit.expand,
+              children: [
+                // ── Fase 1: Capture contextual ─────────────────────────
+                _CapturePhase(
+                  typePageController: _typePageController,
+                  currentType: _currentType,
+                  onTypePageChanged: _onTypePageChanged,
+                  onTypeChipTap: _selectTypeByChip,
+                  onClose: () => Navigator.of(context).maybePop(),
+                  // Camera props
+                  cameraController: _cameraController,
+                  cameraReady: _cameraReady,
+                  flashMode: _flashMode,
+                  hasMultipleCameras: _cameras.length > 1,
+                  isRecordingVideo: _isRecordingVideo,
+                  onCapture: _capturePhoto,
+                  onStartVideo: _startVideoRecording,
+                  onStopVideo: _stopVideoRecording,
+                  onFlip: _flipCamera,
+                  onFlash: _cycleFlash,
+                  onGallery: _pickFromGallery,
+                  // Audio props
+                  isRecordingAudio: _isRecordingAudio,
+                  audioDuration: _audioDuration,
+                  onToggleAudio: _toggleAudioRecording,
+                  // Text-only types — go to editor directly
+                  onDirectToEditor: _goToEditor,
                 ),
-            ],
+
+                // ── Fase 2: Editor slide-up ────────────────────────────
+                if (_phase == _Phase.editor)
+                  SlideTransition(
+                    position: _slideAnimation,
+                    child: _EditorPhase(
+                      provider: provider,
+                      onBack: () => _goBackToCapture(provider),
+                      onPublished: _onPublished,
+                    ),
+                  ),
+              ],
+            ),
           ),
         );
       },
@@ -250,36 +401,60 @@ class _CreatePageContentState extends State<_CreatePageContent>
   }
 }
 
-// ---------------------------------------------------------------------------
-// Fase 1 — câmera fullscreen
-// ---------------------------------------------------------------------------
+// ===========================================================================
+// FASE 1 — Captura contextual (PageView por tipo)
+// ===========================================================================
 
-class _CameraPhase extends StatelessWidget {
-  const _CameraPhase({
+class _CapturePhase extends StatelessWidget {
+  const _CapturePhase({
+    required this.typePageController,
+    required this.currentType,
+    required this.onTypePageChanged,
+    required this.onTypeChipTap,
+    required this.onClose,
     required this.cameraController,
     required this.cameraReady,
     required this.flashMode,
     required this.hasMultipleCameras,
-    required this.selectedType,
-    required this.onTypeSelect,
+    required this.isRecordingVideo,
     required this.onCapture,
-    required this.onGallery,
+    required this.onStartVideo,
+    required this.onStopVideo,
     required this.onFlip,
     required this.onFlash,
-    required this.onClose,
+    required this.onGallery,
+    required this.isRecordingAudio,
+    required this.audioDuration,
+    required this.onToggleAudio,
+    required this.onDirectToEditor,
   });
 
+  final PageController typePageController;
+  final ContentType currentType;
+  final ValueChanged<int> onTypePageChanged;
+  final ValueChanged<ContentType> onTypeChipTap;
+  final VoidCallback onClose;
+
+  // Camera
   final CameraController? cameraController;
   final bool cameraReady;
   final FlashMode flashMode;
   final bool hasMultipleCameras;
-  final ContentType selectedType;
-  final ValueChanged<ContentType> onTypeSelect;
+  final bool isRecordingVideo;
   final VoidCallback onCapture;
-  final VoidCallback onGallery;
+  final VoidCallback onStartVideo;
+  final VoidCallback onStopVideo;
   final VoidCallback onFlip;
   final VoidCallback onFlash;
-  final VoidCallback onClose;
+  final VoidCallback onGallery;
+
+  // Audio
+  final bool isRecordingAudio;
+  final Duration audioDuration;
+  final VoidCallback onToggleAudio;
+
+  // Direct-to-editor
+  final VoidCallback onDirectToEditor;
 
   IconData get _flashIcon => switch (flashMode) {
     FlashMode.always => Icons.flash_on_rounded,
@@ -287,18 +462,42 @@ class _CameraPhase extends StatelessWidget {
     _ => Icons.flash_auto_rounded,
   };
 
+  String get _flashTooltip => switch (flashMode) {
+    FlashMode.always => AppStrings.mediaPickerFlashOn,
+    FlashMode.off => AppStrings.mediaPickerFlashOff,
+    _ => AppStrings.mediaPickerFlashAuto,
+  };
+
   @override
   Widget build(BuildContext context) {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Camera preview (or black background)
-        if (cameraReady && cameraController != null)
-          CameraPreview(cameraController!)
-        else
-          const ColoredBox(color: Colors.black),
+        // ── PageView: cada página é a UI de um tipo ────────────────────
+        PageView.builder(
+          controller: typePageController,
+          onPageChanged: onTypePageChanged,
+          itemCount: ContentType.values.length,
+          itemBuilder: (context, index) {
+            final type = ContentType.values[index];
+            return _TypeCapturePage(
+              type: type,
+              cameraController: cameraController,
+              cameraReady: cameraReady,
+              isRecordingVideo: isRecordingVideo,
+              isRecordingAudio: isRecordingAudio,
+              audioDuration: audioDuration,
+              onCapture: onCapture,
+              onStartVideo: onStartVideo,
+              onStopVideo: onStopVideo,
+              onGallery: onGallery,
+              onToggleAudio: onToggleAudio,
+              onDirectToEditor: onDirectToEditor,
+            );
+          },
+        ),
 
-        // ── Top bar ────────────────────────────────────────────────────
+        // ── Top bar (sobreposta) ───────────────────────────────────────
         Positioned(
           top: 0,
           left: 0,
@@ -311,31 +510,30 @@ class _CameraPhase extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  // X close
+                  // X para fechar toda a tela
                   _CameraIconButton(
                     icon: Icons.close_rounded,
                     onTap: onClose,
                     tooltip: AppStrings.mediaPickerCancel,
                   ),
                   const Spacer(),
-                  // Flash
-                  _CameraIconButton(
-                    icon: _flashIcon,
-                    onTap: onFlash,
-                    tooltip: switch (flashMode) {
-                      FlashMode.always => AppStrings.mediaPickerFlashOn,
-                      FlashMode.off => AppStrings.mediaPickerFlashOff,
-                      _ => AppStrings.mediaPickerFlashAuto,
-                    },
-                  ),
-                  if (hasMultipleCameras) ...[
-                    const SizedBox(width: UIConstants.spaceSm),
-                    // Flip
+                  // Flash (só para tipos com câmera)
+                  if (currentType == ContentType.photo ||
+                      currentType == ContentType.video ||
+                      currentType == ContentType.story) ...[
                     _CameraIconButton(
-                      icon: Icons.flip_camera_ios_rounded,
-                      onTap: onFlip,
-                      tooltip: AppStrings.mediaPickerFlipCamera,
+                      icon: _flashIcon,
+                      onTap: onFlash,
+                      tooltip: _flashTooltip,
                     ),
+                    if (hasMultipleCameras) ...[
+                      const SizedBox(width: UIConstants.spaceSm),
+                      _CameraIconButton(
+                        icon: Icons.flip_camera_ios_rounded,
+                        onTap: onFlip,
+                        tooltip: AppStrings.mediaPickerFlipCamera,
+                      ),
+                    ],
                   ],
                 ],
               ),
@@ -343,11 +541,11 @@ class _CameraPhase extends StatelessWidget {
           ),
         ),
 
-        // ── Type chips (horizontal scroll, below top bar) ───────────────
+        // ── Chips de tipo (swipe indicator) ───────────────────────────
         Positioned(
-          top: UIConstants.minimumInteractiveTargetSize +
-              UIConstants.spaceMd +
-              MediaQuery.of(context).padding.top,
+          top: MediaQuery.of(context).padding.top +
+              UIConstants.minimumInteractiveTargetSize +
+              UIConstants.spaceXs,
           left: 0,
           right: 0,
           child: SizedBox(
@@ -360,19 +558,115 @@ class _CameraPhase extends StatelessWidget {
               children: [
                 for (final type in ContentType.values)
                   Padding(
-                    padding: const EdgeInsets.only(right: UIConstants.spaceXs),
+                    padding:
+                        const EdgeInsets.only(right: UIConstants.spaceXs),
                     child: _TypeChip(
                       type: type,
-                      selected: selectedType == type,
-                      onTap: () => onTypeSelect(type),
+                      selected: currentType == type,
+                      onTap: () => onTypeChipTap(type),
                     ),
                   ),
               ],
             ),
           ),
         ),
+      ],
+    );
+  }
+}
 
-        // ── Bottom controls ─────────────────────────────────────────────
+// ---------------------------------------------------------------------------
+// Página de captura de cada tipo (dentro do PageView)
+// ---------------------------------------------------------------------------
+
+class _TypeCapturePage extends StatelessWidget {
+  const _TypeCapturePage({
+    required this.type,
+    required this.cameraController,
+    required this.cameraReady,
+    required this.isRecordingVideo,
+    required this.isRecordingAudio,
+    required this.audioDuration,
+    required this.onCapture,
+    required this.onStartVideo,
+    required this.onStopVideo,
+    required this.onGallery,
+    required this.onToggleAudio,
+    required this.onDirectToEditor,
+  });
+
+  final ContentType type;
+  final CameraController? cameraController;
+  final bool cameraReady;
+  final bool isRecordingVideo;
+  final bool isRecordingAudio;
+  final Duration audioDuration;
+  final VoidCallback onCapture;
+  final VoidCallback onStartVideo;
+  final VoidCallback onStopVideo;
+  final VoidCallback onGallery;
+  final VoidCallback onToggleAudio;
+  final VoidCallback onDirectToEditor;
+
+  @override
+  Widget build(BuildContext context) {
+    return switch (type) {
+      ContentType.photo => _PhotoCapturePage(
+          cameraController: cameraController,
+          cameraReady: cameraReady,
+          onCapture: onCapture,
+          onGallery: onGallery,
+        ),
+      ContentType.video => _VideoCapturePage(
+          cameraController: cameraController,
+          cameraReady: cameraReady,
+          isRecording: isRecordingVideo,
+          onStartVideo: onStartVideo,
+          onStopVideo: onStopVideo,
+          onGallery: onGallery,
+        ),
+      ContentType.story => _StoryCapturePage(
+          cameraController: cameraController,
+          cameraReady: cameraReady,
+          onCapture: onCapture,
+          onGallery: onGallery,
+        ),
+      ContentType.audio => _AudioCapturePage(
+          isRecording: isRecordingAudio,
+          duration: audioDuration,
+          onToggle: onToggleAudio,
+        ),
+      _ => _DirectEditorPage(type: type, onTap: onDirectToEditor),
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Foto — câmera + shutter
+// ---------------------------------------------------------------------------
+
+class _PhotoCapturePage extends StatelessWidget {
+  const _PhotoCapturePage({
+    required this.cameraController,
+    required this.cameraReady,
+    required this.onCapture,
+    required this.onGallery,
+  });
+
+  final CameraController? cameraController;
+  final bool cameraReady;
+  final VoidCallback onCapture;
+  final VoidCallback onGallery;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        _CameraPreviewOrBlack(
+          controller: cameraController,
+          ready: cameraReady,
+        ),
         Positioned(
           bottom: 0,
           left: 0,
@@ -389,49 +683,14 @@ class _CameraPhase extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Gallery button
                   _CameraIconButton(
                     icon: Icons.photo_library_rounded,
                     onTap: onGallery,
                     tooltip: AppStrings.mediaPickerGallery,
                     size: UIConstants.composerAvatarSize,
                   ),
-
-                  // Shutter
-                  Semantics(
-                    button: true,
-                    label: AppStrings.mediaPickerTakePhoto,
-                    child: GestureDetector(
-                      onTap: () {
-                        HapticFeedback.mediumImpact();
-                        onCapture();
-                      },
-                      child: Container(
-                      width: UIConstants.mediaPickerCameraButtonSize,
-                      height: UIConstants.mediaPickerCameraButtonSize,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white,
-                          width: UIConstants.mediaPickerSelectionBorderWidth,
-                        ),
-                      ),
-                      child: Center(
-                        child: Container(
-                          width: UIConstants.mediaPickerCameraButtonInner,
-                          height: UIConstants.mediaPickerCameraButtonInner,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                    ),
-                  ),
-
-                  // Spacer (balances gallery button)
-                  SizedBox(width: UIConstants.composerAvatarSize),
+                  _ShutterButton(onTap: onCapture),
+                  const SizedBox(width: UIConstants.composerAvatarSize),
                 ],
               ),
             ),
@@ -443,7 +702,580 @@ class _CameraPhase extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Chip de tipo de conteúdo (câmera)
+// Vídeo — câmera + hold-to-record
+// ---------------------------------------------------------------------------
+
+class _VideoCapturePage extends StatelessWidget {
+  const _VideoCapturePage({
+    required this.cameraController,
+    required this.cameraReady,
+    required this.isRecording,
+    required this.onStartVideo,
+    required this.onStopVideo,
+    required this.onGallery,
+  });
+
+  final CameraController? cameraController;
+  final bool cameraReady;
+  final bool isRecording;
+  final VoidCallback onStartVideo;
+  final VoidCallback onStopVideo;
+  final VoidCallback onGallery;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        _CameraPreviewOrBlack(
+          controller: cameraController,
+          ready: cameraReady,
+        ),
+        // Recording indicator
+        if (isRecording)
+          Positioned(
+            top: MediaQuery.of(context).padding.top +
+                UIConstants.minimumInteractiveTargetSize +
+                UIConstants.composerTypeChipHeight +
+                UIConstants.spaceLg,
+            left: 0,
+            right: 0,
+            child: const Center(child: _RecordingIndicator()),
+          ),
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.only(
+                bottom: UIConstants.spaceXl,
+                left: UIConstants.spaceLg,
+                right: UIConstants.spaceLg,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    isRecording
+                        ? AppStrings.createVideoRecordingHint
+                        : AppStrings.createVideoRecordHint,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: UIConstants.spaceMd),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      if (!isRecording)
+                        _CameraIconButton(
+                          icon: Icons.photo_library_rounded,
+                          onTap: onGallery,
+                          tooltip: AppStrings.mediaPickerGallery,
+                          size: UIConstants.composerAvatarSize,
+                        )
+                      else
+                        const SizedBox(width: UIConstants.composerAvatarSize),
+                      // Hold-to-record shutter (vermelho quando gravando)
+                      _VideoShutterButton(
+                        isRecording: isRecording,
+                        onStart: onStartVideo,
+                        onStop: onStopVideo,
+                      ),
+                      const SizedBox(width: UIConstants.composerAvatarSize),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Story — câmera fullscreen + shutter + galeria (como Instagram)
+// ---------------------------------------------------------------------------
+
+class _StoryCapturePage extends StatelessWidget {
+  const _StoryCapturePage({
+    required this.cameraController,
+    required this.cameraReady,
+    required this.onCapture,
+    required this.onGallery,
+  });
+
+  final CameraController? cameraController;
+  final bool cameraReady;
+  final VoidCallback onCapture;
+  final VoidCallback onGallery;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        _CameraPreviewOrBlack(
+          controller: cameraController,
+          ready: cameraReady,
+        ),
+        // Story hint label
+        Positioned(
+          top: MediaQuery.of(context).padding.top +
+              UIConstants.minimumInteractiveTargetSize +
+              UIConstants.composerTypeChipHeight +
+              UIConstants.spaceLg,
+          left: UIConstants.spaceLg,
+          right: UIConstants.spaceLg,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: UIConstants.spaceMd,
+              vertical: UIConstants.spaceXs,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.45),
+              borderRadius:
+                  BorderRadius.circular(UIConstants.createEditorFieldRadius),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.timer_outlined,
+                  size: 14,
+                  color: colors.onInverseSurface,
+                ),
+                const SizedBox(width: UIConstants.spaceXs),
+                Text(
+                  AppStrings.createStoryExpiry,
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.only(
+                bottom: UIConstants.spaceXl,
+                left: UIConstants.spaceLg,
+                right: UIConstants.spaceLg,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _CameraIconButton(
+                    icon: Icons.photo_library_rounded,
+                    onTap: onGallery,
+                    tooltip: AppStrings.mediaPickerGallery,
+                    size: UIConstants.composerAvatarSize,
+                  ),
+                  _ShutterButton(onTap: onCapture),
+                  const SizedBox(width: UIConstants.composerAvatarSize),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Áudio — gravador de microfone
+// ---------------------------------------------------------------------------
+
+class _AudioCapturePage extends StatelessWidget {
+  const _AudioCapturePage({
+    required this.isRecording,
+    required this.duration,
+    required this.onToggle,
+  });
+
+  final bool isRecording;
+  final Duration duration;
+  final VoidCallback onToggle;
+
+  String get _durationLabel {
+    final m = duration.inMinutes.toString().padLeft(2, '0');
+    final s = (duration.inSeconds % 60).toString().padLeft(2, '0');
+    return '$m:$s';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return SafeArea(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Ícone do microfone com pulso animado
+          _MicPulse(isRecording: isRecording),
+          const SizedBox(height: UIConstants.spaceXl),
+          // Duração
+          AnimatedOpacity(
+            opacity: isRecording ? 1 : 0,
+            duration: UIConstants.createAudioPulse,
+            child: Text(
+              _durationLabel,
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    color: Colors.white,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+            ),
+          ),
+          const SizedBox(height: UIConstants.spaceLg),
+          // Hint
+          Text(
+            isRecording
+                ? AppStrings.createAudioRecording
+                : AppStrings.createAudioRecordHint,
+            style: TextStyle(
+              color: isRecording ? colors.error : Colors.white70,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: UIConstants.space2xl),
+          // Botão gravar / parar
+          Semantics(
+            button: true,
+            label: isRecording
+                ? AppStrings.createAudioStop
+                : AppStrings.createAudioRecordHint,
+            child: GestureDetector(
+              onTap: onToggle,
+              child: AnimatedContainer(
+                duration: UIConstants.engagementColorDuration,
+                width: UIConstants.createAudioRecorderSize,
+                height: UIConstants.createAudioRecorderSize,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isRecording
+                      ? colors.error
+                      : Colors.white.withValues(alpha: 0.15),
+                  border: Border.all(color: Colors.white, width: 3),
+                ),
+                child: Icon(
+                  isRecording ? Icons.stop_rounded : Icons.mic_rounded,
+                  color: Colors.white,
+                  size: UIConstants.createAudioRecorderSize * 0.45,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Tipos textuais (Post/Artigo/Enquete/Evento/Live) — tela de CTA
+// ---------------------------------------------------------------------------
+
+class _DirectEditorPage extends StatelessWidget {
+  const _DirectEditorPage({required this.type, required this.onTap});
+
+  final ContentType type;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(type.activeIcon, size: 56, color: Colors.white),
+            const SizedBox(height: UIConstants.spaceLg),
+            Text(
+              type.label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: UIConstants.spaceXs),
+            Text(
+              type.description,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: UIConstants.space2xl),
+            FilledButton.icon(
+              onPressed: onTap,
+              icon: const Icon(Icons.edit_rounded),
+              label: Text('Criar ${type.label}'),
+              style: FilledButton.styleFrom(
+                backgroundColor: colors.primary,
+                foregroundColor: colors.onPrimary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ===========================================================================
+// WIDGETS COMPARTILHADOS — Captura
+// ===========================================================================
+
+class _CameraPreviewOrBlack extends StatelessWidget {
+  const _CameraPreviewOrBlack({required this.controller, required this.ready});
+
+  final CameraController? controller;
+  final bool ready;
+
+  @override
+  Widget build(BuildContext context) {
+    if (ready && controller != null) {
+      return CameraPreview(controller!);
+    }
+    return const ColoredBox(color: Colors.black);
+  }
+}
+
+/// Shutter para foto (círculo branco).
+class _ShutterButton extends StatelessWidget {
+  const _ShutterButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: AppStrings.mediaPickerTakePhoto,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: UIConstants.mediaPickerCameraButtonSize,
+          height: UIConstants.mediaPickerCameraButtonSize,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Colors.white,
+              width: UIConstants.mediaPickerSelectionBorderWidth,
+            ),
+          ),
+          child: Center(
+            child: Container(
+              width: UIConstants.mediaPickerCameraButtonInner,
+              height: UIConstants.mediaPickerCameraButtonInner,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Shutter para vídeo (vermelho quando gravando, branco parado).
+class _VideoShutterButton extends StatelessWidget {
+  const _VideoShutterButton({
+    required this.isRecording,
+    required this.onStart,
+    required this.onStop,
+  });
+
+  final bool isRecording;
+  final VoidCallback onStart;
+  final VoidCallback onStop;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: isRecording
+          ? AppStrings.createAudioStop
+          : AppStrings.createVideoRecordHint,
+      child: GestureDetector(
+        onTapDown: (_) => onStart(),
+        onTapUp: (_) => onStop(),
+        onTapCancel: onStop,
+        child: AnimatedContainer(
+          duration: UIConstants.engagementColorDuration,
+          width: UIConstants.mediaPickerCameraButtonSize,
+          height: UIConstants.mediaPickerCameraButtonSize,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 3),
+          ),
+          child: Center(
+            child: AnimatedContainer(
+              duration: UIConstants.engagementColorDuration,
+              width: isRecording
+                  ? UIConstants.mediaPickerCameraButtonSize * 0.4
+                  : UIConstants.mediaPickerCameraButtonInner,
+              height: isRecording
+                  ? UIConstants.mediaPickerCameraButtonSize * 0.4
+                  : UIConstants.mediaPickerCameraButtonInner,
+              decoration: BoxDecoration(
+                shape: isRecording ? BoxShape.rectangle : BoxShape.circle,
+                borderRadius:
+                    isRecording ? BorderRadius.circular(6) : null,
+                color: isRecording ? Colors.red : Colors.white,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Indicador de gravação (ponto vermelho pulsante + "REC").
+class _RecordingIndicator extends StatefulWidget {
+  const _RecordingIndicator();
+
+  @override
+  State<_RecordingIndicator> createState() => _RecordingIndicatorState();
+}
+
+class _RecordingIndicatorState extends State<_RecordingIndicator>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse = AnimationController(
+    vsync: this,
+    duration: UIConstants.createAudioPulse,
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _pulse,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: UIConstants.spaceSm,
+          vertical: UIConstants.space2xs,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: BorderRadius.circular(UIConstants.createEditorFieldRadius),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.circle, color: Colors.white, size: 10),
+            SizedBox(width: UIConstants.space2xs),
+            Text(
+              'REC',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Microfone com pulso animado quando gravando.
+class _MicPulse extends StatefulWidget {
+  const _MicPulse({required this.isRecording});
+
+  final bool isRecording;
+
+  @override
+  State<_MicPulse> createState() => _MicPulseState();
+}
+
+class _MicPulseState extends State<_MicPulse>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse = AnimationController(
+    vsync: this,
+    duration: UIConstants.createAudioPulse,
+  );
+
+  @override
+  void didUpdateWidget(_MicPulse old) {
+    super.didUpdateWidget(old);
+    if (widget.isRecording && !old.isRecording) {
+      _pulse.repeat(reverse: true);
+    } else if (!widget.isRecording && old.isRecording) {
+      _pulse.stop();
+      _pulse.value = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return AnimatedBuilder(
+      animation: _pulse,
+      builder: (context, child) {
+        final scale = widget.isRecording ? 1.0 + _pulse.value * 0.2 : 1.0;
+        return Transform.scale(
+          scale: scale,
+          child: Container(
+            width: UIConstants.createAudioRecorderSize,
+            height: UIConstants.createAudioRecorderSize,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: widget.isRecording
+                  ? colors.error.withValues(alpha: 0.2)
+                  : Colors.white.withValues(alpha: 0.1),
+            ),
+            child: Icon(
+              widget.isRecording ? Icons.mic_rounded : Icons.mic_outlined,
+              size: UIConstants.createAudioRecorderSize * 0.5,
+              color: widget.isRecording ? colors.error : Colors.white,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Chip de tipo
 // ---------------------------------------------------------------------------
 
 class _TypeChip extends StatelessWidget {
@@ -459,29 +1291,47 @@ class _TypeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        height: UIConstants.composerTypeChipHeight,
-        padding: const EdgeInsets.symmetric(horizontal: UIConstants.spaceMd),
-        decoration: BoxDecoration(
-          color: selected
-              ? Colors.white
-              : Colors.black.withValues(alpha: 0.45),
-          borderRadius: BorderRadius.circular(UIConstants.composerTypeChipRadius),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.6),
-            width: 1,
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: type.label,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          height: UIConstants.composerTypeChipHeight,
+          padding: const EdgeInsets.symmetric(horizontal: UIConstants.spaceMd),
+          decoration: BoxDecoration(
+            color: selected
+                ? Colors.white
+                : Colors.black.withValues(alpha: 0.45),
+            borderRadius:
+                BorderRadius.circular(UIConstants.composerTypeChipRadius),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.6),
+              width: 1,
+            ),
           ),
-        ),
-        child: Center(
-          child: Text(
-            type.label,
-            style: TextStyle(
-              color: selected ? Colors.black : Colors.white,
-              fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-              fontSize: 13,
+          child: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  selected ? type.activeIcon : type.icon,
+                  size: 14,
+                  color: selected ? Colors.black : Colors.white,
+                ),
+                const SizedBox(width: UIConstants.space2xs),
+                Text(
+                  type.label,
+                  style: TextStyle(
+                    color: selected ? Colors.black : Colors.white,
+                    fontWeight:
+                        selected ? FontWeight.bold : FontWeight.normal,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -520,16 +1370,20 @@ class _CameraIconButton extends StatelessWidget {
             shape: BoxShape.circle,
             color: Colors.black.withValues(alpha: 0.45),
           ),
-          child: Icon(icon, color: Colors.white, size: UIConstants.composerAttachIconSize),
+          child: Icon(
+            icon,
+            color: Colors.white,
+            size: UIConstants.composerAttachIconSize,
+          ),
         ),
       ),
     );
   }
 }
 
-// ---------------------------------------------------------------------------
-// Fase 2 — Editor (slide up como bottom sheet)
-// ---------------------------------------------------------------------------
+// ===========================================================================
+// FASE 2 — Editor
+// ===========================================================================
 
 class _EditorPhase extends StatelessWidget {
   const _EditorPhase({
@@ -547,18 +1401,13 @@ class _EditorPhase extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) onBack();
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            tooltip: AppStrings.createEditorDiscard,
-            icon: const Icon(Icons.arrow_back_rounded),
-            onPressed: onBack,
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          tooltip: AppStrings.createEditorDiscard,
+          icon: const Icon(Icons.arrow_back_rounded),
+          onPressed: onBack,
+        ),
         title: Text(
           provider.draft.type.label,
           style: theme.textTheme.titleMedium,
@@ -578,9 +1427,8 @@ class _EditorPhase extends StatelessWidget {
           ),
         ),
       ),
-        body: const CreatePostEditor(),
-        bottomNavigationBar: _PublishToolbar(provider: provider),
-      ),
+      body: const CreatePostEditor(),
+      bottomNavigationBar: _PublishToolbar(provider: provider),
     );
   }
 }
@@ -692,13 +1540,17 @@ class _PublishToolbar extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(action.icon, size: 18, color: colors.onSurfaceVariant),
+                      Icon(
+                        action.icon,
+                        size: 18,
+                        color: colors.onSurfaceVariant,
+                      ),
                       const SizedBox(width: UIConstants.space2xs),
                       Text(
                         action.tooltip,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: colors.onSurfaceVariant,
-                        ),
+                              color: colors.onSurfaceVariant,
+                            ),
                       ),
                     ],
                   ),
@@ -712,7 +1564,8 @@ class _PublishToolbar extends StatelessWidget {
             const Spacer(),
             if (type == ContentType.post || type == ContentType.story)
               Padding(
-                padding: const EdgeInsets.only(right: UIConstants.spaceMd),
+                padding:
+                    const EdgeInsets.only(right: UIConstants.spaceMd),
                 child: _CharCounter(body: provider.draft.body),
               ),
           ],
@@ -744,7 +1597,6 @@ class _CharCounter extends StatelessWidget {
   const _CharCounter({required this.body});
 
   final String body;
-
 
   @override
   Widget build(BuildContext context) {

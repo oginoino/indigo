@@ -213,4 +213,26 @@ class AppStrings {
   static const composerReplyPermission = 'Quem pode responder?';
   static const composerAddGif = 'Adicionar GIF';
   static const composerAddLocation = 'Adicionar localização';
+
+  // Audio recorder
+  static const createAudioRecordHint = 'Toque para começar a gravar';
+  static const createAudioRecording = 'Gravando…';
+  static const createAudioStop = 'Parar gravação';
+  static const createAudioRecordAgain = 'Gravar novamente';
+  static const createAudioDuration = '{duration}';
+  static const createAudioCaptionHint = 'Legenda do áudio (opcional)';
+  static const createAudioNoMicError = 'Microfone não disponível neste dispositivo.';
+
+  // Video recorder
+  static const createVideoRecordHint = 'Pressione para gravar';
+  static const createVideoRecordingHint = 'Gravando — solte para parar';
+  static const createVideoOrGallery = 'ou escolha da galeria';
+
+  // Story
+  static const createStoryHint = 'Adicione uma foto, vídeo ou texto ao seu story';
+  static const createStoryTextHint = 'Digite algo…';
+  static const createStoryExpiry = 'Desaparece em 24 h';
+
+  // Type swipe hint
+  static const createSwipeHint = 'Deslize para mudar o tipo';
 }

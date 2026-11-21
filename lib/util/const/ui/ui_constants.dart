@@ -269,6 +269,16 @@ class UIConstants {
   static const double mediaPickerDragHandleHeight = 4;
   static const double mediaPickerDragHandleRadius = 2;
 
+  // Audio recorder
+  static const double createAudioRecorderSize = 96;
+  static const double createAudioWaveBarWidth = 3;
+  static const double createAudioWaveBarMaxHeight = 48;
+  static const double createAudioWaveBarSpacing = 3;
+  static const Duration createAudioPulse = Duration(milliseconds: 800);
+
+  // Type PageView / swipe
+  static const Duration createTypeSwipeDuration = Duration(milliseconds: 220);
+
   // Twitter-style composer
   static const double composerAvatarSize = avatarMediumSize;
   static const double composerThreadLineWidth = 1.5;

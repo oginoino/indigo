@@ -12,6 +12,7 @@ class PostDraft {
     List<DraftPollOption> pollOptions = const [],
     this.eventDate,
     this.eventLocation,
+    this.audioDuration = Duration.zero,
   }) : pollOptions = List<DraftPollOption>.of(pollOptions);
 
   ContentType type;
@@ -20,6 +21,7 @@ class PostDraft {
   List<DraftPollOption> pollOptions;
   String? eventDate;
   String? eventLocation;
+  Duration audioDuration;
 
   /// Número de itens de mídia adicionados (simulado — sem upload real).
   int mediaCount = 0;
@@ -32,10 +34,10 @@ class PostDraft {
       ContentType.post || ContentType.story => body.trim().isNotEmpty,
       ContentType.article =>
         title.trim().isNotEmpty || body.trim().isNotEmpty,
-      ContentType.photo ||
-      ContentType.video ||
-      ContentType.audio =>
+      ContentType.photo || ContentType.video =>
         mediaCount > 0 || body.trim().isNotEmpty,
+      ContentType.audio =>
+        audioDuration.inSeconds > 0 || mediaCount > 0,
       ContentType.poll =>
         body.trim().isNotEmpty &&
             pollOptions.where((o) => o.text.trim().isNotEmpty).length >= 2,
