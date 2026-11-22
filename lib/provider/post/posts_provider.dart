@@ -9,6 +9,8 @@ import '../../model/post/post_media.dart';
 import '../../service/mapper/user_profile_json_mapper.dart';
 import '../../service/post_repository.dart';
 import '../../service/social_data_service.dart';
+import '../../util/const/app/social_data_constants.dart';
+import '../create/create_post_provider.dart';
 
 enum PostsLoadStatus { initial, loading, loaded, error }
 
@@ -26,18 +28,39 @@ class PostsProvider extends ChangeNotifier {
     required this._repository,
     required this._socialDataService,
     DateTime Function()? clock,
-  }) : _clock = clock ?? DateTime.now;
+  })  : _clock = clock ?? DateTime.now,
+        _currentUserRoleId =
+            _resolveCurrentUserRoleId(_socialDataService);
 
   final PostRepository _repository;
   final SocialDataService _socialDataService;
   final DateTime Function() _clock;
+  final String? _currentUserRoleId;
   final Map<String, UserProfile> _authorCache = {};
+
+  static String? _resolveCurrentUserRoleId(SocialDataService service) {
+    try {
+      final data = service.data;
+      final partyId = data.currentUserPartyId;
+      final profileJson = data.profileForParty(partyId);
+      if (profileJson == null) return null;
+      return profileJson[SocialDataConstants.platformUserRoleIdKey] as String?;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String? get currentUserRoleId => _currentUserRoleId;
 
   /// Overrides de engagement aplicados otimisticamente (antes de confirmação
   /// do servidor). Indexados por post ID.
   final Map<String, PostEngagementSummary> _engagementOverrides = {};
 
   List<Post> _posts = const [];
+  /// Posts criados localmente (publicação otimista) ainda não confirmados
+  /// pelo servidor. Preservados entre reloads e merged na frente do feed.
+  final List<Post> _localPosts = [];
+  List<Post> _remotePosts = const [];
   PostsLoadStatus _status = PostsLoadStatus.initial;
   Object? _error;
   Object? _loadMoreError;
@@ -61,14 +84,20 @@ class PostsProvider extends ChangeNotifier {
 
   UserProfile? authorFor(Post post) {
     final roleId = post.authorPartyRoleId;
-    final cachedProfile = _authorCache[roleId];
+    // Posts locais publicados na sessão atual: resolve via currentUserRoleId.
+    final effectiveRoleId = roleId == CreatePostProvider.kLocalAuthorRoleId
+        ? (_currentUserRoleId ?? roleId)
+        : roleId;
+
+    final cachedProfile = _authorCache[effectiveRoleId];
     if (cachedProfile != null) return cachedProfile;
 
-    final profileJson = _socialDataService.data.profileForPartyRole(roleId);
+    final profileJson =
+        _socialDataService.data.profileForPartyRole(effectiveRoleId);
     if (profileJson == null) return null;
 
     final profile = UserProfileJsonMapper.fromJson(profileJson);
-    _authorCache[roleId] = profile;
+    _authorCache[effectiveRoleId] = profile;
     return profile;
   }
 
@@ -79,7 +108,30 @@ class PostsProvider extends ChangeNotifier {
   /// Insere um post criado localmente no início do feed (antes de confirmação
   /// do servidor). Invalida o cache de vídeos e notifica os ouvintes.
   void addLocalPost(Post post) {
-    _posts = List.unmodifiable([post, ..._posts]);
+    // Substitui o roleId sentinela pelo roleId real do usuário corrente.
+    final roleId = _currentUserRoleId;
+    final corrected =
+        post.authorPartyRoleId == CreatePostProvider.kLocalAuthorRoleId &&
+                roleId != null
+            ? Post(
+                id: post.id,
+                authorPartyRoleId: roleId,
+                content: post.content,
+                title: post.title,
+                media: post.media,
+                feeds: post.feeds,
+                status: post.status,
+                createdAt: post.createdAt,
+                expiresAt: post.expiresAt,
+              )
+            : post;
+    _localPosts.insert(0, corrected);
+    _rebuildPosts();
+  }
+
+  /// Reconstrói `_posts` juntando posts locais (frente) + posts remotos.
+  void _rebuildPosts() {
+    _posts = List.unmodifiable([..._localPosts, ..._remotePosts]);
     notifyListeners();
   }
 
@@ -224,7 +276,8 @@ class PostsProvider extends ChangeNotifier {
 
     try {
       final page = await _loadVisiblePage(refresh: refresh, offset: 0);
-      _posts = page.posts;
+      _remotePosts = page.posts;
+      _rebuildPosts();
       _hasMore = page.hasMore;
       _status = PostsLoadStatus.loaded;
       // Warm-up do cache de autores dos primeiros posts em paralelo — evita
@@ -264,9 +317,10 @@ class PostsProvider extends ChangeNotifier {
     try {
       final page = await _loadVisiblePage(
         refresh: false,
-        offset: _posts.length,
+        offset: _remotePosts.length,
       );
-      _posts = List.unmodifiable([..._posts, ...page.posts]);
+      _remotePosts = List.unmodifiable([..._remotePosts, ...page.posts]);
+      _rebuildPosts();
       _hasMore = page.hasMore;
     } catch (error) {
       _loadMoreError = error;

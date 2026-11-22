@@ -219,11 +219,27 @@ class CreatePostProvider extends ChangeNotifier {
       ));
     }
 
+    // Converte XFiles em PostMedia para foto/vídeo/story.
+    if (draft.type != ContentType.audio) {
+      for (var i = 0; i < _mediaItems.length; i++) {
+        final file = _mediaItems[i];
+        final isVideo = file.mimeType?.startsWith('video/') == true ||
+            file.path.toLowerCase().endsWith('.mp4') ||
+            file.path.toLowerCase().endsWith('.mov');
+        media.add(PostMedia(
+          id: '$id-media-$i',
+          type: isVideo ? PostMediaType.video : PostMediaType.image,
+          sourceUrl: file.path,
+          mimeType: file.mimeType,
+        ));
+      }
+    }
+
     return Post(
       id: id,
       // Usa um partyRoleId sentinela — a tela de feed resolve o autor atual
       // via FriendsProvider se não encontrar no cache.
-      authorPartyRoleId: _kLocalAuthorRoleId,
+      authorPartyRoleId: kLocalAuthorRoleId,
       content: PostContent(segments: segments),
       title: draft.hasTitle && draft.title.trim().isNotEmpty
           ? draft.title.trim()
@@ -242,7 +258,7 @@ class CreatePostProvider extends ChangeNotifier {
   /// ID sentinela usado como `authorPartyRoleId` para posts locais.
   /// O [PostsProvider.authorFor] retorna `null` para IDs desconhecidos e a UI
   /// usa [AppStrings.unknownPostAuthor] como fallback.
-  static const String _kLocalAuthorRoleId = 'local-current-user';
+  static const String kLocalAuthorRoleId = 'local-current-user';
 
   void reset() {
     _draft = PostDraft();

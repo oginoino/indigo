@@ -36,6 +36,13 @@ class StoriesRow extends StatelessWidget {
     ];
     final orderedStories = <Post>[for (final group in groups) ...group.stories];
 
+    // Stories próprios do usuário (para ring e tap no avatar próprio).
+    final ownStories = ownRoleId == null
+        ? const <Post>[]
+        : stories
+            .where((s) => s.authorPartyRoleId == ownRoleId)
+            .toList(growable: false);
+
     final items = <Widget>[];
     if (currentUser case final user?) {
       items.add(
@@ -43,6 +50,10 @@ class StoriesRow extends StatelessWidget {
           label: AppStrings.yourStory,
           imageProvider: _avatarProvider(user),
           isOwn: true,
+          hasOwnStory: ownStories.isNotEmpty,
+          onTap: ownStories.isNotEmpty
+              ? () => _openStory(context, ownStories, 0)
+              : null,
         ),
       );
     }
@@ -145,6 +156,7 @@ class _StoryItem extends StatelessWidget {
     required this.imageProvider,
     this.isOwn = false,
     this.isSeen = false,
+    this.hasOwnStory = false,
     this.onTap,
   });
 
@@ -152,6 +164,7 @@ class _StoryItem extends StatelessWidget {
   final ImageProvider<Object>? imageProvider;
   final bool isOwn;
   final bool isSeen;
+  final bool hasOwnStory;
   final VoidCallback? onTap;
 
   @override
@@ -176,6 +189,7 @@ class _StoryItem extends StatelessWidget {
             children: [
               _StoryRing(
                 isOwn: isOwn,
+                hasOwnStory: hasOwnStory,
                 isSeen: isSeen,
                 child: Avatar(
                   diameter: avatarDiameter,
@@ -204,20 +218,24 @@ class _StoryRing extends StatelessWidget {
   const _StoryRing({
     required this.child,
     required this.isOwn,
+    this.hasOwnStory = false,
     this.isSeen = false,
   });
 
   final Widget child;
   final bool isOwn;
+  final bool hasOwnStory;
   final bool isSeen;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final gradient = isOwn || isSeen
-        ? null
-        : LinearGradient(
+    // Ring com gradiente: outros usuários com stories não vistos, ou o próprio
+    // usuário quando tem stories publicados.
+    final showGradient = isOwn ? hasOwnStory : (!isSeen);
+    final gradient = showGradient
+        ? LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
@@ -225,7 +243,8 @@ class _StoryRing extends StatelessWidget {
               colorScheme.tertiary,
               colorScheme.secondary,
             ],
-          );
+          )
+        : null;
 
     return Container(
       width: UIConstants.storyAvatarSize,
