@@ -386,4 +386,38 @@ class UIConstants {
   static const double mediaPickerBadgeIconSize = 12.0;
   static const double mediaPickerBadgePaddingVertical = 1.0;
   static const double mediaPickerBadgeFontSize = 10.0;
+
+  // ---------------------------------------------------------------------------
+  // Skeleton / Shimmer (PostsLoadStateView)
+  // ---------------------------------------------------------------------------
+
+  /// Duração do ciclo pulse do shimmer skeleton.
+  static const Duration skeletonShimmerDuration = Duration(milliseconds: 900);
+
+  /// Raio padrão das caixas skeleton.
+  static const double skeletonBoxRadius = 6.0;
+
+  /// Tamanho do círculo avatar no skeleton.
+  static const double skeletonAvatarSize = 40.0;
+
+  /// Altura das linhas de texto skeleton (corpo).
+  static const double skeletonLineHeight = 14.0;
+
+  /// Altura das linhas de texto skeleton (meta/subtítulo).
+  static const double skeletonLineHeightSm = 10.0;
+
+  /// Largura simulada do nome no header skeleton.
+  static const double skeletonNameWidth = 120.0;
+
+  /// Largura simulada do meta (tempo/seguindo) no header skeleton.
+  static const double skeletonMetaWidth = 80.0;
+
+  /// Largura da última linha de corpo (parcial, para naturalidade).
+  static const double skeletonLastLineWidth = 180.0;
+
+  /// Altura do placeholder de mídia (imagem) no skeleton.
+  static const double skeletonMediaHeight = 180.0;
+
+  /// Largura de cada ação de engajamento no rodapé skeleton.
+  static const double skeletonActionWidth = 48.0;
 }

@@ -76,6 +76,13 @@ class PostsProvider extends ChangeNotifier {
     _posts.where((post) => !post.isEphemeral && post.isPublishedAt(_clock())),
   );
 
+  /// Insere um post criado localmente no início do feed (antes de confirmação
+  /// do servidor). Invalida o cache de vídeos e notifica os ouvintes.
+  void addLocalPost(Post post) {
+    _posts = List.unmodifiable([post, ..._posts]);
+    notifyListeners();
+  }
+
   List<Post> get stories => List.unmodifiable(
     _posts.where((post) => post.isEphemeral && post.isPublishedAt(_clock())),
   );
@@ -220,6 +227,9 @@ class PostsProvider extends ChangeNotifier {
       _posts = page.posts;
       _hasMore = page.hasMore;
       _status = PostsLoadStatus.loaded;
+      // Warm-up do cache de autores dos primeiros posts em paralelo — evita
+      // jank no primeiro scroll enquanto os perfis são resolvidos um a um.
+      _warmUpAuthorCache(page.posts);
     } catch (error) {
       _error = error;
       if (!hadPosts) _status = PostsLoadStatus.error;
@@ -265,6 +275,27 @@ class PostsProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  /// Preenche o cache de autores para os primeiros [_kAuthorPrefetchCount]
+  /// posts em paralelo, eliminando lookups sequenciais no primeiro render.
+  ///
+  /// Opera de forma síncrona (os dados vêm do [SocialDataService] local), mas
+  /// agrupamos os IDs únicos para evitar trabalho duplicado.
+  void _warmUpAuthorCache(List<Post> posts) {
+    final uniqueRoleIds = posts
+        .take(_kAuthorPrefetchCount)
+        .map((p) => p.authorPartyRoleId)
+        .toSet();
+    for (final roleId in uniqueRoleIds) {
+      if (_authorCache.containsKey(roleId)) continue;
+      final profileJson = _socialDataService.data.profileForPartyRole(roleId);
+      if (profileJson == null) continue;
+      _authorCache[roleId] = UserProfileJsonMapper.fromJson(profileJson);
+    }
+  }
+
+  /// Número de autores pré-carregados no cache após o primeiro load.
+  static const int _kAuthorPrefetchCount = 10;
 
   Future<PostPage> _loadVisiblePage({
     required bool refresh,

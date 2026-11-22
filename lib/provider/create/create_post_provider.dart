@@ -3,6 +3,9 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../model/create/content_type.dart';
 import '../../model/create/post_draft.dart';
+import '../../model/post/post.dart';
+import '../../model/post/post_content.dart';
+import '../../model/post/post_media.dart';
 
 /// Estado da sessão de criação de conteúdo.
 ///
@@ -161,8 +164,11 @@ class CreatePostProvider extends ChangeNotifier {
   // ---------------------------------------------------------------------------
 
   /// Simula o envio do rascunho (sem backend real).
-  Future<bool> publish() async {
-    if (!_draft.hasContent || _isPublishing) return false;
+  ///
+  /// Retorna o [Post] construído a partir do rascunho em caso de sucesso,
+  /// ou `null` se a publicação falhar ou o provider já tiver sido descartado.
+  Future<Post?> publish() async {
+    if (!_draft.hasContent || _isPublishing) return null;
 
     _isPublishing = true;
     notifyListeners();
@@ -170,13 +176,73 @@ class CreatePostProvider extends ChangeNotifier {
     // Simula latência de rede.
     await Future<void>.delayed(const Duration(milliseconds: 900));
 
-    if (!hasListeners) return false;
+    if (!hasListeners) return null;
     _isPublishing = false;
     notifyListeners();
 
+    final post = _buildPostFromDraft(_draft);
     reset();
-    return true;
+    return post;
   }
+
+  /// Converte o [PostDraft] atual em um [Post] local para exibição imediata
+  /// no feed enquanto a confirmação do servidor não chega.
+  Post _buildPostFromDraft(PostDraft draft) {
+    // ID único baseado em timestamp — suficiente para o feed local.
+    final id = 'local-${DateTime.now().millisecondsSinceEpoch}';
+    final now = DateTime.now();
+
+    // Mapeia ContentType para feeds que devem receber o post.
+    final feeds = switch (draft.type) {
+      ContentType.story => <String>[],
+      ContentType.video => ['/discover', '/friends', '/appbar-videos'],
+      ContentType.photo => ['/discover', '/friends', '/photos'],
+      ContentType.event => ['/discover', '/friends', '/events'],
+      _ => ['/discover', '/friends'],
+    };
+
+    // Monta o conteúdo textual principal.
+    final body = draft.body.trim();
+    final segments = body.isNotEmpty
+        ? [PostTextSegment(text: body)]
+        : [PostTextSegment(text: '')];
+
+    // Monta mídia de áudio local se houver duração gravada.
+    final media = <PostMedia>[];
+    if (draft.type == ContentType.audio && draft.audioDuration > Duration.zero) {
+      media.add(PostMedia(
+        id: '$id-audio',
+        type: PostMediaType.audio,
+        sourceUrl: '',
+        duration: draft.audioDuration,
+        waveform: const <double>[0.5, 0.8, 0.6, 0.9, 0.4, 0.7, 0.5, 0.8],
+      ));
+    }
+
+    return Post(
+      id: id,
+      // Usa um partyRoleId sentinela — a tela de feed resolve o autor atual
+      // via FriendsProvider se não encontrar no cache.
+      authorPartyRoleId: _kLocalAuthorRoleId,
+      content: PostContent(segments: segments),
+      title: draft.hasTitle && draft.title.trim().isNotEmpty
+          ? draft.title.trim()
+          : null,
+      media: media,
+      feeds: feeds,
+      status: PostStatus.published,
+      createdAt: now,
+      // Story expira em 24 horas.
+      expiresAt: draft.type == ContentType.story
+          ? now.add(const Duration(hours: 24))
+          : null,
+    );
+  }
+
+  /// ID sentinela usado como `authorPartyRoleId` para posts locais.
+  /// O [PostsProvider.authorFor] retorna `null` para IDs desconhecidos e a UI
+  /// usa [AppStrings.unknownPostAuthor] como fallback.
+  static const String _kLocalAuthorRoleId = 'local-current-user';
 
   void reset() {
     _draft = PostDraft();

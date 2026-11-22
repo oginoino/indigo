@@ -7,7 +7,9 @@ import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
 import '../../model/create/content_type.dart';
+import '../../model/post/post.dart';
 import '../../provider/create/create_post_provider.dart';
+import '../../provider/post/posts_provider.dart';
 import '../../route/routes.dart';
 import '../../service/media_picker_service.dart';
 import '../../util/const/app/app_strings.dart';
@@ -361,7 +363,11 @@ class _CreatePageContentState extends State<_CreatePageContent>
 
   // ── Publicação ────────────────────────────────────────────────────────────
 
-  void _onPublished() {
+  void _onPublished(Post? post) {
+    // Injeta o post no feed imediatamente (otimistic update).
+    if (post != null && mounted) {
+      context.read<PostsProvider>().addLocalPost(post);
+    }
     _resetAudio();
     _slideController.reverse();
     setState(() => _phase = _Phase.capture);
@@ -1452,7 +1458,7 @@ class _EditorPhase extends StatelessWidget {
 
   final CreatePostProvider provider;
   final VoidCallback onBack;
-  final VoidCallback onPublished;
+  final ValueChanged<Post?> onPublished;
 
   @override
   Widget build(BuildContext context) {
@@ -1502,7 +1508,7 @@ class _PublishButton extends StatelessWidget {
   });
 
   final CreatePostProvider provider;
-  final VoidCallback onPublished;
+  final ValueChanged<Post?> onPublished;
 
   @override
   Widget build(BuildContext context) {
@@ -1526,13 +1532,13 @@ class _PublishButton extends StatelessWidget {
   }
 
   Future<void> _publish(BuildContext context) async {
-    final success = await provider.publish();
+    final post = await provider.publish();
     if (!context.mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          success
+          post != null
               ? AppStrings.createPublishSuccess
               : AppStrings.createPublishFailed,
         ),
@@ -1541,7 +1547,7 @@ class _PublishButton extends StatelessWidget {
       ),
     );
 
-    if (success) onPublished();
+    if (post != null) onPublished(post);
   }
 }
 
