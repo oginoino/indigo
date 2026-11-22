@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
@@ -153,14 +154,18 @@ class _StoryViewerState extends State<StoryViewer>
     if (!mounted || index < 0 || index >= widget.stories.length) return;
     final media = widget.stories[index].media;
     if (media.isEmpty) return;
+    final url = media.first.sourceUrl;
+    final provider = _isLocalPath(url)
+        ? FileImage(File(url)) as ImageProvider
+        : NetworkImage(url);
     unawaited(
-      precacheImage(
-        NetworkImage(media.first.sourceUrl),
-        context,
-        onError: (error, stackTrace) {},
-      ),
+      precacheImage(provider, context, onError: (error, stackTrace) {}),
     );
   }
+
+  /// Retorna `true` para paths de arquivo local.
+  static bool _isLocalPath(String url) =>
+      url.startsWith('/') || url.startsWith('file://');
 
   void _handleTap(TapUpDetails details) {
     final width = MediaQuery.sizeOf(context).width;
@@ -333,6 +338,22 @@ class _StoryImageState extends State<_StoryImage> {
     final sourceUrl = _usingFallbackSource
         ? widget.media.thumbnailUrl!
         : widget.media.sourceUrl;
+
+    // Paths locais (câmera/galeria) → Image.file; URLs remotas → Image.network.
+    if (_StoryViewerState._isLocalPath(sourceUrl)) {
+      return Image.file(
+        File(sourceUrl),
+        key: ValueKey(_requestVersion),
+        fit: BoxFit.cover,
+        semanticLabel: widget.semanticLabel,
+        errorBuilder: (context, error, stackTrace) => PostMediaLoadError(
+          message: AppStrings.imageLoadFailed,
+          icon: Icons.broken_image_outlined,
+          onDarkBackground: true,
+          onRetry: _retryImage,
+        ),
+      );
+    }
 
     return Image.network(
       sourceUrl,

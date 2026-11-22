@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
@@ -560,26 +562,51 @@ class _NetworkPhotoState extends State<_NetworkPhoto> {
   }
 
   @override
-  Widget build(BuildContext context) => Image.network(
-    _usingFallbackSource
+  Widget build(BuildContext context) {
+    final url = _usingFallbackSource
         ? widget.fallbackSourceUrl!
-        : widget.sourceUrl ?? widget.media.sourceUrl,
-    key: ValueKey(_requestVersion),
-    fit: widget.fit,
-    semanticLabel: widget.semanticLabel,
-    loadingBuilder: (context, child, progress) {
-      if (progress == null) return child;
-      return Center(
-        child: CircularProgressIndicator(
-          color: widget.loadingColor ?? Theme.of(context).colorScheme.primary,
+        : widget.sourceUrl ?? widget.media.sourceUrl;
+
+    // Paths locais (câmera/galeria) → Image.file; URLs remotas → Image.network.
+    if (_isLocalPath(url)) {
+      return Image.file(
+        File(url),
+        key: ValueKey(_requestVersion),
+        fit: widget.fit,
+        semanticLabel: widget.semanticLabel,
+        errorBuilder: (context, error, stackTrace) => PostMediaLoadError(
+          message: AppStrings.imageLoadFailed,
+          icon: Icons.broken_image_outlined,
+          onRetry: _retryImage,
+          onDarkBackground: widget.onDarkBackground,
         ),
       );
-    },
-    errorBuilder: (context, error, stackTrace) => PostMediaLoadError(
-      message: AppStrings.imageLoadFailed,
-      icon: Icons.broken_image_outlined,
-      onRetry: _retryImage,
-      onDarkBackground: widget.onDarkBackground,
-    ),
-  );
+    }
+
+    return Image.network(
+      url,
+      key: ValueKey(_requestVersion),
+      fit: widget.fit,
+      semanticLabel: widget.semanticLabel,
+      loadingBuilder: (context, child, progress) {
+        if (progress == null) return child;
+        return Center(
+          child: CircularProgressIndicator(
+            color: widget.loadingColor ?? Theme.of(context).colorScheme.primary,
+          ),
+        );
+      },
+      errorBuilder: (context, error, stackTrace) => PostMediaLoadError(
+        message: AppStrings.imageLoadFailed,
+        icon: Icons.broken_image_outlined,
+        onRetry: _retryImage,
+        onDarkBackground: widget.onDarkBackground,
+      ),
+    );
+  }
+
+  /// Retorna `true` para paths de arquivo local (iOS, Android, desktop).
+  /// URLs HTTP/HTTPS e strings vazias retornam `false`.
+  static bool _isLocalPath(String url) =>
+      url.startsWith('/') || url.startsWith('file://');
 }
