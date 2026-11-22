@@ -25,11 +25,18 @@ class _AudioPlaybackHub {
 }
 
 class PostAudioPlayer extends StatefulWidget {
-  const PostAudioPlayer({required this.media, super.key});
+  /// Player completo — carrega e reproduz áudio a partir de [media.sourceUrl].
+  const PostAudioPlayer({required this.media, super.key}) : _previewOnly = false;
+
+  /// Player somente-preview: exibe duração e waveform sem tentar carregar
+  /// nenhum arquivo. Usado no editor de criação antes do upload real.
+  const PostAudioPlayer.preview({required this.media, super.key})
+    : _previewOnly = true;
 
   static const waveformKey = Key('postAudioWaveform');
 
   final PostMedia media;
+  final bool _previewOnly;
 
   @override
   State<PostAudioPlayer> createState() => _PostAudioPlayerState();
@@ -49,6 +56,13 @@ class _PostAudioPlayerState extends State<PostAudioPlayer> {
   @override
   void initState() {
     super.initState();
+    if (widget._previewOnly || widget.media.sourceUrl.isEmpty) {
+      // Modo preview — sem controller real; usa a duração do media diretamente.
+      _controller = _createController();
+      _initialization = Future.value();
+      _duration = widget.media.duration ?? Duration.zero;
+      return;
+    }
     _controller = _createController();
     _initialization = _initialize(_controller, _generation);
   }
@@ -62,7 +76,13 @@ class _PostAudioPlayerState extends State<PostAudioPlayer> {
   }
 
   VideoPlayerController _createController() {
-    return VideoPlayerController.networkUrl(Uri.parse(widget.media.sourceUrl));
+    final url = widget.media.sourceUrl;
+    // URL vazia ou modo preview → controller apontando para URI nula; nunca
+    // será inicializado (initState não chama _initialize nesses casos).
+    if (url.isEmpty || widget._previewOnly) {
+      return VideoPlayerController.networkUrl(Uri());
+    }
+    return VideoPlayerController.networkUrl(Uri.parse(url));
   }
 
   Future<void> _initialize(
@@ -236,9 +256,12 @@ class _PostAudioPlayerState extends State<PostAudioPlayer> {
     return FutureBuilder<void>(
       future: _initialization,
       builder: (context, snapshot) {
+        final isPreview = widget._previewOnly || widget.media.sourceUrl.isEmpty;
         final isLoading =
-            snapshot.connectionState == ConnectionState.waiting && !_hasError;
-        final canSeek = !isLoading && !_hasError;
+            !isPreview &&
+            snapshot.connectionState == ConnectionState.waiting &&
+            !_hasError;
+        final canSeek = !isPreview && !isLoading && !_hasError;
 
         return Semantics(
           container: true,
@@ -265,7 +288,7 @@ class _PostAudioPlayerState extends State<PostAudioPlayer> {
                       isPlaying: _isPlaying,
                       isLoading: isLoading,
                       hasError: _hasError,
-                      onPressed: isLoading ? null : _togglePlayback,
+                      onPressed: isLoading || isPreview ? null : _togglePlayback,
                     ),
                     SizedBox(width: UIConstants.audioPlayerSpacing),
                     Expanded(

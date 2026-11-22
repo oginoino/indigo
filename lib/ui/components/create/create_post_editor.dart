@@ -6,10 +6,12 @@ import 'package:provider/provider.dart';
 
 import '../../../model/create/content_type.dart';
 import '../../../model/create/post_draft.dart';
+import '../../../model/post/post_media.dart';
 import '../../../provider/create/create_post_provider.dart';
 import '../../../util/const/app/app_strings.dart';
 import '../../../util/const/ui/ui_constants.dart';
 import '../avatar.dart';
+import '../post/post_audio_player.dart';
 import 'media_picker_sheet.dart';
 import 'media_preview_strip.dart';
 
@@ -641,115 +643,25 @@ class _AudioEditor extends StatelessWidget {
   final CreatePostProvider provider;
   final PostDraft draft;
 
-  String get _durationLabel {
-    final d = draft.audioDuration;
-    if (d == Duration.zero) return '--:--';
-    final m = d.inMinutes.toString().padLeft(2, '0');
-    final s = (d.inSeconds % 60).toString().padLeft(2, '0');
-    return '$m:$s';
-  }
-
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final hasAudio = draft.audioDuration.inSeconds > 0;
+    // Monta um PostMedia mínimo para o player de preview: sem URL real (modo
+    // somente-preview), apenas com a duração gravada e waveform vazio.
+    final previewMedia = PostMedia(
+      id: 'audio-preview',
+      type: PostMediaType.audio,
+      sourceUrl: '',
+      duration: draft.audioDuration > Duration.zero
+          ? draft.audioDuration
+          : null,
+    );
 
     return ListView(
       padding: _editorPadding(context),
       children: [
-        // ── Player preview ─────────────────────────────────────────────
-        // Sem height fixa para evitar overflow — o conteúdo determina a altura.
-        DecoratedBox(
-          decoration: BoxDecoration(
-            color: colors.primaryContainer,
-            borderRadius:
-                BorderRadius.circular(UIConstants.createEditorFieldRadius),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: UIConstants.spaceMd,
-              vertical: UIConstants.spaceMd,
-            ),
-            child: Row(
-              children: [
-                // Botão play / mic
-                Container(
-                  width: UIConstants.avatarMediumSize,
-                  height: UIConstants.avatarMediumSize,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: colors.primary,
-                  ),
-                  child: Icon(
-                    hasAudio ? Icons.play_arrow_rounded : Icons.mic_rounded,
-                    color: colors.onPrimary,
-                  ),
-                ),
-                const SizedBox(width: UIConstants.spaceMd),
-                // Título + waveform
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        draft.title.isEmpty
-                            ? AppStrings.createAudioTitleHint
-                            : draft.title,
-                        style: Theme.of(context).textTheme.titleSmall
-                            ?.copyWith(color: colors.onPrimaryContainer),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: UIConstants.space2xs),
-                      // Waveform placeholder — altura limitada a 24px para caber
-                      SizedBox(
-                        height: UIConstants.createAudioWaveBarMidHeight * 2,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            for (var i = 0;
-                                i < UIConstants.createAudioWaveBarCount;
-                                i++)
-                              Container(
-                                width: UIConstants.createAudioWaveBarWidth,
-                                height: (i % 3 == 0
-                                    ? UIConstants.createAudioWaveBarMidHeight * 2
-                                    : i % 2 == 0
-                                        ? UIConstants.createAudioWaveBarMidHeight
-                                        : UIConstants.createAudioWaveBarMinHeight),
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal:
-                                      UIConstants.createAudioWaveBarSpacing / 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: colors.primary.withValues(
-                                    alpha: hasAudio ? 0.7 : 0.35,
-                                  ),
-                                  borderRadius: BorderRadius.circular(
-                                    UIConstants.createAudioWaveBarRadius,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: UIConstants.spaceSm),
-                // Duração
-                Text(
-                  _durationLabel,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: colors.onPrimaryContainer,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        // ── Player preview — reutiliza o PostAudioPlayer da publicação ──
+        PostAudioPlayer.preview(media: previewMedia),
         const _SectionDivider(),
         // ── Autor ──────────────────────────────────────────────────────
         const _AuthorRow(),
