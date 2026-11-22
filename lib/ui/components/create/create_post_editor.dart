@@ -161,7 +161,7 @@ class _VisibilityRow extends StatelessWidget {
 
     return Row(
       children: [
-        Icon(Icons.visibility_outlined, size: 16, color: colors.onSurfaceVariant),
+        Icon(Icons.visibility_outlined, size: UIConstants.createVisibilityIconSize, color: colors.onSurfaceVariant),
         const SizedBox(width: UIConstants.spaceXs),
         Text(
           AppStrings.createEditorVisibilityLabel,
@@ -227,7 +227,7 @@ class _EmptyMediaPlaceholder extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 40, color: colors.onSurfaceVariant),
+              Icon(icon, size: UIConstants.createEmptyMediaIconSize, color: colors.onSurfaceVariant),
               const SizedBox(height: UIConstants.spaceSm),
               Text(
                 hint,
@@ -429,7 +429,7 @@ class _PhotoCarouselState extends State<_PhotoCarousel> {
                   margin: const EdgeInsets.symmetric(
                     horizontal: UIConstants.space2xs,
                   ),
-                  width: i == _page ? 16 : 6,
+                  width: i == _page ? UIConstants.createCarouselActiveDotWidth : UIConstants.createCarouselDotSize,
                   height: 6,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(3),
@@ -533,8 +533,8 @@ class _VideoEditor extends StatelessWidget {
               Positioned.fill(
                 child: Center(
                   child: Container(
-                    width: 56,
-                    height: 56,
+                    width: UIConstants.createVideoPlayOverlaySize,
+                    height: UIConstants.createVideoPlayOverlaySize,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: Colors.black.withValues(alpha: 0.5),
@@ -542,7 +542,7 @@ class _VideoEditor extends StatelessWidget {
                     child: const Icon(
                       Icons.play_arrow_rounded,
                       color: Colors.white,
-                      size: 36,
+                      size: UIConstants.createVideoPlayIconSize,
                     ),
                   ),
                 ),
@@ -703,14 +703,14 @@ class _AudioEditor extends StatelessWidget {
                     // Waveform placeholder
                     Row(
                       children: [
-                        for (var i = 0; i < 20; i++)
+                        for (var i = 0; i < UIConstants.createAudioWaveBarCount; i++)
                           Container(
                             width: UIConstants.createAudioWaveBarWidth,
                             height: (i % 3 == 0
-                                    ? 20.0
+                                    ? UIConstants.createAudioWaveBarMaxHeight
                                     : i % 2 == 0
-                                        ? 12.0
-                                        : 8.0),
+                                        ? UIConstants.createAudioWaveBarMidHeight
+                                        : UIConstants.createAudioWaveBarMinHeight),
                             margin: const EdgeInsets.symmetric(
                               horizontal:
                                   UIConstants.createAudioWaveBarSpacing / 2,
@@ -865,7 +865,7 @@ class _StoryEditor extends StatelessWidget {
                       children: [
                         const Icon(
                           Icons.timer_outlined,
-                          size: 12,
+                          size: UIConstants.createStoryBadgeIconSize,
                           color: Colors.white,
                         ),
                         const SizedBox(width: UIConstants.space2xs),
@@ -873,7 +873,7 @@ class _StoryEditor extends StatelessWidget {
                           AppStrings.createStoryExpiry,
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 11,
+                            fontSize: UIConstants.createStoryBadgeFontSize,
                           ),
                         ),
                       ],
@@ -909,7 +909,7 @@ class _StoryEditor extends StatelessWidget {
           ),
           style: Theme.of(context).textTheme.bodyMedium,
           autofocus: false,
-          maxLines: 3,
+          maxLines: UIConstants.createStoryTextMaxLines,
           textCapitalization: TextCapitalization.sentences,
           onChanged: provider.setBody,
         ),
@@ -935,7 +935,7 @@ class _ArticleEditor extends StatelessWidget {
 
   int get _estimatedReadMinutes {
     final words = draft.body.trim().split(RegExp(r'\s+')).length;
-    return (words / 200).ceil().clamp(1, 99);
+    return (words / UIConstants.createArticleWpm).ceil().clamp(1, 99);
   }
 
   @override
@@ -990,7 +990,7 @@ class _ArticleEditor extends StatelessWidget {
                   UIConstants.createEditorMediaAddRadius,
                 ),
               ),
-              minimumSize: const Size(double.infinity, 48),
+              minimumSize: const Size(double.infinity, UIConstants.createEditorButtonMinHeight),
             ),
           ),
         const SizedBox(height: UIConstants.createEditorSectionSpacing),
@@ -1064,7 +1064,7 @@ class _ArticleEditor extends StatelessWidget {
                 height: UIConstants.postArticleBodyLineHeight,
               ),
           maxLines: null,
-          minLines: 10,
+          minLines: UIConstants.createArticleBodyMinLines,
           textCapitalization: TextCapitalization.sentences,
           onChanged: provider.setBody,
         ),
@@ -1116,12 +1116,12 @@ class _PollEditor extends StatelessWidget {
           _PollOptionRow(
             index: i,
             provider: provider,
-            canRemove: options.length > 2,
+            canRemove: options.length > UIConstants.createPollMinOptions,
           ),
           const SizedBox(height: UIConstants.createEditorPollSpacing),
         ],
         // Adicionar opção (máx 4)
-        if (options.length < 4)
+        if (options.length < UIConstants.createPollMaxOptions)
           TextButton.icon(
             onPressed: provider.addPollOption,
             icon: const Icon(Icons.add_circle_outline),
@@ -1132,7 +1132,7 @@ class _PollEditor extends StatelessWidget {
         Row(
           children: [
             Icon(Icons.timer_outlined,
-                size: 18, color: colors.onSurfaceVariant),
+                size: UIConstants.createEditorInlineIconSize, color: colors.onSurfaceVariant),
             const SizedBox(width: UIConstants.spaceSm),
             Text(
               AppStrings.createPollDuration,
@@ -1326,7 +1326,7 @@ class _EventEditorState extends State<_EventEditor> {
         Row(
           children: [
             Icon(Icons.location_on_outlined,
-                size: 18, color: colors.onSurfaceVariant),
+                size: UIConstants.createEditorInlineIconSize, color: colors.onSurfaceVariant),
             const SizedBox(width: UIConstants.spaceSm),
             Text(
               AppStrings.createEventFormat,
@@ -1469,7 +1469,7 @@ class _LiveEditorState extends State<_LiveEditor> {
                     vertical: UIConstants.space2xs,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.red,
+                    color: Theme.of(context).colorScheme.error,
                     borderRadius: BorderRadius.circular(
                       UIConstants.createEditorFieldRadius,
                     ),
@@ -1477,15 +1477,15 @@ class _LiveEditorState extends State<_LiveEditor> {
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.circle, size: 8, color: Colors.white),
+                      Icon(Icons.circle, size: UIConstants.createLiveBadgeDotSize, color: Colors.white),
                       SizedBox(width: UIConstants.space2xs),
                       Text(
-                        'AO VIVO',
+                        AppStrings.createLiveBadgeLabel,
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 10,
+                          fontSize: UIConstants.createLiveBadgeFontSize,
                           fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
+                          letterSpacing: UIConstants.createLiveBadgeLetterSpacing,
                         ),
                       ),
                     ],
@@ -1621,7 +1621,7 @@ class _LiveEditorState extends State<_LiveEditor> {
           child: Row(
             children: [
               Icon(Icons.info_outline_rounded,
-                  color: colors.onErrorContainer, size: 18),
+                  color: colors.onErrorContainer, size: UIConstants.createEditorInlineIconSize),
               const SizedBox(width: UIConstants.spaceSm),
               Expanded(
                 child: Text(
@@ -1673,7 +1673,7 @@ class _ScheduleChip extends StatelessWidget {
           borderRadius:
               BorderRadius.circular(UIConstants.createEditorFieldRadius),
           border: selected
-              ? Border.all(color: colors.primary, width: 1.5)
+              ? Border.all(color: colors.primary, width: UIConstants.createScheduleChipBorderWidth)
               : null,
         ),
         child: Row(
@@ -1681,7 +1681,7 @@ class _ScheduleChip extends StatelessWidget {
           children: [
             Icon(
               icon,
-              size: 18,
+              size: UIConstants.createScheduleChipIconSize,
               color: selected ? colors.primary : colors.onSurfaceVariant,
             ),
             const SizedBox(width: UIConstants.spaceXs),

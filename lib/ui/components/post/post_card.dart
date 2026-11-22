@@ -15,7 +15,7 @@ import 'post_media_gallery.dart';
 /// Card de post no feed.
 ///
 /// Conecta automaticamente as ações de engajamento (curtir, salvar, repostar,
-/// comentar) ao [PostsProvider] e [CommentsProvider] da árvore.
+/// comentar) ao [PostsProvider] da árvore.
 class PostCard extends StatelessWidget {
   const PostCard({required this.post, required this.author, super.key});
 
@@ -25,7 +25,6 @@ class PostCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final postsProvider = context.read<PostsProvider>();
     final title = post.title?.trim();
     final content = post.content.plainText.trim();
 
@@ -62,6 +61,7 @@ class PostCard extends StatelessWidget {
                   return (v.isReacted, v.isSaved, v.isShared);
                 },
                 builder: (context, _, _) {
+                  final postsProvider = context.read<PostsProvider>();
                   final engagement = postsProvider.engagementFor(post);
                   final effectivePost = PostEngagementProxy(post, engagement);
                   return PostEngagementBar(

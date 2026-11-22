@@ -100,11 +100,20 @@ class PostsProvider extends ChangeNotifier {
     );
   }
 
-  List<VideoFeedItem> get videoFeedItems => List.unmodifiable([
-    for (final post in feedPosts)
-      for (final media in post.media)
-        if (media.isVideo) VideoFeedItem(post: post, media: media),
-  ]);
+  List<VideoFeedItem>? _videoFeedItemsCache;
+
+  List<VideoFeedItem> get videoFeedItems =>
+      _videoFeedItemsCache ??= List.unmodifiable([
+        for (final post in feedPosts)
+          for (final media in post.media)
+            if (media.isVideo) VideoFeedItem(post: post, media: media),
+      ]);
+
+  @override
+  void notifyListeners() {
+    _videoFeedItemsCache = null;
+    super.notifyListeners();
+  }
 
   // ---------------------------------------------------------------------------
   // Interações otimistas
@@ -263,8 +272,12 @@ class PostsProvider extends ChangeNotifier {
   }) async {
     final posts = <Post>[];
     var hasMore = true;
+    const maxPages = 10;
+    var pagesFetched = 0;
 
-    while (hasMore && !posts.any((post) => post.isPublishedAt(_clock()))) {
+    while (hasMore &&
+        pagesFetched < maxPages &&
+        !posts.any((post) => post.isPublishedAt(_clock()))) {
       final page = await _repository.loadPostPage(
         refresh: refresh && posts.isEmpty,
         offset: offset + posts.length,
@@ -272,6 +285,7 @@ class PostsProvider extends ChangeNotifier {
       );
       posts.addAll(page.posts);
       hasMore = page.hasMore;
+      pagesFetched++;
     }
 
     return PostPage(posts: posts, hasMore: hasMore);

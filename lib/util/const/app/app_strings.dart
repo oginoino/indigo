@@ -228,6 +228,7 @@ class AppStrings {
   static const createVideoRecordHint = 'Pressione para gravar';
   static const createVideoRecordingHint = 'Gravando — solte para parar';
   static const createVideoRecLabel = 'REC';
+  static const createLiveBadgeLabel = 'AO VIVO';
   static const createVideoOrGallery = 'ou escolha da galeria';
 
   // Story

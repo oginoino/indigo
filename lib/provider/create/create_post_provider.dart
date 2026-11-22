@@ -80,15 +80,15 @@ class CreatePostProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void removePollOption(int i) {
-    if (i < 0 || i >= _draft.pollOptions.length) return;
-    _draft.pollOptions.removeAt(i);
+  void removePollOption(int index) {
+    if (index < 0 || index >= _draft.pollOptions.length) return;
+    _draft.pollOptions.removeAt(index);
     notifyListeners();
   }
 
-  void setPollOptionText(int i, String text) {
-    if (i < 0 || i >= _draft.pollOptions.length) return;
-    _draft.pollOptions[i].text = text;
+  void setPollOptionText(int index, String text) {
+    if (index < 0 || index >= _draft.pollOptions.length) return;
+    _draft.pollOptions[index].text = text;
     notifyListeners();
   }
 
@@ -170,6 +170,7 @@ class CreatePostProvider extends ChangeNotifier {
     // Simula latência de rede.
     await Future<void>.delayed(const Duration(milliseconds: 900));
 
+    if (!hasListeners) return false;
     _isPublishing = false;
     notifyListeners();
 

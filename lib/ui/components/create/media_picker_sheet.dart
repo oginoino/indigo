@@ -296,7 +296,7 @@ class _GridThumb extends StatelessWidget {
                 color: colors.error,
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.close, size: 12, color: colors.onError),
+              child: Icon(Icons.close, size: UIConstants.mediaPickerBadgeIconSize, color: colors.onError),
             ),
           ),
         ),
@@ -307,7 +307,7 @@ class _GridThumb extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(
               horizontal: UIConstants.space2xs,
-              vertical: 1,
+              vertical: UIConstants.mediaPickerBadgePaddingVertical,
             ),
             decoration: BoxDecoration(
               color: Colors.black.withValues(alpha: 0.6),
@@ -318,7 +318,7 @@ class _GridThumb extends StatelessWidget {
               '${index + 1}',
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 10,
+                fontSize: UIConstants.mediaPickerBadgeFontSize,
                 fontWeight: FontWeight.bold,
               ),
             ),

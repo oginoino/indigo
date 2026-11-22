@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 
 import '../../model/create/content_type.dart';
 import '../../provider/create/create_post_provider.dart';
+import '../../route/routes.dart';
 import '../../service/media_picker_service.dart';
 import '../../util/const/app/app_strings.dart';
 import '../../util/const/ui/ui_constants.dart';
@@ -320,6 +321,23 @@ class _CreatePageContentState extends State<_CreatePageContent>
     return result ?? false;
   }
 
+  // ── Navegação de saída (GoRouter-safe) ───────────────────────────────────
+
+  /// Fecha a página de criação.
+  ///
+  /// Usa [GoRouter.pop] quando há algo na pilha (ex.: o usuário chegou via
+  /// push interno). Caso contrário, navega com [GoRouter.go] para [Routes.home]
+  /// porque `/create` é uma rota raiz no GoRouter e não tem nada para fazer
+  /// pop — chamar [GoRouter.pop] sem canPop lança [GoError].
+  void _closeCreate() {
+    if (!mounted) return;
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go(Routes.home);
+    }
+  }
+
   // ── Publicação ────────────────────────────────────────────────────────────
 
   void _onPublished() {
@@ -343,7 +361,7 @@ class _CreatePageContentState extends State<_CreatePageContent>
               await _goBackToCapture(provider);
             } else {
               // Fase capture: sai normalmente (GoRouter)
-              if (context.mounted) context.pop();
+              _closeCreate();
             }
           },
           child: Scaffold(
@@ -362,7 +380,7 @@ class _CreatePageContentState extends State<_CreatePageContent>
                   currentType: _currentType,
                   onTypePageChanged: _onTypePageChanged,
                   onTypeChipTap: _selectTypeByChip,
-                  onClose: () => context.pop(),
+                  onClose: _closeCreate,
                   // Camera props
                   cameraController: _cameraController,
                   cameraReady: _cameraReady,
@@ -545,7 +563,7 @@ class _CapturePhase extends StatelessWidget {
 
         // ── Chips de tipo (swipe indicator) ───────────────────────────
         Positioned(
-          top: MediaQuery.of(context).padding.top +
+          top: MediaQuery.paddingOf(context).top +
               UIConstants.minimumInteractiveTargetSize +
               UIConstants.spaceXs,
           left: 0,
@@ -736,7 +754,7 @@ class _VideoCapturePage extends StatelessWidget {
         // Recording indicator
         if (isRecording)
           Positioned(
-            top: MediaQuery.of(context).padding.top +
+            top: MediaQuery.paddingOf(context).top +
                 UIConstants.minimumInteractiveTargetSize +
                 UIConstants.composerTypeChipHeight +
                 UIConstants.spaceLg,
@@ -765,7 +783,7 @@ class _VideoCapturePage extends StatelessWidget {
                         : AppStrings.createVideoRecordHint,
                     style: const TextStyle(
                       color: Colors.white70,
-                      fontSize: 13,
+                      fontSize: UIConstants.createTypeChipFontSize,
                     ),
                   ),
                   const SizedBox(height: UIConstants.spaceMd),
@@ -831,7 +849,7 @@ class _StoryCapturePage extends StatelessWidget {
         ),
         // Story hint label
         Positioned(
-          top: MediaQuery.of(context).padding.top +
+          top: MediaQuery.paddingOf(context).top +
               UIConstants.minimumInteractiveTargetSize +
               UIConstants.composerTypeChipHeight +
               UIConstants.spaceLg,
@@ -853,13 +871,16 @@ class _StoryCapturePage extends StatelessWidget {
               children: [
                 Icon(
                   Icons.timer_outlined,
-                  size: 14,
+                  size: UIConstants.createStoryBadgeIconSize,
                   color: colors.onInverseSurface,
                 ),
                 const SizedBox(width: UIConstants.spaceXs),
                 Text(
                   AppStrings.createStoryExpiry,
-                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: UIConstants.createStoryBadgeFontSize,
+                  ),
                 ),
               ],
             ),
@@ -951,7 +972,7 @@ class _AudioCapturePage extends StatelessWidget {
                 : AppStrings.createAudioRecordHint,
             style: TextStyle(
               color: isRecording ? colors.error : Colors.white70,
-              fontSize: 14,
+              fontSize: UIConstants.createAudioHintFontSize,
             ),
           ),
           const SizedBox(height: UIConstants.space2xl),
@@ -972,12 +993,12 @@ class _AudioCapturePage extends StatelessWidget {
                   color: isRecording
                       ? colors.error
                       : Colors.white.withValues(alpha: 0.15),
-                  border: Border.all(color: Colors.white, width: 3),
+                  border: Border.all(color: Colors.white, width: UIConstants.createCameraShutterBorderWidth),
                 ),
                 child: Icon(
                   isRecording ? Icons.stop_rounded : Icons.mic_rounded,
                   color: Colors.white,
-                  size: UIConstants.createAudioRecorderSize * 0.45,
+                  size: UIConstants.createAudioRecorderSize * UIConstants.createAudioRecorderIconScale,
                 ),
               ),
             ),
@@ -1009,13 +1030,13 @@ class _DirectEditorPage extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(type.activeIcon, size: 56, color: Colors.white),
+            Icon(type.activeIcon, size: UIConstants.createDirectEditorIconSize, color: Colors.white),
             const SizedBox(height: UIConstants.spaceLg),
             Text(
               type.label,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 22,
+                fontSize: UIConstants.createDirectEditorLabelFontSize,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -1024,7 +1045,7 @@ class _DirectEditorPage extends StatelessWidget {
               type.description,
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.7),
-                fontSize: 14,
+                fontSize: UIConstants.createDirectEditorDescFontSize,
               ),
             ),
             const SizedBox(height: UIConstants.space2xl),
@@ -1136,22 +1157,22 @@ class _VideoShutterButton extends StatelessWidget {
           height: UIConstants.mediaPickerCameraButtonSize,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: 3),
+            border: Border.all(color: Colors.white, width: UIConstants.createCameraShutterBorderWidth),
           ),
           child: Center(
             child: AnimatedContainer(
               duration: UIConstants.engagementColorDuration,
               width: isRecording
-                  ? UIConstants.mediaPickerCameraButtonSize * 0.4
+                  ? UIConstants.mediaPickerCameraButtonSize * UIConstants.createVideoShutterRecordingScale
                   : UIConstants.mediaPickerCameraButtonInner,
               height: isRecording
-                  ? UIConstants.mediaPickerCameraButtonSize * 0.4
+                  ? UIConstants.mediaPickerCameraButtonSize * UIConstants.createVideoShutterRecordingScale
                   : UIConstants.mediaPickerCameraButtonInner,
               decoration: BoxDecoration(
                 shape: isRecording ? BoxShape.rectangle : BoxShape.circle,
                 borderRadius:
-                    isRecording ? BorderRadius.circular(6) : null,
-                color: isRecording ? Colors.red : Colors.white,
+                    isRecording ? BorderRadius.circular(UIConstants.createVideoShutterRecordingRadius) : null,
+                color: isRecording ? Theme.of(context).colorScheme.error : Colors.white,
               ),
             ),
           ),
@@ -1192,21 +1213,21 @@ class _RecordingIndicatorState extends State<_RecordingIndicator>
           vertical: UIConstants.space2xs,
         ),
         decoration: BoxDecoration(
-          color: Colors.red,
+          color: Theme.of(context).colorScheme.error,
           borderRadius: BorderRadius.circular(UIConstants.createEditorFieldRadius),
         ),
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.circle, color: Colors.white, size: 10),
+            Icon(Icons.circle, color: Colors.white, size: UIConstants.createRecordingDotSize),
             SizedBox(width: UIConstants.space2xs),
             Text(
               AppStrings.createVideoRecLabel,
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 12,
+                fontSize: UIConstants.createRecordingLabelFontSize,
                 fontWeight: FontWeight.bold,
-                letterSpacing: 1,
+                letterSpacing: UIConstants.createRecordingLabelLetterSpacing,
               ),
             ),
           ],
@@ -1257,7 +1278,7 @@ class _MicPulseState extends State<_MicPulse>
     return AnimatedBuilder(
       animation: _pulse,
       builder: (context, child) {
-        final scale = widget.isRecording ? 1.0 + _pulse.value * 0.2 : 1.0;
+        final scale = widget.isRecording ? 1.0 + _pulse.value * UIConstants.createMicPulseScaleAmplitude : 1.0;
         return Transform.scale(
           scale: scale,
           child: Container(
@@ -1271,7 +1292,7 @@ class _MicPulseState extends State<_MicPulse>
             ),
             child: Icon(
               widget.isRecording ? Icons.mic_rounded : Icons.mic_outlined,
-              size: UIConstants.createAudioRecorderSize * 0.5,
+              size: UIConstants.createAudioRecorderSize * UIConstants.createMicIconScale,
               color: widget.isRecording ? colors.error : Colors.white,
             ),
           ),
@@ -1305,7 +1326,7 @@ class _TypeChip extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
+          duration: UIConstants.createTypeChipAnimationDuration,
           height: UIConstants.composerTypeChipHeight,
           padding: const EdgeInsets.symmetric(horizontal: UIConstants.spaceMd),
           decoration: BoxDecoration(
@@ -1316,7 +1337,7 @@ class _TypeChip extends StatelessWidget {
                 BorderRadius.circular(UIConstants.composerTypeChipRadius),
             border: Border.all(
               color: Colors.white.withValues(alpha: 0.6),
-              width: 1,
+              width: UIConstants.createTypeChipBorderWidth,
             ),
           ),
           child: Center(
@@ -1325,7 +1346,7 @@ class _TypeChip extends StatelessWidget {
               children: [
                 Icon(
                   selected ? type.activeIcon : type.icon,
-                  size: 14,
+                  size: UIConstants.createTypeChipIconSize,
                   color: selected ? Colors.black : Colors.white,
                 ),
                 const SizedBox(width: UIConstants.space2xs),
@@ -1335,7 +1356,7 @@ class _TypeChip extends StatelessWidget {
                     color: selected ? Colors.black : Colors.white,
                     fontWeight:
                         selected ? FontWeight.bold : FontWeight.normal,
-                    fontSize: 13,
+                    fontSize: UIConstants.createTypeChipFontSize,
                   ),
                 ),
               ],
@@ -1426,10 +1447,10 @@ class _EditorPhase extends StatelessWidget {
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
+          preferredSize: const Size.fromHeight(UIConstants.createEditorAppBarDividerHeight),
           child: Divider(
-            height: 1,
-            thickness: 0.5,
+            height: UIConstants.createEditorAppBarDividerHeight,
+            thickness: UIConstants.createEditorDividerThickness,
             color: colors.outlineVariant.withValues(alpha: 0.5),
           ),
         ),
@@ -1464,7 +1485,7 @@ class _PublishButton extends StatelessWidget {
               key: ValueKey('loading'),
               width: UIConstants.createEditorAvatarSize,
               height: UIConstants.createEditorAvatarSize,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              child: CircularProgressIndicator(strokeWidth: UIConstants.createPublishProgressStrokeWidth),
             )
           : FilledButton(
               key: const ValueKey('publish'),
@@ -1532,7 +1553,7 @@ class _PublishToolbar extends StatelessWidget {
           border: Border(
             top: BorderSide(
               color: colors.outlineVariant.withValues(alpha: 0.5),
-              width: 0.5,
+              width: UIConstants.createEditorDividerThickness,
             ),
           ),
         ),
@@ -1549,7 +1570,7 @@ class _PublishToolbar extends StatelessWidget {
                     children: [
                       Icon(
                         action.icon,
-                        size: 18,
+                        size: UIConstants.createToolbarIconSize,
                         color: colors.onSurfaceVariant,
                       ),
                       const SizedBox(width: UIConstants.space2xs),

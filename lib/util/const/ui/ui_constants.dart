@@ -297,4 +297,93 @@ class UIConstants {
   static const double composerTypeChipSpacing = spaceXs;
   static const double composerTypeChipRadius = radiusPill;
   static const double composerAttachIconSize = 22;
+
+  // ---------------------------------------------------------------------------
+  // Camera / capture overlay
+  // ---------------------------------------------------------------------------
+  static const double createCameraOverlayAlpha = 0.45;
+  static const double createCameraShutterBorderWidth = 3.0;
+  static const double createTypeChipFontSize = 13.0;
+  static const double createTypeChipIconSize = 14.0;
+  static const double createTypeChipBorderWidth = 1.0;
+  static const Duration createTypeChipAnimationDuration =
+      Duration(milliseconds: 180);
+
+  // Direct-editor CTA page
+  static const double createDirectEditorIconSize = 56.0;
+  static const double createDirectEditorLabelFontSize = 22.0;
+  static const double createDirectEditorDescFontSize = 14.0;
+
+  // Audio capture
+  static const double createAudioRecorderIconScale = 0.45;
+  static const double createMicIconScale = 0.5;
+  static const double createMicPulseScaleAmplitude = 0.2;
+  static const double createAudioHintFontSize = 14.0;
+  static const double createAudioWaveBarMidHeight = 12.0;
+  static const double createAudioWaveBarMinHeight = 8.0;
+  static const double createAudioWaveBarRadius = 2.0;
+  static const int createAudioWaveBarCount = 20;
+
+  // Recording indicator
+  static const double createRecordingDotSize = 10.0;
+  static const double createRecordingLabelFontSize = 12.0;
+  static const double createRecordingLabelLetterSpacing = 1.0;
+
+  // Video shutter & editor
+  static const double createVideoShutterRecordingScale = 0.4;
+  static const double createVideoShutterRecordingRadius = 6.0;
+  static const double createVideoPlayOverlaySize = 56.0;
+  static const double createVideoPlayIconSize = 36.0;
+  static const double createVideoThumbPlaceholderIconSize = 48.0;
+
+  // Story
+  static const double createStoryBadgeIconSize = 14.0;
+  static const double createStoryBadgeFontSize = 12.0;
+  static const int createStoryTextMaxLines = 3;
+
+  // Carousel dots (photo editor)
+  static const double createCarouselActiveDotWidth = 16.0;
+  static const double createCarouselDotSize = 6.0;
+  static const double createCarouselDotRadius = 3.0;
+
+  // Editor fields / buttons
+  static const int createPostBodyMinLines = 5;
+  static const int createPhotoBodyMinLines = 2;
+  static const int createAudioDescMinLines = 3;
+  static const int createArticleBodyMinLines = 10;
+  static const int createEventDescMinLines = 3;
+  static const double createEditorButtonMinHeight = 48.0;
+  static const double createEditorAppBarDividerHeight = 1.0;
+  static const double createPublishProgressStrokeWidth = 2.0;
+  static const int createArticleWpm = 200;
+
+  // Shared icon sizes
+  static const double createIconRowIconSize = 20.0;
+  static const double createVisibilityIconSize = 16.0;
+  static const double createEmptyMediaIconSize = 40.0;
+  static const double createToolbarIconSize = 18.0;
+  static const double createEditorInlineIconSize = 18.0;
+
+  // Poll
+  static const int createPollMinOptions = 2;
+  static const int createPollMaxOptions = 4;
+  static const double createPollIconSize = 18.0;
+
+  // Event
+  static const double createEventIconSize = 18.0;
+
+  // Live badge
+  static const double createLiveBadgeDotSize = 8.0;
+  static const double createLiveBadgeFontSize = 10.0;
+  static const double createLiveBadgeLetterSpacing = 1.0;
+  static const double createLiveWarningIconSize = 18.0;
+
+  // Schedule chip
+  static const double createScheduleChipBorderWidth = 1.5;
+  static const double createScheduleChipIconSize = 18.0;
+
+  // Media badge (shared between picker sheet and preview strip)
+  static const double mediaPickerBadgeIconSize = 12.0;
+  static const double mediaPickerBadgePaddingVertical = 1.0;
+  static const double mediaPickerBadgeFontSize = 10.0;
 }
