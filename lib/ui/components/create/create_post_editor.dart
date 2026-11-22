@@ -658,84 +658,96 @@ class _AudioEditor extends StatelessWidget {
       padding: _editorPadding(context),
       children: [
         // ── Player preview ─────────────────────────────────────────────
-        Container(
-          height: UIConstants.createAudioPlayerHeight,
+        // Sem height fixa para evitar overflow — o conteúdo determina a altura.
+        DecoratedBox(
           decoration: BoxDecoration(
             color: colors.primaryContainer,
             borderRadius:
                 BorderRadius.circular(UIConstants.createEditorFieldRadius),
           ),
-          padding: const EdgeInsets.symmetric(
-            horizontal: UIConstants.spaceMd,
-            vertical: UIConstants.spaceSm,
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: colors.primary,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: UIConstants.spaceMd,
+              vertical: UIConstants.spaceMd,
+            ),
+            child: Row(
+              children: [
+                // Botão play / mic
+                Container(
+                  width: UIConstants.avatarMediumSize,
+                  height: UIConstants.avatarMediumSize,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: colors.primary,
+                  ),
+                  child: Icon(
+                    hasAudio ? Icons.play_arrow_rounded : Icons.mic_rounded,
+                    color: colors.onPrimary,
+                  ),
                 ),
-                child: Icon(
-                  hasAudio ? Icons.play_arrow_rounded : Icons.mic_rounded,
-                  color: colors.onPrimary,
-                ),
-              ),
-              const SizedBox(width: UIConstants.spaceMd),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      draft.title.isEmpty
-                          ? AppStrings.createAudioTitleHint
-                          : draft.title,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            color: colors.onPrimaryContainer,
-                          ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: UIConstants.space2xs),
-                    // Waveform placeholder
-                    Row(
-                      children: [
-                        for (var i = 0; i < UIConstants.createAudioWaveBarCount; i++)
-                          Container(
-                            width: UIConstants.createAudioWaveBarWidth,
-                            height: (i % 3 == 0
-                                    ? UIConstants.createAudioWaveBarMaxHeight
+                const SizedBox(width: UIConstants.spaceMd),
+                // Título + waveform
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        draft.title.isEmpty
+                            ? AppStrings.createAudioTitleHint
+                            : draft.title,
+                        style: Theme.of(context).textTheme.titleSmall
+                            ?.copyWith(color: colors.onPrimaryContainer),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: UIConstants.space2xs),
+                      // Waveform placeholder — altura limitada a 24px para caber
+                      SizedBox(
+                        height: UIConstants.createAudioWaveBarMidHeight * 2,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            for (var i = 0;
+                                i < UIConstants.createAudioWaveBarCount;
+                                i++)
+                              Container(
+                                width: UIConstants.createAudioWaveBarWidth,
+                                height: (i % 3 == 0
+                                    ? UIConstants.createAudioWaveBarMidHeight * 2
                                     : i % 2 == 0
                                         ? UIConstants.createAudioWaveBarMidHeight
                                         : UIConstants.createAudioWaveBarMinHeight),
-                            margin: const EdgeInsets.symmetric(
-                              horizontal:
-                                  UIConstants.createAudioWaveBarSpacing / 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: colors.primary.withValues(
-                                alpha: hasAudio ? 0.6 : 0.3,
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal:
+                                      UIConstants.createAudioWaveBarSpacing / 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colors.primary.withValues(
+                                    alpha: hasAudio ? 0.7 : 0.35,
+                                  ),
+                                  borderRadius: BorderRadius.circular(
+                                    UIConstants.createAudioWaveBarRadius,
+                                  ),
+                                ),
                               ),
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: UIConstants.spaceSm),
-              Text(
-                _durationLabel,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: colors.onPrimaryContainer,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
-              ),
-            ],
+                const SizedBox(width: UIConstants.spaceSm),
+                // Duração
+                Text(
+                  _durationLabel,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: colors.onPrimaryContainer,
+                        fontFeatures: const [FontFeature.tabularFigures()],
+                      ),
+                ),
+              ],
+            ),
           ),
         ),
         const _SectionDivider(),

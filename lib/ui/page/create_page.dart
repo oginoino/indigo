@@ -77,6 +77,13 @@ class _CreatePageContentState extends State<_CreatePageContent>
   );
   int _typePageIndex = ContentType.values.indexOf(ContentType.photo);
 
+  // ── Chip scroll sync ──────────────────────────────────────────────────────
+  final _chipScrollController = ScrollController();
+  // Largura estimada de cada chip (chip + padding). Calculada na primeira
+  // vez que o layout roda; usada para manter o chip selecionado visível.
+  static const double _chipEstimatedWidth =
+      UIConstants.composerTypeChipHeight * 2.4 + UIConstants.spaceXs;
+
   // ── Editor slide-up ───────────────────────────────────────────────────────
   late final AnimationController _slideController = AnimationController(
     vsync: this,
@@ -108,6 +115,7 @@ class _CreatePageContentState extends State<_CreatePageContent>
     _cameraController?.dispose();
     _slideController.dispose();
     _typePageController.dispose();
+    _chipScrollController.dispose();
     _audioTimer?.cancel();
     super.dispose();
   }
@@ -267,10 +275,23 @@ class _CreatePageContentState extends State<_CreatePageContent>
     // selectType chama notifyListeners — fazemos via post-frame para não
     // interferir no gesto de scroll do PageView.
     setState(() => _typePageIndex = index);
+    _scrollChipIntoView(index);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       context.read<CreatePostProvider>().selectType(type);
     });
+  }
+
+  /// Mantém o chip do tipo selecionado visível na barra de chips.
+  void _scrollChipIntoView(int index) {
+    if (!_chipScrollController.hasClients) return;
+    final target = index * _chipEstimatedWidth;
+    final max = _chipScrollController.position.maxScrollExtent;
+    _chipScrollController.animateTo(
+      target.clamp(0.0, max),
+      duration: UIConstants.createTypeSwipeDuration,
+      curve: Curves.easeInOut,
+    );
   }
 
   void _selectTypeByChip(ContentType type) {
@@ -377,6 +398,7 @@ class _CreatePageContentState extends State<_CreatePageContent>
                   maintainState: true,
                   child: _CapturePhase(
                   typePageController: _typePageController,
+                  chipScrollController: _chipScrollController,
                   currentType: _currentType,
                   onTypePageChanged: _onTypePageChanged,
                   onTypeChipTap: _selectTypeByChip,
@@ -428,6 +450,7 @@ class _CreatePageContentState extends State<_CreatePageContent>
 class _CapturePhase extends StatelessWidget {
   const _CapturePhase({
     required this.typePageController,
+    required this.chipScrollController,
     required this.currentType,
     required this.onTypePageChanged,
     required this.onTypeChipTap,
@@ -450,6 +473,7 @@ class _CapturePhase extends StatelessWidget {
   });
 
   final PageController typePageController;
+  final ScrollController chipScrollController;
   final ContentType currentType;
   final ValueChanged<int> onTypePageChanged;
   final ValueChanged<ContentType> onTypeChipTap;
@@ -571,6 +595,7 @@ class _CapturePhase extends StatelessWidget {
           child: SizedBox(
             height: UIConstants.composerTypeChipHeight + UIConstants.spaceSm,
             child: ListView(
+              controller: chipScrollController,
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(
                 horizontal: UIConstants.spaceSm,
@@ -1023,47 +1048,52 @@ class _DirectEditorPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
 
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(type.activeIcon, size: UIConstants.createDirectEditorIconSize, color: Colors.white),
-            const SizedBox(height: UIConstants.spaceLg),
-            Text(
-              type.label,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: UIConstants.createDirectEditorLabelFontSize,
-                fontWeight: FontWeight.bold,
+    // Tipos textuais não usam câmera — dão seu próprio fundo para sair
+    // do preto do Scaffold de câmera e usar as cores do tema.
+    return DecoratedBox(
+      decoration: BoxDecoration(color: colors.surface),
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                type.activeIcon,
+                size: UIConstants.createDirectEditorIconSize,
+                color: colors.primary,
               ),
-            ),
-            const SizedBox(height: UIConstants.spaceXs),
-            Text(
-              type.description,
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.7),
-                fontSize: UIConstants.createDirectEditorDescFontSize,
-              ),
-            ),
-            const SizedBox(height: UIConstants.space2xl),
-            FilledButton.icon(
-              onPressed: onTap,
-              icon: const Icon(Icons.edit_rounded),
-              label: Text(
-                AppStrings.createDirectEditorCta.replaceFirst(
-                  '{type}',
-                  type.label,
+              const SizedBox(height: UIConstants.spaceLg),
+              Text(
+                type.label,
+                style: TextStyle(
+                  color: colors.onSurface,
+                  fontSize: UIConstants.createDirectEditorLabelFontSize,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              style: FilledButton.styleFrom(
-                backgroundColor: colors.primary,
-                foregroundColor: colors.onPrimary,
+              const SizedBox(height: UIConstants.spaceXs),
+              Text(
+                type.description,
+                style: TextStyle(
+                  color: colors.onSurfaceVariant,
+                  fontSize: UIConstants.createDirectEditorDescFontSize,
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: UIConstants.space2xl),
+              FilledButton.icon(
+                onPressed: onTap,
+                icon: const Icon(Icons.edit_rounded),
+                label: Text(
+                  AppStrings.createDirectEditorCta.replaceFirst(
+                    '{type}',
+                    type.label,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
